@@ -1,0 +1,205 @@
+# Navigation Normal Form
+# Canonical representation + equivalence mappings for the Navigation concept.
+# Concept reference: ontology/navigation.md
+# Taxonomy reference: taxonomy/navigation.taxonomy.yaml
+
+concept: Navigation
+ontology_ref: ontology/navigation.md
+taxonomy_ref: taxonomy/navigation.taxonomy.yaml
+description: "A movement between Pages, Sections, or Capabilities within an application"
+
+# ============================================================================
+# CANONICAL FORM
+# ============================================================================
+
+canonical-form:
+  navigation:
+    id: string               # Unique name (e.g., "go-to-home", "open-project-detail")
+    target: Reference        # Destination: Page, Section, Capability, or external URL
+    method: NavigationMethod?  # push | replace | overlay | inline | scroll-to | external
+    carry-state: StateRef[]?   # States to preserve across navigation
+    carry-data: DataRef[]?     # Data to pass to the target
+    label: string?           # Human-readable name (e.g., "Back to Projects")
+    back-target: Reference?  # Where the user returns to (for push navigation)
+    is-external: boolean?    # Target is outside the application
+
+# ============================================================================
+# CANONICAL PROPERTY NAMES
+# ============================================================================
+
+property-canonical-names:
+  id: { aliases: [name, key, nav-id, transition] }
+  target: { aliases: [destination, to, goes-to, href, route, path, url] }
+  method: { aliases: [type, transition-type, how, mode, navigation-type] }
+  carry-state: { aliases: [preserve-state, keep-state, pass-state, state-transfer] }
+  carry-data: { aliases: [pass-data, transfer-data, send-data, payload, params] }
+  label: { aliases: [text, title, display, link-text, aria-label] }
+  back-target: { aliases: [return-to, go-back-to, previous, parent] }
+  is-external: { aliases: [external, outbound, third-party, offsite] }
+
+# ============================================================================
+# CANONICAL METHOD VALUES
+# ============================================================================
+
+method-values:
+  push:      { aliases: [navigate, go-to, open, visit, forward] }
+  replace:   { aliases: [redirect, swap, overwrite, substitute] }
+  overlay:   { aliases: [modal, dialog, popup, open-in-overlay, show] }
+  inline:    { aliases: [expand, switch-tab, toggle, in-page, same-page] }
+  scroll-to: { aliases: [anchor, jump-to, scroll, go-to-section] }
+  external:  { aliases: [link, outbound, open-external, new-tab, window-open] }
+
+# ============================================================================
+# EQUIVALENCE MAPPINGS
+# ============================================================================
+
+equivalences:
+  # --- Router navigation → Navigation ---
+  - non-canonical:
+      router.push("/projects/123")
+    maps-to:
+      navigation:
+        id: open-project-detail
+        target: page:project-detail
+        method: push
+        carry-data: [project-id: 123]
+    resolution:
+      - 'router.push → method: push'
+      - '"/projects/123" → target: page:project-detail'
+      - '":123" → carry-data'
+
+  - non-canonical:
+      router.replace("/login")
+    maps-to:
+      navigation:
+        id: go-to-login
+        target: page:login
+        method: replace
+    resolution:
+      - 'router.replace → method: replace'
+
+  # --- Link → Navigation ---
+  - non-canonical:
+      link:
+        to: "/dashboard"
+        text: "Go to Dashboard"
+    maps-to:
+      navigation:
+        id: go-to-dashboard
+        target: page:dashboard
+        method: push
+        label: "Go to Dashboard"
+    resolution:
+      - 'link [to] → navigation with target'
+      - 'to "/dashboard" → target: page:dashboard'
+      - 'method: push (default for links)'
+
+  - non-canonical:
+      a:
+        href: "https://docs.example.com"
+        children: "View Documentation"
+    maps-to:
+      navigation:
+        id: view-docs
+        target: "https://docs.example.com"
+        method: external
+        is-external: true
+        label: "View Documentation"
+    resolution:
+      - 'a[href] with external URL → method: external, is-external: true'
+
+  # --- Modal open → Navigation ---
+  - non-canonical:
+      openModal("create-project")
+    maps-to:
+      navigation:
+        id: open-create-dialog
+        target: section:project-form
+        method: overlay
+    resolution:
+      - 'openModal → method: overlay'
+      - '"create-project" → target: section with Create capability'
+
+  # --- Tab switch → Navigation ---
+  - non-canonical:
+      setActiveTab("constraints")
+    maps-to:
+      navigation:
+        id: switch-to-constraints
+        target: section:constraints-panel
+        method: inline
+    resolution:
+      - 'setActiveTab → method: inline'
+      - 'tab name → target section'
+
+  # --- Redirect → Navigation ---
+  - non-canonical:
+      redirect: "/home"
+      after: "login-success"
+    maps-to:
+      navigation:
+        id: go-to-home
+        target: page:home
+        method: replace
+    resolution:
+      - 'redirect → method: replace'
+      - 'after "login-success" → triggered by State.Outcome.Success'
+
+  # --- Back button → Navigation ---
+  - non-canonical:
+      history.back()
+    maps-to:
+      navigation:
+        id: go-back
+        method: push
+        # back-target determined by history stack
+    resolution:
+      - 'history.back() → implicit back-target from navigation history'
+
+  # --- Scroll → Navigation ---
+  - non-canonical:
+      scrollTo("#top")
+    maps-to:
+      navigation:
+        id: scroll-to-top
+        target: section:page-top
+        method: scroll-to
+    resolution:
+      - 'scrollTo → method: scroll-to'
+      - '"#top" → target: section:page-top'
+
+# ============================================================================
+# FALSE FRIENDS
+# ============================================================================
+
+false-friends:
+  - expression: "method: push"
+    looks-like: "method: replace"
+    not-equivalent-because: "Push preserves history (user can go back). Replace overwrites history. Post-login redirect is always replace — you never go 'back' to the login page after authenticating."
+
+  - expression: "target: page:login, method: push"
+    looks-like: "target: page:login, method: replace"
+    not-equivalent-because: "push to login means 'back' returns to the protected page. replace to login means 'back' goes further back in history. Auth redirects should always use replace."
+
+  - expression: "navigates-to: /login"
+    looks-like: "navigation: { target: page:login }"
+    not-equivalent-because: "navigates-to is an Action property (where the user goes after clicking). Navigation is the movement event itself. An Action MAY lead to Navigation, but they are distinct concepts."
+
+  - expression: "href: #section-2"
+    looks-like: "method: scroll-to"
+    not-equivalent-because: "A hash link could be scroll-to (same page) OR push (new page with anchor). Context determines which — the Agent must check if the target is on the current page."
+
+# ============================================================================
+# AGENT INSTRUCTION
+# ============================================================================
+
+agent-instruction: |
+  When generating Navigation in UISL:
+  1. ALWAYS use semantic method names: push, replace, overlay, inline, scroll-to, external
+  2. NEVER emit router API calls: router.push, history.back, window.location
+  3. NEVER emit URL paths as targets — use page:id, section:id, or capability:id references
+  4. External URLs are the ONLY valid string targets
+  5. carry-state references State IDs, carry-data references Data IDs
+  6. Post-authentication navigation is ALWAYS method: replace (not push)
+  7. Overlay navigation (modals, dialogs) → method: overlay
+  8. Tab switches, accordions → method: inline

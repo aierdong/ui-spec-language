@@ -1,0 +1,217 @@
+# Section Normal Form
+# Canonical representation + equivalence mappings for the Section concept.
+# Concept reference: ontology/section.md
+# Taxonomy reference: taxonomy/section.taxonomy.yaml
+
+concept: Section
+ontology_ref: ontology/section.md
+taxonomy_ref: taxonomy/section.taxonomy.yaml
+description: "A physical or logical partition of a Page that groups related Capabilities"
+
+# ============================================================================
+# CANONICAL FORM
+# ============================================================================
+
+canonical-form:
+  section:
+    id: string               # Unique name within this page (e.g., "sidebar", "credential-entry")
+    label: string?           # Human-readable name (e.g., "Navigation Hub")
+    contains:                # Capabilities grouped within
+      - capability: CapabilityRef
+    sections:                # Nested sections (hierarchical partition)
+      - section: SectionRef
+    layout-pattern: LayoutPattern?  # Semantic layout: centered-column | sidebar-shell | split-screen | vertical-stack | horizontal-strip | grid | overlay | master-detail
+    zones:                   # Named sub-areas within the section
+      - zone: string         # e.g., "top", "middle", "bottom", "header", "body", "footer"
+    static: boolean?         # Non-interactive decoration (marketing, branding)
+    priority: Priority?      # Visual emphasis: primary | secondary | tertiary
+    obeys:                   # Constraints
+      - constraint: ConstraintRef
+
+# ============================================================================
+# CANONICAL PROPERTY NAMES
+# ============================================================================
+
+property-canonical-names:
+  id: { aliases: [name, key, section-id, area, region] }
+  label: { aliases: [title, heading, display-name, section-title] }
+  contains: { aliases: [children, capabilities, features, content, items] }
+  sections: { aliases: [sub-sections, nested, children-sections, sub-areas] }
+  layout-pattern: { aliases: [layout, pattern, arrangement, display, format] }
+  zones: { aliases: [slots, areas, sub-regions, positions] }
+  static: { aliases: [decorative, non-interactive, display-only, read-only-section] }
+  priority: { aliases: [emphasis, importance, visual-weight, prominence] }
+  obeys: { aliases: [constraints, rules, conditions, guards] }
+
+# ============================================================================
+# CANONICAL LAYOUT PATTERNS
+# ============================================================================
+
+layout-pattern-values:
+  centered-column: { aliases: [centered, narrow, focused, single-column, form-layout] }
+  sidebar-shell: { aliases: [sidebar, side-nav, shell, app-layout, admin-layout] }
+  split-screen: { aliases: [split, two-column, two-panel, dual] }
+  vertical-stack: { aliases: [stack, list, column, vertical, top-to-bottom] }
+  horizontal-strip: { aliases: [strip, row, horizontal, toolbar, bar, left-to-right] }
+  grid: { aliases: [cards, tile, mosaic, dashboard-grid, masonry] }
+  overlay: { aliases: [modal, dialog, drawer, popup, floating, above] }
+  master-detail: { aliases: [list-detail, split-view, side-panel, browser] }
+
+# ============================================================================
+# CANONICAL PRIORITY VALUES
+# ============================================================================
+
+priority-values:
+  primary: { aliases: [main, dominant, hero, featured] }
+  secondary: { aliases: [supporting, auxiliary, side] }
+  tertiary: { aliases: [minor, subtle, peripheral, low-emphasis, footnote] }
+
+# ============================================================================
+# EQUIVALENCE MAPPINGS
+# ============================================================================
+
+equivalences:
+  # --- Layout components → Section ---
+  - non-canonical:
+      component: Sidebar
+      children: [NavMenu, UserProfile]
+    maps-to:
+      section:
+        id: navigation-hub
+        layout-pattern: sidebar-shell
+        zones: [top, middle, bottom]
+    resolution:
+      - 'component "Sidebar" → Taxonomy: Section.Shell.NavigationHub'
+      - 'children → canonical: contains'
+      - 'zones inferred from sidebar pattern'
+
+  - non-canonical:
+      modal:
+        title: "Create Project"
+        visible: true
+    maps-to:
+      section:
+        id: project-form
+        layout-pattern: overlay
+        zones: [header, body, footer]
+        contains:
+          - capability: create
+    resolution:
+      - 'modal → section with layout-pattern: overlay'
+      - 'Taxonomy: Section.Overlay.FocusOverlay'
+      - 'title → zone: header content'
+
+  - non-canonical:
+      div:
+        className: "auth-container"
+        children: [LoginForm]
+    maps-to:
+      section:
+        id: credential-entry
+        layout-pattern: centered-column
+      # LoginForm resolves to Capability.Authentication
+    resolution:
+      - 'className "auth-container" → Taxonomy match'
+      - 'div → section wrapper'
+      - 'centered-column pattern inferred from auth context'
+
+  - non-canonical:
+      toolbar:
+        items: [FilterButton, SortButton, SearchInput]
+    maps-to:
+      section:
+        id: action-bar
+        layout-pattern: horizontal-strip
+        priority: secondary
+        contains:
+          - capability: filter
+          - capability: sort
+          - capability: search
+    resolution:
+      - 'toolbar → section with layout-pattern: horizontal-strip'
+      - 'items → canonical: contains → Capability references'
+
+  - non-canonical:
+      tabs:
+        - label: "Fields"
+          content: FieldsPanel
+        - label: "Constraints"
+          content: ConstraintsPanel
+    maps-to:
+      section:
+        id: detail-tabs
+        layout-pattern: vertical-stack
+        zones: [tabs, content]
+    resolution:
+      - 'tabs → section with zones: [tabs, content]'
+      - 'Taxonomy: Section.Content.TabPanel'
+      - 'Each tab → inline Navigation.SwitchTab'
+
+  - non-canonical:
+      drawer:
+        anchor: right
+        children: [DetailPanel]
+    maps-to:
+      section:
+        id: detail-drawer
+        layout-pattern: overlay
+        # Taxonomy: Section.Overlay.SideOverlay
+    resolution:
+      - 'drawer [anchor: right] → Taxonomy: Section.Overlay.SideOverlay'
+      - 'origin: right implicit from anchor'
+
+  - non-canonical:
+      empty-placeholder:
+        message: "No projects yet"
+        action: "Create your first project"
+    maps-to:
+      section:
+        id: empty-state-area
+        layout-pattern: centered-column
+        static: false
+        contains:
+          - capability: create
+      # Feedback: Information.EmptyState provides the message
+    resolution:
+      - 'empty-placeholder → Taxonomy: Section.Decorative.EmptyState'
+      - 'action text → Capability.Create capability'
+
+# ============================================================================
+# FALSE FRIENDS
+# ============================================================================
+
+false-friends:
+  - expression: "component: Card"
+    looks-like: "section: { layout-pattern: grid }"
+    not-equivalent-because: "A Card is a data display pattern, not a Section. A grid Section may CONTAIN cards, but Card ≠ Section. The Section describes the spatial arrangement; Card describes data presentation."
+
+  - expression: "div className='flex flex-col'"
+    looks-like: "section: { layout-pattern: vertical-stack }"
+    not-equivalent-because: "CSS class names describe implementation, not spatial intent. 'flex flex-col' could mean vertical-stack OR centered-column OR sidebar-shell. The semantic intent is lost."
+
+  - expression: "component: DropdownMenu"
+    looks-like: "section: { layout-pattern: overlay }"
+    not-equivalent-because: "DropdownMenu is specifically a ContextualMenu (Section.Overlay.ContextualMenu), not a generic overlay. The taxonomy distinction matters for behavior (dismiss trigger, positioning, priority)."
+
+  - expression: "layout: grid"
+    looks-like: "layout-pattern: grid"
+    not-equivalent-because: "grid (layout) in the Page context describes the page skeleton. grid (layout-pattern) in the Section context describes card/tile arrangement. Same word, different semantic scale."
+
+# ============================================================================
+# AGENT INSTRUCTION
+# ============================================================================
+
+agent-instruction: |
+  When generating a Section in UISL:
+  1. NEVER emit component names: Modal, Drawer, Sidebar, Tabs, Toolbar, Card
+  2. Map component names to Taxonomy section IDs:
+     - Sidebar/Nav → Section.Shell.NavigationHub
+     - Modal/Dialog → Section.Overlay.FocusOverlay
+     - Drawer/SlidePanel → Section.Overlay.SideOverlay
+     - Dropdown/Popup → Section.Overlay.ContextualMenu
+     - Toolbar/ActionBar → Section.Content.ActionBar
+     - Tabs → Section.Content.TabPanel
+  3. Use layout-pattern to express spatial intent, NOT CSS
+  4. A Section with static: true contains NO capabilities — it's pure decoration
+  5. Nested sections express hierarchical spatial partition
+  6. Section answers "How is the page organized?" — not "What component library is used?"

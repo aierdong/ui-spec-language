@@ -1,0 +1,277 @@
+# Input Taxonomy
+# Defines the hierarchy and inherited behavior of all Inputs.
+# Concept reference: ontology/input.md
+
+concept: Input
+ontology_ref: ontology/input.md
+description: "What information the user provides to fulfill a Capability"
+
+taxonomy:
+
+  # =========================================================================
+  # Credential — Identity verification values
+  # =========================================================================
+  - id: Credential
+    description: "Information used to verify the user's identity"
+    inherits:
+      sensitive: true              # All credentials are masked by default
+      validation:
+        - required: true           # Credentials are always required
+    children:
+
+      - id: Email
+        description: "User's email address for identification"
+        inherits:
+          validation:
+            - format: email
+            - max-length: 254
+        aliases:
+          - email-address
+          - email
+
+      - id: Password
+        description: "User's secret for authentication"
+        inherits:
+          validation:
+            - min-length: 8
+            - complexity: medium    # at least one uppercase, one digit
+        aliases:
+          - password
+          - passphrase
+
+      - id: OTP
+        description: "One-time passcode, typically numeric and short-lived"
+        inherits:
+          validation:
+            - format: numeric
+            - length: 6
+            - expires: true
+        aliases:
+          - otp
+          - verification-code
+          - token
+          - pin
+
+  # =========================================================================
+  # Text — Free-form character input
+  # =========================================================================
+  - id: Text
+    description: "Free-form character input"
+    inherits: {}
+    children:
+
+      - id: ShortText
+        description: "Short single-line text (names, titles, labels)"
+        inherits:
+          validation:
+            - max-length: 255
+        aliases:
+          - text
+          - name
+          - title
+          - label
+          - username
+          - project-name
+
+      - id: LongText
+        description: "Multi-line free-form text (descriptions, notes, comments)"
+        inherits:
+          multiline: true
+          validation:
+            - max-length: 10000
+        aliases:
+          - textarea
+          - description
+          - notes
+          - comment
+
+      - id: SearchQuery
+        description: "Text input for search functionality"
+        inherits:
+          short-lived: true         # Typically cleared after search
+          multiline: false
+        aliases:
+          - search
+          - query
+          - search-input
+
+  # =========================================================================
+  # Numeric — Numbers and quantities
+  # =========================================================================
+  - id: Numeric
+    description: "Numeric values"
+    inherits:
+      validation:
+        - type: number
+    children:
+
+      - id: Integer
+        description: "Whole number values"
+        inherits:
+          validation:
+            - integer: true
+        aliases:
+          - number
+          - count
+          - quantity
+          - ordered-index
+
+      - id: Decimal
+        description: "Numbers with decimal precision"
+        inherits:
+          validation:
+            - decimal: true
+        aliases:
+          - amount
+          - price
+          - percentage
+
+      - id: Duration
+        description: "A span of time"
+        inherits:
+          display-format: humanized  # "2h 30m" rather than raw seconds
+        aliases:
+          - duration
+          - time-span
+          - elapsed
+
+  # =========================================================================
+  # Selection — Choose from predefined options
+  # =========================================================================
+  - id: Selection
+    description: "Value chosen from a predefined or dynamic set of options"
+    inherits: {}
+    children:
+
+      - id: SingleSelect
+        description: "Choose exactly one option from a list"
+        inherits:
+          multiple: false
+        aliases:
+          - select
+          - dropdown
+          - radio
+          - language-switcher
+          - db-connection
+          - clear-strategy
+
+      - id: MultiSelect
+        description: "Choose zero or more options from a list"
+        inherits:
+          multiple: true
+          searchable: true           # Multi-selects benefit from search
+        aliases:
+          - multi-select
+          - add-table
+          - tag-selector
+
+      - id: Boolean
+        description: "True/false binary choice"
+        inherits:
+          default: false
+        aliases:
+          - checkbox
+          - toggle
+          - switch
+          - agree-to-terms
+          - remember-session
+          - remember-me
+
+  # =========================================================================
+  # Temporal — Date and time values
+  # =========================================================================
+  - id: Temporal
+    description: "Date and time values"
+    inherits: {}
+    children:
+
+      - id: Date
+        description: "Calendar date without time"
+        inherits:
+          format: date
+        aliases:
+          - date
+          - start-date
+          - end-date
+
+      - id: DateTime
+        description: "Calendar date with time component"
+        inherits:
+          format: datetime
+        aliases:
+          - datetime
+          - timestamp
+          - started-at
+          - created-at
+
+  # =========================================================================
+  # File — User-provided file uploads
+  # =========================================================================
+  - id: File
+    description: "A file provided by the user"
+    inherits:
+      upload: true
+    children:
+
+      - id: Image
+        description: "Image file upload"
+        inherits:
+          accept: "image/*"
+          validation:
+            - max-size: 10mb
+            - format: [jpg, png, gif, webp]
+        aliases:
+          - image
+          - photo
+          - avatar
+
+      - id: Document
+        description: "Document file upload"
+        inherits:
+          accept: ".pdf,.doc,.docx,.xls,.xlsx,.csv"
+          validation:
+            - max-size: 50mb
+        aliases:
+          - document
+          - file
+          - attachment
+
+  # =========================================================================
+  # Structured — Composite or list values
+  # =========================================================================
+  - id: Structured
+    description: "Composite or list-based information"
+    children:
+
+      - id: TagList
+        description: "A collection of labels or keywords"
+        inherits:
+          multiple: true
+          display: inline            # Show as compact chips/badges
+        aliases:
+          - tags
+          - table-tags
+          - labels
+
+      - id: KeyValue
+        description: "Key-value pair input"
+        inherits:
+          composite: true
+        aliases:
+          - key-value
+          - key-value-pair
+
+  # =========================================================================
+  # Display — Read-only presentation of information
+  # =========================================================================
+  - id: Display
+    description: "Read-only presentation of data. Not editable by the user."
+    inherits:
+      editable: false
+      validation: []                 # No validation needed for display
+    aliases:
+      - display
+      - readonly
+      - schema-table-meta
+      - field-rule-reference
+      - badge

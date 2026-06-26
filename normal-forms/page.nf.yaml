@@ -1,0 +1,144 @@
+# Page Normal Form
+# Canonical representation + equivalence mappings for the Page concept.
+# Concept reference: ontology/page.md
+# Taxonomy reference: taxonomy/ (Page has no taxonomy — root-level concept)
+
+concept: Page
+ontology_ref: ontology/page.md
+description: "A single screen in the application's navigation map"
+
+# ============================================================================
+# CANONICAL FORM
+# ============================================================================
+# This is the ONE valid YAML shape for a Page.
+# Every Agent output, every training sample, every Spec must use this form.
+# ============================================================================
+
+canonical-form:
+  page:
+    id: string              # Unique application-wide identifier (e.g., "login", "home")
+    label: string           # Human-readable name (e.g., "Sign In")
+    purpose: string?        # High-level purpose (e.g., "entry-point", "workspace")
+    layout: PageLayout?     # Semantic page layout (sidebar-shell | split-screen | centered-column | full-canvas | master-detail | stacked)
+    requires-auth: boolean?  # Whether authentication is required
+    guarded-by:             # Constraints that gate access
+      - constraint: ConstraintRef
+    sections:               # Sections that partition this page
+      - section: SectionRef  # → see section.nf.yaml
+    navigation-in:          # How users arrive at this page
+      - navigation: NavigationRef
+    navigation-out:         # Where users can go from here
+      - navigation: NavigationRef
+
+# ============================================================================
+# CANONICAL PROPERTY NAMES
+# ============================================================================
+# The ONE valid key for each attribute. Aliases are NEVER generated.
+# ============================================================================
+
+property-canonical-names:
+  id: { aliases: [name, key, page-id, route-name] }
+  label: { aliases: [title, heading, display-name, page-title] }
+  purpose: { aliases: [role, function, page-purpose, intent] }
+  layout: { aliases: [layout-type, page-layout, template] }
+  requires-auth: { aliases: [auth-required, protected, authenticated-only, private] }
+  guarded-by: { aliases: [access-control, permissions, guards, restricted-by] }
+  sections: { aliases: [children, content, regions, areas, blocks] }
+  navigation-in: { aliases: [routes-in, entry-points, inbound] }
+  navigation-out: { aliases: [routes-out, destinations, outbound, links] }
+
+# ============================================================================
+# CANONICAL LAYOUT VALUES
+# ============================================================================
+
+layout-values:
+  sidebar-shell: { aliases: [sidebar, side-nav, admin-layout, dashboard-layout] }
+  split-screen: { aliases: [split, two-column, two-panel, side-by-side] }
+  centered-column: { aliases: [centered, single-column, narrow, focused] }
+  full-canvas: { aliases: [fullscreen, canvas, full-width, immersive] }
+  master-detail: { aliases: [list-detail, master-detail-layout, split-view] }
+  stacked: { aliases: [vertical, single-column-mobile, mobile-stack] }
+
+# ============================================================================
+# EQUIVALENCE MAPPINGS
+# ============================================================================
+# Non-canonical expressions that resolve to the canonical form.
+# ============================================================================
+
+equivalences:
+  - non-canonical:
+      route: "/login"
+      component: LoginScreen
+    maps-to:
+      page:
+        id: login
+        label: "Sign In"
+    resolution:
+      - 'route "/login" → page.id = "login" (path segment inference)'
+      - 'component "LoginScreen" → page.id = "login" (PascalCase → kebab-case)'
+      - 'page.label inferred from component name: "Sign In"'
+
+  - non-canonical:
+      path: "/projects/:id"
+      component: ProjectDetail
+    maps-to:
+      page:
+        id: project-detail
+        label: "Project Detail"
+        layout: master-detail
+    resolution:
+      - 'path "/projects/:id" → page.id = "project-detail"'
+      - 'component "ProjectDetail" confirms identity'
+
+  - non-canonical:
+      screen: DashboardScreen
+      protected: true
+    maps-to:
+      page:
+        id: dashboard
+        label: "Dashboard"
+        requires-auth: true
+    resolution:
+      - 'screen → page wrapper'
+      - 'protected: true → requires-auth: true'
+
+  - non-canonical:
+      route-config:
+        path: "/settings"
+        component: SettingsPage
+    maps-to:
+      page:
+        id: settings
+        label: "Settings"
+    resolution:
+      - 'route-config wrapper → page'
+      - 'path "/settings" → page.id = "settings"'
+
+# ============================================================================
+# FALSE FRIENDS — NOT equivalent
+# ============================================================================
+
+false-friends:
+  - expression: "route: /projects/:id/edit"
+    looks-like: "page: project-edit"
+    not-equivalent-because: "Routes /projects/:id and /projects/:id/edit may serve the SAME page (project-detail) with a mode switch. A route is not a page — one page can have multiple routes."
+
+  - expression: "component: AppShell"
+    looks-like: "page: app-shell"
+    not-equivalent-because: "AppShell is the persistent frame that CONTAINS pages (sidebar, header). It is not itself a page."
+
+  - expression: "modal: NewProjectModal"
+    looks-like: "page: new-project"
+    not-equivalent-because: "A modal dialog is a Section (Overlay.FocusOverlay) within a page, not a standalone Page."
+
+# ============================================================================
+# AGENT INSTRUCTION
+# ============================================================================
+
+agent-instruction: |
+  When generating a Page in UISL:
+  1. Use ONLY the canonical property names (id, label, purpose, layout, etc.)
+  2. NEVER emit aliases (name, route, component, screen, protected)
+  3. Map all incoming route/path/component references to canonical page.id
+  4. A page with `layout: centered-column` and `requires-auth: false` containing an authentication capability → this is a login page
+  5. Pages are targets of Navigation events; define `navigation-out` for where users go from here

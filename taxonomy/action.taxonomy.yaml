@@ -1,0 +1,370 @@
+# Action Taxonomy
+# Defines the hierarchy and inherited behavior of all Actions.
+# Concept reference: ontology/action.md
+#
+# Taxonomy-specific properties (not in ontology):
+#   blocking: true       — Action blocks other UI interactions during execution (timing hint)
+#   instant: true        — Action takes effect immediately without loading state (UX hint)
+#   opens: overlay|inline|external — Where the Action presents its result (rendering hint)
+#   pre-populates: bool  — Whether form fields start with existing values (data hint)
+#   requires: [...]      — Inputs this Action type typically needs (same semantic as Capability.requires)
+
+concept: Action
+ontology_ref: ontology/action.md
+description: "What the user can trigger within a Capability"
+
+taxonomy:
+
+  # =========================================================================
+  # Submit — Finalize and send user-provided information to the system
+  # =========================================================================
+  - id: Submit
+    description: "Finalize and send user input to the system for processing"
+    inherits:
+      priority: primary
+      blocking: true               # Submit blocks the UI during processing
+      produces:
+        - "State: Lifecycle.Loading"
+        - "State: Outcome.Success"
+        - "State: Outcome.Error"
+      feedback:
+        success:
+          kind: confirmation
+          severity: success
+          duration: transient
+          placement: overlay
+        error:
+          kind: error-message
+          severity: error
+          duration: sticky
+          placement: page-top
+    children:
+
+      - id: SubmitAuth
+        description: "Authenticate with provided credentials"
+        inherits:
+          feedback:
+            error:
+              placement: target-proximity   # Auth errors near the form, not top banner
+        aliases:
+          - submit-auth
+          - login
+          - sign-in
+          - authenticate
+
+      - id: SubmitForm
+        description: "Submit form data for processing (create or update)"
+        inherits:
+          produces:
+            - "State: Validation.Validating"
+        aliases:
+          - submit
+          - save
+          - apply
+
+      - id: SubmitPayment
+        description: "Submit payment information for processing"
+        inherits:
+          requires:
+            - "Input: Numeric"      # payment amount
+            - "Input: Selection"    # payment method
+          produces:
+            - "State: Lifecycle.Processing"
+        aliases:
+          - pay
+          - checkout
+          - confirm-payment
+
+  # =========================================================================
+  # CRUD — Create, Read, Update, Delete operations on data records
+  # =========================================================================
+  - id: CRUD
+    description: "Operations that create, read, update, or delete data records"
+    children:
+
+      - id: Create
+        description: "Open a form to create a new record"
+        inherits:
+          priority: primary
+          opens: overlay             # Typically opens a dialog/modal
+          pre-populates: false       # Starts with empty form
+          produces:
+            - "State: Lifecycle.Loading"
+            - "State: Outcome.Success"
+            - "State: Outcome.Error"
+          feedback:
+            success:
+              kind: confirmation
+              duration: transient
+            error:
+              kind: error-message
+              duration: sticky
+        aliases:
+          - new
+          - add
+          - create-project
+          - create-record
+
+      - id: Read
+        description: "View or expand record details without modifying data"
+        inherits:
+          priority: tertiary
+          modifies-data: false       # Read-only, no data mutation
+          produces: []               # No side effects
+          opens: inline              # Expands within current context
+        aliases:
+          - view
+          - expand
+          - open
+          - show-detail
+
+      - id: Update
+        description: "Open a form to modify an existing record"
+        inherits:
+          priority: secondary
+          opens: overlay
+          pre-populates: true        # Form starts with current values
+          produces:
+            - "State: Lifecycle.Loading"
+            - "State: Outcome.Success"
+            - "State: Outcome.Error"
+          feedback:
+            success:
+              kind: confirmation
+              duration: transient
+            error:
+              kind: error-message
+              duration: sticky
+        aliases:
+          - edit
+          - modify
+          - change
+          - update-project
+          - edit-project
+
+      - id: Delete
+        description: "Permanently remove a record"
+        inherits:
+          priority: destructive
+          requires: confirmation     # MUST show confirmation before executing
+          reversible: false          # Cannot undo
+          produces:
+            - "State: Outcome.Success"
+            - "State: Outcome.Error"
+          feedback:
+            success:
+              kind: confirmation
+              duration: transient
+            error:
+              kind: error-message
+              duration: sticky
+        aliases:
+          - remove
+          - delete-project
+          - delete-record
+
+      - id: Clone
+        description: "Create a copy of an existing record"
+        inherits:
+          priority: secondary
+          opens: overlay
+          pre-populates: true        # Copies values from source
+          feedback:
+            success:
+              kind: confirmation
+              duration: transient
+        aliases:
+          - duplicate
+          - copy
+          - clone-project
+
+  # =========================================================================
+  # Navigate — Move between views, pages, or dismiss overlays
+  # =========================================================================
+  - id: Navigate
+    description: "Move the user to a different view or dismiss the current one"
+    inherits:
+      modifies-data: false
+    children:
+
+      - id: NavigateTo
+        description: "Go to another page or section of the application"
+        inherits:
+          priority: secondary
+          method: push               # Preserves history, allows back-navigation
+        aliases:
+          - go-to
+          - navigate
+          - open-page
+
+      - id: Dismiss
+        description: "Close the current overlay or return to previous view"
+        inherits:
+          priority: tertiary
+          discards-changes: true     # Does not save unsaved input
+        aliases:
+          - close
+          - cancel
+          - back
+          - dismiss
+
+      - id: ScrollTo
+        description: "Scroll to a specific position within the current view"
+        inherits:
+          priority: tertiary
+          method: scroll-to
+        aliases:
+          - scroll
+          - scroll-to-top
+
+  # =========================================================================
+  # Toggle — Switch between binary or enumerated states
+  # =========================================================================
+  - id: Toggle
+    description: "Switch between states without submitting data"
+    inherits:
+      modifies-data: false
+      instant: true                 # Takes effect immediately, no loading state
+    children:
+
+      - id: ToggleTheme
+        description: "Switch between visual presentations (light/dark mode)"
+        inherits:
+          priority: tertiary
+          scope: application         # Affects entire application
+        aliases:
+          - toggle-theme
+          - switch-theme
+
+      - id: ToggleSelection
+        description: "Select or deselect one or more items"
+        inherits:
+          priority: tertiary
+          scope: section
+        aliases:
+          - select
+          - deselect
+          - toggle-selection
+
+      - id: ToggleExpand
+        description: "Expand or collapse detail content"
+        inherits:
+          priority: tertiary
+          opens: inline
+        aliases:
+          - expand
+          - collapse
+          - toggle-detail
+
+  # =========================================================================
+  # System — Application-level operations
+  # =========================================================================
+  - id: System
+    description: "Application-level operations that affect the user session or environment"
+    children:
+
+      - id: SignOut
+        description: "End the current user session"
+        inherits:
+          priority: tertiary
+          requires: confirmation     # Explicitly modified from Delete's pattern
+          scope: application
+          clears-session: true
+        aliases:
+          - logout
+          - sign-out
+          - log-out
+
+      - id: SignIn
+        description: "Begin authentication via external provider"
+        inherits:
+          priority: secondary
+          opens: external            # Redirect to OAuth provider
+        aliases:
+          - oauth
+          - social-login
+
+      - id: SwitchLanguage
+        description: "Change the application display language"
+        inherits:
+          priority: tertiary
+          scope: application
+          instant: true
+        aliases:
+          - change-language
+
+  # =========================================================================
+  # Export — Download or copy data from the system
+  # =========================================================================
+  - id: Export
+    description: "Extract data from the system in a portable format"
+    inherits:
+      priority: secondary
+      produces:
+        - "State: Lifecycle.Processing"
+      feedback:
+        success:
+          kind: confirmation
+          duration: transient
+        error:
+          kind: error-message
+          duration: sticky
+    children:
+
+      - id: Download
+        description: "Download data as a file"
+        inherits:
+          triggers-download: true
+        aliases:
+          - export
+          - download-csv
+          - download-pdf
+
+      - id: CopyToClipboard
+        description: "Copy data to the system clipboard"
+        inherits:
+          instant: true
+        aliases:
+          - copy
+
+  # =========================================================================
+  # Run — Execute a process or workflow
+  # =========================================================================
+  - id: Run
+    description: "Execute a process, task, or workflow"
+    inherits:
+      priority: primary
+      blocking: true
+      produces:
+        - "State: Lifecycle.Processing"
+        - "State: Outcome.Success"
+        - "State: Outcome.Error"
+        - "State: Outcome.PartialSuccess"
+      feedback:
+        success:
+          kind: confirmation
+          duration: transient
+        error:
+          kind: error-message
+          duration: sticky
+    aliases:
+      - execute
+      - run-project
+      - start
+      - launch
+
+  # =========================================================================
+  # Search — Query and filter data
+  # =========================================================================
+  - id: Search
+    description: "Query the system for matching records"
+    inherits:
+      priority: primary
+      produces:
+        - "State: Lifecycle.Loading"
+      requires:
+        - "Input: Text.SearchQuery"
+    aliases:
+      - search
+      - find
+      - query

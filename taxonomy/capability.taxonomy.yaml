@@ -1,0 +1,278 @@
+# Capability Taxonomy
+# Defines the hierarchy and inherited behavior of all Capabilities.
+# Concept reference: ontology/capability.md
+#
+# Taxonomy-specific properties (not in ontology):
+#   instant: true     — Capability responds immediately without loading (UX hint)
+
+concept: Capability
+ontology_ref: ontology/capability.md
+description: "A user-facing function that the system provides within a specific context"
+
+taxonomy:
+
+  # =========================================================================
+  # Identity — Verify who the user is
+  # =========================================================================
+  - id: Identity
+    description: "Capabilities related to user identity verification and management"
+    children:
+
+      - id: Authentication
+        description: "Verify the user's identity to grant system access"
+        inherits:
+          requires:
+            - "Input: Credential.Email"
+            - "Input: Credential.Password"
+          provides:
+            - "Action: Submit.SubmitAuth"
+          produces:
+            - "State: Lifecycle.Loading"
+            - "State: Outcome.Success"
+            - "State: Outcome.Error"
+          feedback:
+            error:
+              kind: error-message
+              severity: error
+              duration: sticky
+              placement: page-top
+          may-lead-to:
+            - "Decision: Authentication.AuthOutcome"
+          layout-pattern: centered-column
+        aliases:
+          - login
+          - sign-in
+          - auth
+          - authenticate
+
+      - id: Registration
+        description: "Create a new user identity in the system"
+        inherits:
+          requires:
+            - "Input: Credential.Email"
+            - "Input: Credential.Password"
+            - "Input: Text.ShortText"   # name
+          provides:
+            - "Action: Submit.SubmitForm"
+          produces:
+            - "State: Lifecycle.Loading"
+            - "State: Outcome.Success"
+            - "State: Outcome.Error"
+          feedback:
+            error:
+              kind: error-message
+              severity: error
+              duration: sticky
+              placement: page-top
+        aliases:
+          - register
+          - sign-up
+          - create-account
+
+      - id: AccountRecovery
+        description: "Recover access to a locked or forgotten account"
+        inherits:
+          requires:
+            - "Input: Credential.Email"
+          provides:
+            - "Action: Submit.SubmitForm"
+        aliases:
+          - forgot-password
+          - reset-password
+          - account-recovery
+
+  # =========================================================================
+  # DataManagement — Work with data records
+  # =========================================================================
+  - id: DataManagement
+    description: "Capabilities for creating, viewing, searching, and managing data"
+    children:
+
+      - id: CRUD
+        description: "Full Create-Read-Update-Delete lifecycle for records"
+        inherits:
+          provides:
+            - "Action: CRUD.Create"
+            - "Action: CRUD.Read"
+            - "Action: CRUD.Update"
+            - "Action: CRUD.Delete"
+          data:
+            source: collection
+            mutable: true
+          states:
+            - "State: Selection.Unselected"
+            - "State: Lifecycle.Loading"
+          layout-pattern: master-detail
+        aliases:
+          - "project-management"
+          - "entity-list"
+          - "data-grid"
+
+      - id: Search
+        description: "Find records matching user-specified criteria"
+        inherits:
+          requires:
+            - "Input: Text.SearchQuery"
+          provides:
+            - "Action: Search"
+          produces:
+            - "State: Lifecycle.Loading"
+            - "State: Outcome.Success"
+          feedback:
+            empty: "Feedback: Information.EmptyState"
+        aliases:
+          - search
+          - find
+
+      - id: Filter
+        description: "Narrow a collection to items matching conditions"
+        inherits:
+          provides:
+            - "Action: Toggle"
+          produces:
+            - "State: Lifecycle.Loading"
+        aliases:
+          - filter
+          - refine
+
+      - id: Sort
+        description: "Reorder a collection by a chosen attribute"
+        inherits:
+          provides:
+            - "Action: Toggle"
+          instant: true              # Sorting is instant on client
+        aliases:
+          - sort
+          - order-by
+
+  # =========================================================================
+  # Transfer — Move data in and out of the system
+  # =========================================================================
+  - id: Transfer
+    description: "Capabilities for moving data across system boundaries"
+    children:
+
+      - id: Upload
+        description: "Transfer files from the user's device to the system"
+        inherits:
+          requires:
+            - "Input: File"
+          provides:
+            - "Action: Submit"
+          produces:
+            - "State: Lifecycle.Processing"
+            - "State: Outcome.Success"
+            - "State: Outcome.Error"
+          feedback:
+            progress: "Feedback: Information.Progress"
+        aliases:
+          - upload
+          - import
+
+      - id: Download
+        description: "Transfer data from the system to the user's device"
+        inherits:
+          provides:
+            - "Action: Export.Download"
+          produces:
+            - "State: Lifecycle.Processing"
+        aliases:
+          - download
+          - export
+
+  # =========================================================================
+  # Communication — Notify and inform users
+  # =========================================================================
+  - id: Communication
+    description: "Capabilities for notifying and informing users"
+    children:
+
+      - id: Notification
+        description: "Alert the user to time-sensitive or relevant events"
+        inherits:
+          produces:
+            - "State: Visibility.Visible"
+          feedback:
+            kind: "Feedback: Background.BackgroundNotification"
+        aliases:
+          - notification
+          - alert
+
+      - id: Confirmation
+        description: "Explicit acknowledgment from the user before proceeding"
+        inherits:
+          requires:
+            - "Input: Selection.Boolean"    # Confirm/Cancel
+          provides:
+            - "Action: Toggle.Selection"
+          layout-pattern: overlay
+        aliases:
+          - confirm
+          - verify
+
+  # =========================================================================
+  # Presentation — Control how the application appears
+  # =========================================================================
+  - id: Presentation
+    description: "Capabilities that control the application's visual presentation"
+    children:
+
+      - id: ToggleTheme
+        description: "Switch between visual presentations (light/dark mode)"
+        inherits:
+          provides:
+            - "Action: Toggle.ToggleTheme"
+          scope: application
+          instant: true
+        aliases:
+          - toggle-theme
+          - dark-mode
+
+      - id: SwitchLanguage
+        description: "Change the application display language"
+        inherits:
+          provides:
+            - "Action: System.SwitchLanguage"
+          scope: application
+          instant: true
+          data:
+            source: local-storage
+            mutable: true
+        aliases:
+          - switch-language
+          - locale
+
+      - id: ToggleView
+        description: "Switch between layout views (e.g., list vs grid)"
+        inherits:
+          provides:
+            - "Action: Toggle"
+          instant: true
+        aliases:
+          - toggle-view
+          - list-view
+          - grid-view
+
+  # =========================================================================
+  # Workflow — Execute multi-step operations
+  # =========================================================================
+  - id: Workflow
+    description: "Capabilities that execute multi-step business processes"
+    children:
+
+      - id: Run
+        description: "Execute a predefined process or pipeline"
+        inherits:
+          provides:
+            - "Action: Run"
+          produces:
+            - "State: Lifecycle.Processing"
+            - "State: Outcome.Success"
+            - "State: Outcome.PartialSuccess"
+            - "State: Outcome.Error"
+          feedback:
+            progress: "Feedback: Information.Progress"
+        aliases:
+          - run-project
+          - execute
+          - run-pipeline

@@ -1,0 +1,201 @@
+# State Normal Form
+# Canonical representation + equivalence mappings for the State concept.
+# Concept reference: ontology/state.md
+# Taxonomy reference: taxonomy/state.taxonomy.yaml
+
+concept: State
+ontology_ref: ontology/state.md
+taxonomy_ref: taxonomy/state.taxonomy.yaml
+description: "A transient condition of the UI at a given moment"
+
+# ============================================================================
+# CANONICAL FORM
+# ============================================================================
+
+canonical-form:
+  state:
+    id: string              # Unique name (e.g., "loading", "empty", "error", "authenticated")
+    label: string?          # Human-readable name (e.g., "Loading")
+    values: string[]?       # Enumerated possible values (e.g., ["success", "failed", "partial-failed"])
+    default: string?        # Initial value when the page/component mounts
+    persistent: boolean?    # Survives page navigation (default: false)
+    visible-when: Condition?  # When this state is shown
+    message: string?        # Human-readable description for the user
+    source: StateSource?    # What triggers this state: internal | external | user-action
+
+# ============================================================================
+# CANONICAL PROPERTY NAMES
+# ============================================================================
+
+property-canonical-names:
+  id: { aliases: [name, key, state-id, status, condition] }
+  label: { aliases: [title, display, text, description] }
+  values: { aliases: [options, variants, enum, choices, possible-values] }
+  default: { aliases: [initial, starting, preset, fallback] }
+  persistent: { aliases: [survives-navigation, keep-alive, retained, sticky-state] }
+  visible-when: { aliases: [show-when, active-when, condition, trigger] }
+  message: { aliases: [description, detail, explanation, text] }
+  source: { aliases: [trigger, origin, caused-by, from] }
+
+# ============================================================================
+# CANONICAL STATE ID VALUES (Top-level)
+# ============================================================================
+
+state-id-values:
+  idle:       { aliases: [ready, normal, default, initial, interactive] }
+  loading:    { aliases: [fetching, in-progress, waiting, pending, spinner-visible, skeleton] }
+  empty:      { aliases: [no-data, no-results, nothing-here, blank, zero-state] }
+  error:      { aliases: [failed, failure, broken, problem, issue, exception] }
+  success:    { aliases: [completed, done, finished, ok, resolved] }
+  processing: { aliases: [running, executing, working, computing, saving, submitting] }
+  selected:   { aliases: [chosen, picked, highlighted, active-item, focused-item] }
+  expanded:   { aliases: [open, revealed, shown, unfolded] }
+  focused:    { aliases: [active, current, highlighted-focus] }
+  disabled:   { aliases: [inactive, greyed-out, unavailable, locked-out] }
+
+# ============================================================================
+# EQUIVALENCE MAPPINGS
+# ============================================================================
+
+equivalences:
+  # --- Boolean flags → State ---
+  - non-canonical:
+      isLoading: true
+    maps-to:
+      state:
+        id: loading
+        source: internal
+    resolution:
+      - 'boolean flag → state.id = "loading"'
+      - 'source: internal (system-initiated)'
+
+  - non-canonical:
+      hasError: true
+      errorMessage: "Something went wrong"
+    maps-to:
+      state:
+        id: error
+        message: "Something went wrong"
+        source: external
+    resolution:
+      - 'hasError flag → state.id = "error"'
+      - 'errorMessage → state.message'
+
+  - non-canonical:
+      isEmpty: true
+    maps-to:
+      state:
+        id: empty
+        source: external
+    resolution:
+      - 'isEmpty flag → state.id = "empty"'
+
+  - non-canonical:
+      useState(false)
+    maps-to:
+      state:
+        id: custom
+        default: "false"
+    resolution:
+      - 'React useState → primitive state. Extract semantic meaning from variable name:'
+      - 'const [isOpen, setIsOpen] = useState(false) → state.id = "collapsed"'
+      - 'const [isSelected, setIsSelected] = useState(false) → state.id = "selected", default: "false"'
+
+  # --- State machine values → State ---
+  - non-canonical:
+      status: "authenticated"
+    maps-to:
+      state:
+        id: authenticated
+        default: "authenticated"
+    resolution:
+      - 'status value → state.id'
+
+  - non-canonical:
+      authState:
+        current: "loading"
+        possible: ["loading", "authenticated", "auth-failed", "offline"]
+    maps-to:
+      states:
+        - id: auth-state
+          values: [loading, authenticated, auth-failed, offline]
+          default: loading
+    resolution:
+      - 'state machine → state with values and default'
+      - 'possible → values'
+      - 'current → default'
+
+  # --- Visual state indicators → State ---
+  - non-canonical:
+      showSpinner: true
+    maps-to:
+      state:
+        id: loading
+    resolution:
+      - 'showSpinner → state.id = "loading"'
+      - 'NOT Feedback.Progress — the spinner is the VISUAL, loading is the STATE'
+
+  - non-canonical:
+      skeleton: true
+    maps-to:
+      state:
+        id: loading
+    resolution:
+      - 'skeleton screen → state.id = "loading"'
+      - 'The skeleton is the rendering; loading is the concept'
+
+  # --- Redux/Store state → State ---
+  - non-canonical:
+      store:
+        auth:
+          user: null
+          token: null
+          status: "idle"
+    maps-to:
+      states:
+        - id: user
+          default: null
+        - id: auth-status
+          default: idle
+    resolution:
+      - 'Redux state slice → multiple State concepts'
+      - 'user: null → data, not state'
+      - 'status → state.id'
+
+# ============================================================================
+# FALSE FRIENDS
+# ============================================================================
+
+false-friends:
+  - expression: "isLoading: true"
+    looks-like: "state: processing"
+    not-equivalent-because: "loading = fetching data (blocks navigation less). processing = executing action (blocks navigation more). Taxonomy distinguishes them: Lifecycle.Loading vs Lifecycle.Processing."
+
+  - expression: "error: '404'"
+    looks-like: "state: error"
+    not-equivalent-because: "HTTP status codes are technical details. The STATE is 'error' — the code is metadata, not the state identity."
+
+  - expression: "disabled: true"
+    looks-like: "state: disabled"
+    not-equivalent-because: "disabled is a Constraint (Availability) effect, not necessarily a State. If something is disabled 'when no items are selected', that's a Constraint, not a State."
+
+  - expression: "showErrorBanner: true"
+    looks-like: "state: error"
+    not-equivalent-because: "Showing an error banner is Feedback, not State. The State is 'error'; the banner is how the system communicates it."
+
+# ============================================================================
+# AGENT INSTRUCTION
+# ============================================================================
+
+agent-instruction: |
+  When generating a State in UISL:
+  1. Use semantic state IDs: loading, empty, error, success — never isLoading, hasError
+  2. State ≠ visual representation — strip all CSS/component references
+  3. State ≠ React hook — extract semantic meaning from variable names
+  4. Boolean flags (isLoading, hasError, isEmpty) → state.id with the semantic name
+  5. State machine definitions → state with values[] and default
+  6. Taxonomy provides implicit behavior:
+     - loading → blocks Action.Submit
+     - processing → blocks Action.Submit + Action.Navigate.NavigateTo
+     - error → triggers Feedback.Error
+     - success → triggers Feedback.Confirmation

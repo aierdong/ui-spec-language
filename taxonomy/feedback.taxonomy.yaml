@@ -1,0 +1,206 @@
+# Feedback Taxonomy
+# Defines the hierarchy and inherited behavior of all Feedback.
+# Concept reference: ontology/feedback.md
+#
+# Taxonomy-specific properties (not in ontology):
+#   blocking: true    — Feedback replaces previous of same kind (rendering hint)
+
+concept: Feedback
+ontology_ref: ontology/feedback.md
+description: "Information communicated to the user about the result of an Action or State change"
+
+taxonomy:
+
+  # =========================================================================
+  # Confirmation — Action completed successfully
+  # =========================================================================
+  - id: Confirmation
+    description: "Notify the user that an operation completed successfully"
+    inherits:
+      severity: success
+    children:
+
+      - id: InlineSuccess
+        description: "Success message embedded within the page content"
+        inherits:
+          placement: inline
+          duration: transient        # Auto-dismiss (e.g., 3 seconds)
+        aliases:
+          - "confirmation"
+          - "save-success"
+          - "delete-success"
+
+      - id: ToastSuccess
+        description: "Success message floating above content (toast notification)"
+        inherits:
+          placement: overlay
+          duration: transient
+        aliases:
+          - "toast"
+          - "notification"
+
+  # =========================================================================
+  # Error — Action failed; communicates what went wrong
+  # =========================================================================
+  - id: Error
+    description: "Inform the user that an operation failed and why"
+    inherits:
+      severity: error
+      duration: sticky              # User must read and dismiss or correct
+    children:
+
+      - id: InlineError
+        description: "Error message adjacent to the specific element that caused it"
+        inherits:
+          placement: target-proximity
+          duration: sticky           # Until corrected
+        aliases:
+          - "validation-email-format"
+          - "field-error"
+
+      - id: BannerError
+        description: "Page or section-level error banner"
+        inherits:
+          placement: page-top
+          duration: sticky
+        aliases:
+          - "auth-failed"
+          - "submission-failed"
+          - "error-message"
+
+      - id: DialogError
+        description: "Blocking error that requires user acknowledgment"
+        inherits:
+          placement: overlay
+          duration: sticky
+          requires: dismiss          # User must click to dismiss
+        aliases:
+          - "fatal-error"
+          - "blocking-error"
+
+  # =========================================================================
+  # Warning — Action succeeded but with caveats; or user should be cautious
+  # =========================================================================
+  - id: Warning
+    description: "Caution the user about consequences or partial success"
+    inherits:
+      severity: warning
+    children:
+
+      - id: InlineWarning
+        description: "Warning message near related content"
+        inherits:
+          placement: inline
+          duration: sticky
+        aliases:
+          - "dependency-impact"
+          - "partial-results-warning"
+
+      - id: ConfirmationWarning
+        description: "Warning shown before executing a destructive or irreversible action"
+        inherits:
+          placement: overlay
+          duration: sticky
+          requires: user-choice       # User must confirm or cancel
+          provides:
+            - "Action: Submit.SubmitForm"     # Confirm = submit the current intent
+            - "Action: Navigate.Dismiss"      # Cancel = dismiss and discard
+        aliases:
+          - "delete-warning"
+          - "delete-confirmation"
+          - "discard-changes-warning"
+
+  # =========================================================================
+  # Information — Neutral, non-actionable communication
+  # =========================================================================
+  - id: Information
+    description: "Communicate neutral information to the user"
+    inherits:
+      severity: info
+    children:
+
+      - id: EmptyState
+        description: "Shown when a collection or view has no data"
+        inherits:
+          placement: inline
+          duration: persistent        # Visible until data exists
+        aliases:
+          - "empty"
+          - "no-results"
+          - "no-projects"
+          - "no-data"
+
+      - id: Progress
+        description: "Shows ongoing operation progress (loading bar, spinner)"
+        inherits:
+          placement: inline
+          duration: persistent        # Visible until operation completes
+          blocking: true              # Multiple progresses don't stack; replaces previous
+        aliases:
+          - "loading"
+          - "upload-progress"
+          - "processing"
+
+      - id: InlineHelp
+        description: "Contextual guidance or explanation near an element"
+        inherits:
+          placement: inline
+          duration: persistent
+        aliases:
+          - "inline-help"
+          - "help-text"
+          - "clone-source-summary"
+          - "table-generation-order"
+
+      - id: Tooltip
+        description: "Brief clarification shown on hover or focus"
+        inherits:
+          placement: overlay
+          duration: transient         # Disappears on mouse-out or click-away
+        aliases:
+          - "tooltip"
+          - "hint"
+
+  # =========================================================================
+  # Validation — Input validation feedback
+  # =========================================================================
+  - id: Validation
+    description: "Feedback about requirement validation"
+    children:
+
+      - id: ValidationError
+        description: "Individual requirement-level validation error"
+        inherits:
+          placement: target-proximity
+          duration: sticky            # Until value corrected
+          severity: error
+        aliases:
+          - "validation-error"
+          - "field-error"
+
+      - id: ValidationSummary
+        description: "Summary of all validation errors at form level"
+        inherits:
+          placement: page-top
+          duration: sticky
+          severity: error
+        aliases:
+          - "form-errors"
+          - "validation-summary"
+
+  # =========================================================================
+  # Background — System-level feedback requiring no immediate action
+  # =========================================================================
+  - id: Background
+    description: "System-level events that don't require immediate user action"
+    children:
+
+      - id: BackgroundNotification
+        description: "Non-blocking notification of a background event"
+        inherits:
+          placement: overlay
+          duration: transient
+          severity: info
+        aliases:
+          - "notification"
+          - "background-success"

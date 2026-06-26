@@ -1,0 +1,223 @@
+# Constraint Taxonomy
+# Defines the hierarchy and inherited behavior of all Constraints.
+# Concept reference: ontology/constraint.md
+
+concept: Constraint
+ontology_ref: ontology/constraint.md
+description: "A condition that restricts when an Input, Action, State, or Capability is available, visible, or valid"
+
+taxonomy:
+
+  # =========================================================================
+  # Visibility — Whether the element is shown
+  # =========================================================================
+  - id: Visibility
+    description: "Conditions that control whether an element is rendered"
+    inherits:
+      applies-to: visibility
+    children:
+
+      - id: ShowWhen
+        description: "Element is visible only when the condition is true"
+        inherits:
+          default: hidden           # Hidden by default; condition reveals it
+        aliases:
+          - visible-when
+          - show-when
+          - display-when
+
+      - id: HideWhen
+        description: "Element is hidden when the condition is true"
+        inherits:
+          default: visible          # Visible by default; condition hides it
+        aliases:
+          - hide-when
+          - invisible-when
+
+      - id: RoleBased
+        description: "Element visibility based on user role or permission"
+        inherits:
+          severity: error           # Access denied is an error condition
+          message: "You do not have permission to access this"
+        aliases:
+          - "admin-only-action"
+          - permission-required
+          - role-restricted
+
+  # =========================================================================
+  # Availability — Whether the element is interactive
+  # =========================================================================
+  - id: Availability
+    description: "Conditions that control whether an element can be interacted with"
+    inherits:
+      applies-to: availability
+    children:
+
+      - id: EnableWhen
+        description: "Element is enabled only when the condition is true"
+        inherits:
+          default: disabled
+        aliases:
+          - enabled-when
+
+      - id: DisableWhen
+        description: "Element is disabled when the condition is true"
+        inherits:
+          default: enabled
+        aliases:
+          - disabled-when
+
+      - id: NoOpsOnEmpty
+        description: "Actions disabled when a collection is empty"
+        inherits:
+          condition: "items is empty"
+          message: "No items available"
+        aliases:
+          - "no-ops-on-empty"
+          - empty-state-disable
+
+      - id: SessionRequired
+        description: "Element requires an active authenticated session"
+        inherits:
+          condition: "user is not authenticated"
+          message: "Please sign in to continue"
+        aliases:
+          - "auth-required"
+          - login-required
+
+      - id: Submitting
+        description: "Element is disabled during form submission"
+        inherits:
+          condition: "State: Lifecycle.Processing is active"
+          reason: "Prevent double-submission"
+        aliases:
+          - is-submitting
+          - submission-in-progress
+
+  # =========================================================================
+  # Validity — Whether the value meets business rules
+  # =========================================================================
+  - id: Validity
+    description: "Conditions that validate whether a value is acceptable"
+    inherits:
+      applies-to: validity
+      severity: error
+    children:
+
+      - id: Required
+        description: "A value must be provided"
+        inherits:
+          condition: "value is empty"
+          message: "This field is required"
+        aliases:
+          - required
+          - mandatory
+
+      - id: FormatMatch
+        description: "Value must match a specific pattern"
+        inherits:
+          message: "Invalid format"
+        aliases:
+          - "email-format"
+          - pattern
+          - format
+
+      - id: MinLength
+        description: "Value must be at least N characters"
+        inherits:
+          message: "Must be at least N characters"
+        aliases:
+          - "password-min-length"
+          - min-length
+
+      - id: MaxLength
+        description: "Value must not exceed N characters"
+        inherits:
+          message: "Must not exceed N characters"
+        aliases:
+          - max-length
+
+      - id: RangeCheck
+        description: "Value must fall within a specified range (numeric or date)"
+        inherits:
+          message: "Value out of range"
+        aliases:
+          - min
+          - max
+          - range
+          - between
+
+      - id: Uniqueness
+        description: "Value must be unique within a given scope"
+        inherits:
+          message: "This value is already in use"
+        aliases:
+          - unique
+          - already-exists
+
+      - id: DependencyCheck
+        description: "Value depends on another element meeting its requirements"
+        inherits:
+          message: "Required dependencies are not met"
+        aliases:
+          - dependency
+          - "selected-tables missing required upstream tables"
+          - depends-on
+
+  # =========================================================================
+  # Confirmation — User must explicitly confirm before proceeding
+  # =========================================================================
+  - id: Confirmation
+    description: "User must explicitly confirm an action, typically for irreversible operations"
+    inherits:
+      applies-to: availability
+      severity: warning
+    children:
+
+      - id: DestructiveActionWarning
+        description: "Confirmation required before executing a destructive action"
+        inherits:
+          condition: "Action: CRUD.Delete is triggered"
+          message: "This action cannot be undone"
+          provides:
+            - "Feedback: Warning.ConfirmationWarning"
+        aliases:
+          - "delete-confirmation"
+          - destructive-confirm
+
+      - id: DiscardChangesWarning
+        description: "Confirmation when navigating away with unsaved changes"
+        inherits:
+          condition: "unsaved changes exist"
+          message: "You have unsaved changes"
+        aliases:
+          - unsaved-changes
+          - discard-warning
+
+  # =========================================================================
+  # Timing — Time-based constraints
+  # =========================================================================
+  - id: Timing
+    description: "Constraints based on time or expiration"
+    children:
+
+      - id: SessionExpiry
+        description: "Session expires after a period of inactivity"
+        inherits:
+          applies-to: availability
+          condition: "session has expired"
+          resolves-to:
+            - "Navigation: AuthNavigation.GoToLogin"
+        aliases:
+          - session-expired
+          - timeout
+
+      - id: RateLimit
+        description: "Action is rate-limited to prevent abuse"
+        inherits:
+          applies-to: availability
+          message: "Too many attempts. Please try again later."
+        aliases:
+          - rate-limit
+          - too-many-requests
+          - cooldown

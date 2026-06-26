@@ -1,0 +1,202 @@
+# Decision Taxonomy
+# Defines the hierarchy and inherited behavior of all Decisions.
+# Concept reference: ontology/decision.md
+
+concept: Decision
+ontology_ref: ontology/decision.md
+description: "A branch point where the system chooses a path based on State, Data, or user choice"
+
+taxonomy:
+
+  # =========================================================================
+  # Authentication — Branching after identity verification
+  # =========================================================================
+  - id: Authentication
+    description: "Decisions related to authentication outcomes"
+    inherits:
+      trigger: automatic
+    children:
+
+      - id: AuthOutcome
+        description: "What happens after an authentication attempt"
+        inherits:
+          evaluates:
+            - "State: Outcome.Success"
+            - "State: Outcome.Error"
+          branches:
+            - condition: "State: Outcome.Success"
+              resolves-to: "Navigation: AuthNavigation.GoToHome"
+              label: "Authentication succeeded"
+            - condition: "State: Outcome.Error"
+              resolves-to: "Feedback: Error.BannerError"
+              label: "Authentication failed"
+            - condition: "State: Network.Offline"
+              resolves-to: "Feedback: Error.BannerError"
+              label: "No network connection"
+        aliases:
+          - auth-outcome
+          - login-outcome
+          - sign-in-result
+
+      - id: SessionExpired
+        description: "What happens when the user session expires"
+        inherits:
+          evaluates:
+            - "State: Outcome.Error"
+          branches:
+            - condition: "unsaved changes exist"
+              resolves-to: "Feedback: Warning.DiscardChangesWarning"
+              label: "Prompt to save before redirect"
+            - condition: "no unsaved changes"
+              resolves-to: "Navigation: AuthNavigation.GoToLogin"
+              label: "Redirect to login"
+        aliases:
+          - session-expiry
+          - session-timeout
+
+  # =========================================================================
+  # CRUD — Branching after data operations
+  # =========================================================================
+  - id: CRUD
+    description: "Decisions after Create, Update, or Delete operations"
+    children:
+
+      - id: DeleteConfirmation
+        description: "User confirms or cancels a delete operation"
+        inherits:
+          trigger: user-choice
+          branches:
+            - condition: "user confirms"
+              resolves-to: "Action: CRUD.Delete"
+              label: "Proceed with deletion"
+            - condition: "user cancels"
+              resolves-to: "Action: Navigate.Dismiss"
+              label: "Cancel deletion"
+        aliases:
+          - delete-confirmation
+          - remove-confirmation
+
+      - id: FormDirtyNavigate
+        description: "User tries to navigate away while a form has unsaved changes"
+        inherits:
+          trigger: user-choice
+          evaluates:
+            - "State: Validation.Dirty"
+          branches:
+            - condition: "user chooses save"
+              resolves-to: "Action: Submit.SubmitForm"
+              label: "Save then navigate"
+            - condition: "user chooses discard"
+              resolves-to: "Navigation: PageNavigation.Push"
+              label: "Discard and navigate"
+            - condition: "user chooses cancel"
+              resolves-to: "State: Lifecycle.Idle"
+              label: "Stay on current page"
+        aliases:
+          - unsaved-changes
+          - dirty-form-navigate
+
+      - id: AfterSubmit
+        description: "What happens after a successful form submission"
+        inherits:
+          trigger: automatic
+          evaluates:
+            - "State: Outcome.Success"
+          branches:
+            - condition: "created or updated"
+              resolves-to: "Navigation: ResultNavigation.GoToList"
+              label: "Return to list view"
+        aliases:
+          - post-submit
+          - after-save
+
+  # =========================================================================
+  # DataState — Branching based on data availability
+  # =========================================================================
+  - id: DataState
+    description: "Decisions based on whether data exists or is empty"
+    children:
+
+      - id: EmptyCollection
+        description: "What to show when a collection has no items"
+        inherits:
+          trigger: automatic
+          evaluates:
+            - "Data: Remote.ApiCollection"
+          branches:
+            - condition: "collection is empty and user can create"
+              resolves-to: "Feedback: Information.EmptyState"
+              label: "Show empty state with CTA"
+            - condition: "collection is empty and user cannot create"
+              resolves-to: "Feedback: Information.EmptyState"
+              label: "Show read-only empty state"
+            - condition: "collection has items"
+              resolves-to: "State: Lifecycle.Idle"
+              label: "Show normal list view"
+        aliases:
+          - empty-collection
+          - no-items
+          - no-data-decision
+
+      - id: LoadingDecision
+        description: "What to show during data loading"
+        inherits:
+          trigger: automatic
+          evaluates:
+            - "State: Lifecycle.Loading"
+          branches:
+            - condition: "first load"
+              resolves-to: "Feedback: Information.Progress"
+              label: "Show full-page loading"
+            - condition: "subsequent load"
+              resolves-to: "Feedback: Information.Progress"
+              label: "Show inline loading indicator"
+        aliases:
+          - loading-state
+          - fetching
+
+  # =========================================================================
+  # Navigation — Branching during navigation events
+  # =========================================================================
+  - id: Navigation
+    description: "Decisions during page transitions"
+    children:
+
+      - id: InitialPageLoad
+        description: "Which page to show when the application first loads"
+        inherits:
+          trigger: automatic
+          evaluates:
+            - "State: Outcome.Success"
+          branches:
+            - condition: "user is authenticated"
+              resolves-to: "Navigation: AuthNavigation.GoToHome"
+              label: "Go to home page"
+            - condition: "user is not authenticated"
+              resolves-to: "Navigation: AuthNavigation.GoToLogin"
+              label: "Go to login page"
+        aliases:
+          - initial-route
+          - startup-decision
+
+  # =========================================================================
+  # Upload — Branching during file operations
+  # =========================================================================
+  - id: Upload
+    description: "Decisions during file upload operations"
+    children:
+
+      - id: FileTooLarge
+        description: "What to do when uploaded file exceeds size limit"
+        inherits:
+          trigger: automatic
+          branches:
+            - condition: "file can be compressed"
+              resolves-to: "Feedback: Warning.InlineWarning"
+              label: "Offer compression"
+            - condition: "file cannot be compressed"
+              resolves-to: "Feedback: Error.InlineError"
+              label: "Show size limit error"
+        aliases:
+          - file-size-error
+          - upload-rejected

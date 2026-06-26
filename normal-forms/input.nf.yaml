@@ -1,0 +1,240 @@
+# Input Normal Form
+# Canonical representation + equivalence mappings for the Input concept.
+# Concept reference: ontology/input.md
+# Taxonomy reference: taxonomy/input.taxonomy.yaml
+
+concept: Input
+ontology_ref: ontology/input.md
+taxonomy_ref: taxonomy/input.taxonomy.yaml
+description: "A piece of information the user provides to fulfill a Capability"
+
+# ============================================================================
+# CANONICAL FORM
+# ============================================================================
+
+canonical-form:
+  input:
+    id: string              # Unique name within the Capability (e.g., "email", "password")
+    label: string           # Human-readable name (e.g., "Email Address")
+    kind: InputKind         # Semantic type: credential | text | long-text | number | boolean | single-select | multi-select | date | datetime | duration | file | tag-list
+    validation:             # Rules the value must satisfy
+      - constraint: ConstraintRef
+    default: any?            # Default value
+    placeholder: string?     # Example or hint text
+    help-text: string?       # Explanatory text
+    sensitive: boolean?      # Mask the value (passwords, tokens)
+    multiple: boolean?       # Allow multiple values
+    searchable: boolean?     # Values from a searchable source
+    source: DataRef?         # Where selectable values come from
+    maps-to: DataRef?        # Which data field this binds to
+    visible-when: Condition?  # Conditional visibility
+    enabled-when: Condition?  # Conditional interactivity
+
+# ============================================================================
+# CANONICAL PROPERTY NAMES
+# ============================================================================
+
+property-canonical-names:
+  id: { aliases: [name, key, field-name, input-id, ref] }
+  label: { aliases: [title, display, text, caption, field-label] }
+  kind: { aliases: [type, role, category, input-type, field-type, widget, component] }
+  validation: { aliases: [rules, constraints, checks, validators] }
+  default: { aliases: [value, initial, preset, default-value] }
+  placeholder: { aliases: [hint, example, ghost-text, watermark] }
+  help-text: { aliases: [description, tooltip, hint-text, explanation] }
+  sensitive: { aliases: [secret, masked, hidden, password-field, protected] }
+  multiple: { aliases: [multi, repeatable, array, list] }
+  searchable: { aliases: [autocomplete, typeahead, filterable] }
+  source: { aliases: [options-from, data-source, choices-from, endpoint] }
+  maps-to: { aliases: [binds-to, field, property, attribute, column] }
+  visible-when: { aliases: [show-when, display-when, if, conditionally-visible] }
+  enabled-when: { aliases: [editable-when, active-when, disabled-when] }
+
+# ============================================================================
+# CANONICAL KIND VALUES
+# ============================================================================
+
+kind-values:
+  credential:  { aliases: [email, password, otp, pin, token, secret, passphrase] }
+  text:        { aliases: [string, short-text, name, title, username, handle, label] }
+  long-text:   { aliases: [textarea, description, notes, comment, content, body, markdown, rich-text] }
+  number:      { aliases: [integer, decimal, amount, quantity, count, price, percentage] }
+  boolean:     { aliases: [checkbox, toggle, switch, yes-no, true-false, binary, agree] }
+  single-select: { aliases: [select, dropdown, radio, picker, choose-one, combo, menu] }
+  multi-select:  { aliases: [multiselect, checkboxes, tag-selector, choose-many, multi-pick] }
+  date:        { aliases: [calendar, date-picker, date-input, day] }
+  datetime:    { aliases: [datetime-picker, timestamp, time-picker, schedule] }
+  duration:    { aliases: [time-span, elapsed, interval, period] }
+  file:        { aliases: [upload, attachment, document, image, photo, avatar, file-input] }
+  tag-list:    { aliases: [tags, labels, chips, keywords, badges] }
+
+# ============================================================================
+# EQUIVALENCE MAPPINGS
+# ============================================================================
+
+equivalences:
+  # --- Widget name → Input kind ---
+  - non-canonical:
+      component: Checkbox
+      label: "I agree to terms"
+    maps-to:
+      input:
+        id: agree-to-terms
+        kind: boolean
+        label: "I agree to terms"
+    resolution:
+      - 'component "Checkbox" → kind: boolean'
+      - 'id inferred from label: "agree-to-terms"'
+
+  - non-canonical:
+      type: email
+      name: user-email
+    maps-to:
+      input:
+        id: email
+        kind: credential
+        label: "Email"
+        validation:
+          - format: email
+    resolution:
+      - 'type "email" → kind: credential (Taxonomy: Input.Credential.Email)'
+      - '"user-email" → canonical id: "email"'
+      - 'format validation auto-added for credential kind'
+
+  - non-canonical:
+      widget: dropdown
+      options: [admin, editor, viewer]
+      name: role
+    maps-to:
+      input:
+        id: role
+        kind: single-select
+        label: "Role"
+        source: inline-options
+    resolution:
+      - 'widget "dropdown" → kind: single-select'
+      - 'options list → source: inline-options'
+
+  - non-canonical:
+      field:
+        type: textarea
+        max-length: 500
+    maps-to:
+      input:
+        kind: long-text
+        validation:
+          - max-length: 500
+    resolution:
+      - 'type "textarea" → kind: long-text'
+      - 'max-length → validation.max-length'
+
+  - non-canonical:
+      role: form-field
+      input-type: password
+    maps-to:
+      input:
+        kind: credential
+        sensitive: true
+    resolution:
+      - 'role "form-field" → generic wrapper, discard'
+      - 'input-type "password" → kind: credential, sensitive: true'
+
+  - non-canonical:
+      component: DatePicker
+      name: start-date
+    maps-to:
+      input:
+        id: start-date
+        kind: date
+        label: "Start Date"
+    resolution:
+      - 'component "DatePicker" → kind: date'
+      - 'name → canonical id'
+
+  - non-canonical:
+      type: number
+      min: 0
+      max: 100
+    maps-to:
+      input:
+        kind: number
+        validation:
+          - min: 0
+          - max: 100
+    resolution:
+      - 'type "number" → kind: number'
+      - 'min/max → validation constraints'
+
+  - non-canonical:
+      field: tags
+      component: TagInput
+    maps-to:
+      input:
+        id: tags
+        kind: tag-list
+        multiple: true
+    resolution:
+      - 'component "TagInput" → kind: tag-list'
+      - 'multiple: true implied by kind: tag-list'
+
+  # --- HTML attribute → Input ---
+  - non-canonical:
+      input:
+        type: text
+        required: true
+        placeholder: "Enter name"
+    maps-to:
+      input:
+        kind: text
+        label: inferred
+        validation:
+          - required: true
+        placeholder: "Enter name"
+    resolution:
+      - 'HTML type "text" → kind: text'
+      - 'required attribute → validation.required'
+      - 'label must be inferred from context or explicit'
+
+# ============================================================================
+# FALSE FRIENDS
+# ============================================================================
+
+false-friends:
+  - expression: "type: password, component: TextInput"
+    looks-like: "kind: credential, sensitive: true"
+    not-equivalent-because: "If only type:password but no credential context, the Agent cannot assume credential kind. A password field for a WiFi network is not identity verification."
+
+  - expression: "component: RichTextEditor"
+    looks-like: "kind: long-text"
+    not-equivalent-because: "RichTextEditor implies HTML/markdown output. kind: long-text alone does not specify the output format. Add validation for format."
+
+  - expression: "type: select, multiple: true"
+    looks-like: "kind: multi-select"
+    not-equivalent-because: "HTML <select multiple> and a tag-selector widget are BOTH kind: multi-select but with different interaction models. The kind is correct, but the rendering is undetermined."
+
+  - expression: "field: search"
+    looks-like: "kind: text"
+    not-equivalent-because: "A search input is kind: text (Input.Text.SearchQuery), not a separate kind. It is text with specific semantics (short-lived, cleared after search)."
+
+# ============================================================================
+# AGENT INSTRUCTION
+# ============================================================================
+
+agent-instruction: |
+  When generating an Input in UISL:
+  1. ALWAYS use `kind` — never `type`, `component`, `widget`, or `role`
+  2. Map widget names to InputKind through the Taxonomy:
+     - Checkbox → boolean
+     - Dropdown/Select/Radio → single-select
+     - TextInput/TextField → text (or credential if in auth context)
+     - TextArea → long-text
+     - DatePicker → date
+     - FileUpload → file
+     - Toggle/Switch → boolean
+  3. Password fields MUST have both kind: credential AND sensitive: true
+  4. Email fields in auth context → kind: credential; in profile context → kind: text with format: email validation
+  5. Input kind determines implicit behavior:
+     - credential → sensitive: true, required: true by Taxonomy default
+     - long-text → multiline: true
+     - multi-select → multiple: true, searchable: true
+     - boolean → default: false

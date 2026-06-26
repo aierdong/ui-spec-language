@@ -1,0 +1,288 @@
+# State Taxonomy
+# Defines the hierarchy and inherited behavior of all States.
+# Concept reference: ontology/state.md
+#
+# Taxonomy-specific properties (not in ontology):
+#   blocking: true    — State blocks user interaction (UX hint for rendering)
+
+concept: State
+ontology_ref: ontology/state.md
+description: "A transient condition of the UI at a given moment"
+
+taxonomy:
+
+  # =========================================================================
+  # Lifecycle — Where a Capability is in its execution lifecycle
+  # =========================================================================
+  - id: Lifecycle
+    description: "Execution lifecycle states of a Capability"
+    children:
+
+      - id: Idle
+        description: "Normal interactive state. The default state."
+        inherits:
+          default: true              # This is the default for most capabilities
+          blocks: []                 # Nothing blocked in idle state
+        aliases:
+          - idle
+          - ready
+
+      - id: Loading
+        description: "Data or content is being fetched or processed"
+        inherits:
+          blocks:                    # While loading, these are disabled
+            - "Action: Submit"       # Prevent double-submission
+            - "Action: CRUD.Delete"       # Prevent delete during load
+          triggers:
+            - "Feedback: Information.Progress"   # Show loading indicator
+        aliases:
+          - loading
+          - fetching
+          - in-progress
+
+      - id: Processing
+        description: "An operation is in progress (post-submission)"
+        inherits:
+          blocks:
+            - "Action: Submit"
+            - "Action: CRUD.Delete"
+            - "Action: Navigate.NavigateTo"  # Prevent navigation during processing
+          triggers:
+            - "Feedback: Information.Progress"
+        aliases:
+          - processing
+          - running
+          - executing
+
+  # =========================================================================
+  # Outcome — Result of an Action
+  # =========================================================================
+  - id: Outcome
+    description: "Result states after an Action completes"
+    children:
+
+      - id: Success
+        description: "The Action completed successfully"
+        inherits:
+          triggers:
+            - "Feedback: Confirmation"
+          duration: transient        # Auto-clear after feedback shown
+        aliases:
+          - success
+          - completed
+          - done
+
+      - id: Error
+        description: "The Action failed"
+        inherits:
+          blocking: true             # User must acknowledge before continuing
+          triggers:
+            - "Feedback: Error"
+          duration: sticky           # Persists until user dismisses or retries
+        aliases:
+          - error
+          - failed
+          - failure
+          - auth-failed
+
+      - id: PartialSuccess
+        description: "Some items succeeded, some failed"
+        inherits:
+          triggers:
+            - "Feedback: Warning"
+          duration: sticky
+        aliases:
+          - partial-success
+          - partial-failed
+          - partial
+
+  # =========================================================================
+  # Selection — What items are currently selected
+  # =========================================================================
+  - id: Selection
+    description: "Item selection states"
+    children:
+
+      - id: Unselected
+        description: "No items selected. Default state."
+        inherits:
+          default: true
+        aliases:
+          - unselected
+          - none-selected
+
+      - id: Selected
+        description: "One or more items are selected"
+        inherits:
+          enables:
+            - "Action: CRUD.Delete"       # Bulk delete available when items selected
+            - "Action: Export"
+        aliases:
+          - selected
+          - items-selected
+
+      - id: MultiSelected
+        description: "Multiple items selected, enabling batch operations"
+        inherits:
+          enables:
+            - "Action: CRUD.Delete"
+            - "Action: Export"
+            - "Action: CRUD.Update"     # Batch update when multiple selected
+        aliases:
+          - multi-selected
+
+  # =========================================================================
+  # Availability — Whether an element can be interacted with
+  # =========================================================================
+  - id: Availability
+    description: "Interaction availability of an element"
+    children:
+
+      - id: Enabled
+        description: "Element is fully interactive"
+        inherits:
+          default: true
+        aliases:
+          - enabled
+          - active
+
+      - id: Disabled
+        description: "Element is visible but not interactive"
+        inherits:
+          reason: "Constraint or system state prevents interaction"
+        aliases:
+          - disabled
+          - inactive
+          - greyed-out
+
+      - id: Locked
+        description: "Element is locked due to external condition (e.g., subscription required)"
+        inherits:
+          triggers:
+            - "Feedback: Information"
+        aliases:
+          - locked
+          - premium
+          - requires-upgrade
+
+  # =========================================================================
+  # Visibility — Whether content is shown
+  # =========================================================================
+  - id: Visibility
+    description: "Content display states"
+    children:
+
+      - id: Visible
+        description: "Content is shown"
+        inherits:
+          default: true
+        aliases:
+          - visible
+          - shown
+
+      - id: Hidden
+        description: "Content is not rendered"
+        inherits:
+          reason: "Constraint hides this element"
+        aliases:
+          - hidden
+
+      - id: Collapsed
+        description: "Detail content is collapsed; summary visible"
+        inherits:
+          default: true              # Often the default for collapsible sections
+        aliases:
+          - collapsed
+
+      - id: Expanded
+        description: "Detail content is fully visible"
+        aliases:
+          - expanded
+
+  # =========================================================================
+  # Network — Connection quality states
+  # =========================================================================
+  - id: Network
+    description: "Network connectivity states"
+    children:
+
+      - id: Online
+        description: "Normal connectivity"
+        inherits:
+          default: true
+        aliases:
+          - online
+          - connected
+
+      - id: Offline
+        description: "No network connectivity"
+        inherits:
+          blocking: true             # Most actions blocked
+          triggers:
+            - "Feedback: Error"
+          duration: persistent       # Until connectivity restored
+        aliases:
+          - offline
+          - disconnected
+
+      - id: Reconnecting
+        description: "Attempting to restore connectivity"
+        inherits:
+          triggers:
+            - "Feedback: Information.Progress"
+          blocks:
+            - "Action: Submit"
+            - "Action: CRUD.Delete"
+        aliases:
+          - reconnecting
+          - slow-connection
+
+  # =========================================================================
+  # Validation — Form input validation states
+  # =========================================================================
+  - id: Validation
+    description: "Input validation lifecycle states"
+    children:
+
+      - id: Pristine
+        description: "Input has not been touched by the user"
+        inherits:
+          default: true
+          feedback: none             # No error shown for untouched inputs
+        aliases:
+          - pristine
+          - untouched
+
+      - id: Dirty
+        description: "Input has been modified by the user"
+        inherits:
+          feedback: deferred         # Show validation on submit, not on change
+        aliases:
+          - dirty
+          - modified
+          - touched
+
+      - id: Valid
+        description: "Input value passes all validation rules"
+        aliases:
+          - valid
+
+      - id: Invalid
+        description: "Input value fails one or more validation rules"
+        inherits:
+          triggers:
+            - "Feedback: Validation.ValidationError"
+          blocks:
+            - "Action: Submit"       # Prevent submission with invalid data
+        aliases:
+          - invalid
+          - validation-failed
+
+      - id: Validating
+        description: "Input value is being checked against rules"
+        inherits:
+          triggers:
+            - "Feedback: Information.Progress"   # Show validating indicator
+        aliases:
+          - validating
+          - checking

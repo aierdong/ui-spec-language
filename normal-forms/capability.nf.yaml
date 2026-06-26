@@ -1,0 +1,189 @@
+# Capability Normal Form
+# Canonical representation + equivalence mappings for the Capability concept.
+# Concept reference: ontology/capability.md
+# Taxonomy reference: taxonomy/capability.taxonomy.yaml
+
+concept: Capability
+ontology_ref: ontology/capability.md
+taxonomy_ref: taxonomy/capability.taxonomy.yaml
+description: "A user-facing function that the system provides within a specific context"
+
+# ============================================================================
+# CANONICAL FORM
+# ============================================================================
+
+canonical-form:
+  capability:
+    id: string              # Unique machine-readable name (e.g., "authentication", "crud")
+    label: string?          # Human-readable name (e.g., "Sign In")
+    description: string?    # What the user can accomplish
+    requires:               # Inputs the user must provide
+      - input: InputRef     # → see input.nf.yaml
+    provides:               # Actions the user can trigger
+      - action: ActionRef   # → see action.nf.yaml
+    produces:               # States that can arise
+      - state: StateRef     # → see state.nf.yaml
+    obeys:                  # Constraints that limit this capability
+      - constraint: ConstraintRef
+    feedback:               # Feedback mechanisms
+      - feedback: FeedbackRef
+    may-lead-to:            # Branch decisions
+      - decision: DecisionRef
+    consumes:               # External data this capability reads
+      - data: DataRef
+    layout-pattern: LayoutPattern?  # Semantic layout hint (centered-column, master-detail, overlay)
+
+# ============================================================================
+# CANONICAL PROPERTY NAMES
+# ============================================================================
+
+property-canonical-names:
+  id: { aliases: [name, key, capability-id, feature] }
+  label: { aliases: [title, display-name, caption] }
+  description: { aliases: [summary, purpose, what-it-does] }
+  requires: { aliases: [needs, inputs, fields, params, dependencies] }
+  provides: { aliases: [offers, actions, operations, verbs] }
+  produces: { aliases: [results-in, yields, states, outcomes] }
+  obeys: { aliases: [constraints, rules, validations, conditions] }
+  feedback: { aliases: [messages, notifications, alerts] }
+  may-lead-to: { aliases: [branches, decisions, next-steps, flows] }
+  consumes: { aliases: [reads, uses, data-sources, fetches-from] }
+  layout-pattern: { aliases: [layout, pattern, presentation, display] }
+
+# ============================================================================
+# EQUIVALENCE MAPPINGS — Ambiguous forms → Canonical
+# ============================================================================
+
+equivalences:
+  # --- Authentication equivalences ---
+  - non-canonical:
+      feature: login
+      fields: [email, password]
+      actions: [submit]
+    maps-to:
+      capability:
+        id: authentication
+        requires: [input.email, input.password]
+        provides: [action.submit]
+    resolution:
+      - '"login" → Taxonomy alias for Authentication → capability.id = "authentication"'
+      - '"fields" → canonical: requires'
+      - '"email", "password" → Taxonomy: Input.Credential.Email, Input.Credential.Password'
+
+  - non-canonical:
+      page-type: sign-in
+      components: [EmailInput, PasswordInput, SubmitButton]
+    maps-to:
+      capability:
+        id: authentication
+        requires: [input.email, input.password]
+        provides: [action.submit]
+    resolution:
+      - '"sign-in" → Taxonomy alias → Authentication'
+      - 'Component names "EmailInput" → Input.Credential.Email, "PasswordInput" → Input.Credential.Password'
+      - '"SubmitButton" → Action.Submit'
+
+  # --- CRUD equivalences ---
+  - non-canonical:
+      feature: project-management
+      operations: [create, read, update, delete]
+    maps-to:
+      capability:
+        id: crud
+        provides: [action.create, action.read, action.update, action.delete]
+        layout-pattern: master-detail
+    resolution:
+      - '"project-management" → Taxonomy alias for CRUD'
+      - '"operations" → canonical: provides'
+      - 'Each operation maps to Action.CRUD.*'
+
+  - non-canonical:
+      data-grid:
+        entity: projects
+        columns: [name, status, created]
+        row-actions: [edit, delete, view]
+    maps-to:
+      capability:
+        id: crud
+        provides: [action.read, action.update, action.delete]
+        layout-pattern: master-detail
+    resolution:
+      - 'data-grid → Capability pattern → CRUD'
+      - 'row-actions → canonical: provides'
+      - '"view" → Action.CRUD.Read, "edit" → Action.CRUD.Update, "delete" → Action.CRUD.Delete'
+
+  # --- Search equivalences ---
+  - non-canonical:
+      search-bar:
+        placeholder: "Search projects..."
+    maps-to:
+      capability:
+        id: search
+        requires: [input.search-query]
+        provides: [action.search]
+    resolution:
+      - 'search-bar → Capability.Search'
+      - 'implicit Input: SearchQuery, Action: Search'
+
+  # --- Upload equivalences ---
+  - non-canonical:
+      file-upload:
+        accept: [.csv, .json]
+        max-size: 10mb
+    maps-to:
+      capability:
+        id: upload
+        requires: [input.file]
+        provides: [action.submit]
+    resolution:
+      - 'file-upload → Capability.Transfer.Upload'
+      - 'accept, max-size → Constraint.Validity on the Input'
+
+  # --- Filter/Sort equivalences ---
+  - non-canonical:
+      toolbar:
+        - filter-by-status
+        - sort-by-date
+    maps-to:
+      capabilities:
+        - id: filter
+          provides: [action.toggle]
+        - id: sort
+          provides: [action.toggle]
+    resolution:
+      - 'Toolbar actions "filter-by-status" → Capability.Filter'
+      - '"sort-by-date" → Capability.Sort'
+
+# ============================================================================
+# FALSE FRIENDS
+# ============================================================================
+
+false-friends:
+  - expression: "component: DataTable"
+    looks-like: "capability: crud"
+    not-equivalent-because: "DataTable is a rendering pattern. The Capability is CRUD — the DataTable is ONE possible visual implementation of CRUD."
+
+  - expression: "feature: export-csv"
+    looks-like: "capability: export"
+    not-equivalent-because: "Export is primarily an Action (Action.Export.Download), not a standalone Capability. Export is typically a supporting action within a data Capability like CRUD."
+
+  - expression: "modal: CreateProject"
+    looks-like: "capability: create"
+    not-equivalent-because: "A modal is a Section pattern. 'Create project' is a capability that may OPEN in a modal, but the modal is not the capability itself."
+
+  - expression: "form: login-form"
+    looks-like: "capability: authentication"
+    not-equivalent-because: "A form is a Section pattern that CONTAINS a Capability. Authentication is the capability; the form is the container."
+
+# ============================================================================
+# AGENT INSTRUCTION
+# ============================================================================
+
+agent-instruction: |
+  When generating a Capability in UISL:
+  1. Use ONLY the canonical property names: id, requires, provides, produces, etc.
+  2. NEVER emit aliases: needs, fields, operations, results-in
+  3. Resolve capability strings through Taxonomy aliases (e.g., "login" → "authentication")
+  4. A capability MUST NOT be described by its visual representation (e.g., "form", "table", "modal")
+  5. A capability answers "What can the user accomplish?" — if the answer is a widget name, it's wrong
+  6. All sub-references (requires → Input, provides → Action) MUST use canonical references

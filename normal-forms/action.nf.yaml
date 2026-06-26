@@ -1,0 +1,222 @@
+# Action Normal Form
+# Canonical representation + equivalence mappings for the Action concept.
+# Concept reference: ontology/action.md
+# Taxonomy reference: taxonomy/action.taxonomy.yaml
+
+concept: Action
+ontology_ref: ontology/action.md
+taxonomy_ref: taxonomy/action.taxonomy.yaml
+description: "A behavior the user can trigger within a Capability"
+
+# ============================================================================
+# CANONICAL FORM
+# ============================================================================
+
+canonical-form:
+  action:
+    id: string              # Unique name within the Capability (e.g., "submit", "cancel")
+    intent: ActionIntent    # What the user intends to accomplish
+    priority: Priority?     # Visual emphasis: primary | secondary | tertiary | destructive
+    label: string?          # Human-readable text (e.g., "Sign In", "Delete Project")
+    trigger: TriggerSource? # Where the action originates (row-body | row-action | inline | toolbar | context-menu | global)
+    target: Reference?      # Which Capability or element this action affects
+    sets-mode: string?      # Mode change (e.g., "create", "edit", "clone")
+    navigates-to: PageRef?  # Where the user goes after this action
+    disabled-when: Condition?  # When this action cannot be triggered
+    visible-when: Condition?   # When this action is hidden
+    confirmation: string?      # Message before destructive action
+    keyboard-shortcut: string? # Platform-independent shortcut hint
+
+# ============================================================================
+# CANONICAL PROPERTY NAMES
+# ============================================================================
+
+property-canonical-names:
+  id: { aliases: [name, key, action-id, ref] }
+  intent: { aliases: [purpose, goal, action-type, behavior, verb, operation, role] }
+  priority: { aliases: [importance, emphasis, level, weight, variant, style] }
+  label: { aliases: [text, title, display, caption, button-text] }
+  trigger: { aliases: [source, origin, location, placement, from] }
+  target: { aliases: [affects, operates-on, applies-to, scope] }
+  sets-mode: { aliases: [mode, context, opens-in, sets] }
+  navigates-to: { aliases: [goes-to, redirects-to, links-to, href, route, path] }
+  disabled-when: { aliases: [disabled, inactive-when, unavailable-when, not-allowed-when] }
+  visible-when: { aliases: [show-when, hidden-when, display-when] }
+  confirmation: { aliases: [confirm-message, are-you-sure, warn-before, verify] }
+  keyboard-shortcut: { aliases: [shortcut, hotkey, key-binding, accelerator] }
+
+# ============================================================================
+# CANONICAL INTENT VALUES
+# ============================================================================
+
+intent-values:
+  submit:     { aliases: [save, apply, send, post, create, update, confirm, execute, finish, done, ok, sign-in, login, authenticate] }
+  cancel:     { aliases: [back, abort, stop, discard, revert, reset, clear] }
+  dismiss:    { aliases: [close, hide, x, escape, minimize] }
+  delete:     { aliases: [remove, destroy, erase, trash, archive] }
+  create:     { aliases: [new, add, insert, compose, start] }
+  edit:       { aliases: [modify, change, update, rename, configure] }
+  clone:      { aliases: [duplicate, copy, replicate, fork] }
+  expand:     { aliases: [open, show-more, reveal, unfold, details] }
+  search:     { aliases: [find, query, lookup, filter, go] }
+  sort:       { aliases: [order, arrange, organize] }
+  filter:     { aliases: [refine, narrow, screen] }
+  sign-out:   { aliases: [logout, log-out, disconnect, end-session, exit] }
+  toggle-theme: { aliases: [dark-mode, light-mode, switch-theme, theme-switch] }
+  download:   { aliases: [export, save-as, get-file] }
+  run:        { aliases: [execute, start, launch, play, begin, trigger] }
+  navigate:   { aliases: [go-to, open, view, visit, jump-to] }
+  copy:       { aliases: [clipboard, duplicate-to-clipboard] }
+
+# ============================================================================
+# CANONICAL PRIORITY VALUES
+# ============================================================================
+
+priority-values:
+  primary: { aliases: [main, principal, default, filled, solid, strong, emphasized] }
+  secondary: { aliases: [alternative, outlined, bordered, ghost] }
+  tertiary: { aliases: [minor, subtle, text, link, icon-only, low-emphasis] }
+  destructive: { aliases: [danger, warning, red, caution, critical, irreversible] }
+
+# ============================================================================
+# EQUIVALENCE MAPPINGS
+# ============================================================================
+
+equivalences:
+  # --- Button → Action ---
+  - non-canonical:
+      button:
+        text: "Sign In"
+        variant: primary
+        type: submit
+    maps-to:
+      action:
+        id: submit
+        intent: submit
+        priority: primary
+        label: "Sign In"
+    resolution:
+      - 'button wrapper → action'
+      - 'type "submit" → intent: submit'
+      - 'variant "primary" → priority: primary'
+      - 'text → label'
+
+  - non-canonical:
+      component: Button
+      props:
+        onClick: handleDelete
+        color: danger
+        children: "Delete Project"
+    maps-to:
+      action:
+        id: delete
+        intent: delete
+        priority: destructive
+        label: "Delete Project"
+    resolution:
+      - 'onClick "handleDelete" → intent: delete'
+      - 'color "danger" → priority: destructive'
+
+  - non-canonical:
+      link:
+        text: "Back to Projects"
+        href: "/projects"
+    maps-to:
+      action:
+        id: navigate-to-projects
+        intent: navigate
+        priority: secondary
+        label: "Back to Projects"
+        navigates-to: "page:projects"
+    resolution:
+      - 'link + href → action with intent: navigate + navigates-to'
+      - 'href "/projects" → navigates-to: page:projects'
+
+  - non-canonical:
+      icon-button:
+        icon: close
+        aria-label: "Close dialog"
+    maps-to:
+      action:
+        id: dismiss
+        intent: dismiss
+        priority: tertiary
+        label: "Close dialog"
+    resolution:
+      - 'icon "close" + aria-label → intent: dismiss'
+      - 'icon-only → priority: tertiary'
+
+  - non-canonical:
+      menu-item:
+        label: "Delete"
+        shortcut: "Ctrl+D"
+        danger: true
+    maps-to:
+      action:
+        id: delete
+        intent: delete
+        priority: destructive
+        label: "Delete"
+        trigger: context-menu
+        keyboard-shortcut: "Ctrl+D"
+    resolution:
+      - 'menu-item → action with trigger: context-menu'
+      - 'danger: true → priority: destructive'
+
+  - non-canonical:
+      onClick: () => router.push('/home')
+    maps-to:
+      action:
+        intent: navigate
+        navigates-to: "page:home"
+    resolution:
+      - 'router.push → navigates-to'
+      - '/home → page:home'
+
+  - non-canonical:
+      type: reset
+    maps-to:
+      action:
+        intent: cancel
+        label: "Reset"
+    resolution:
+      - 'HTML reset button → intent: cancel (clears form without saving)'
+
+# ============================================================================
+# FALSE FRIENDS
+# ============================================================================
+
+false-friends:
+  - expression: "intent: cancel"
+    looks-like: "intent: dismiss"
+    not-equivalent-because: "Cancel = abandon input with possible data loss warning. Dismiss = close overlay (no data concern). They have different confirmation behaviors."
+
+  - expression: "intent: save"
+    looks-like: "intent: submit"
+    not-equivalent-because: "Save implies persistence without navigation; Submit implies finalize-and-send. Save may not trigger validation; Submit always does."
+
+  - expression: "button: { href: '/login', text: 'Go' }"
+    looks-like: "action: { intent: navigate, navigates-to: page:login }"
+    not-equivalent-because: "A plain link navigates. A button might trigger state changes before navigation. The HTML element type alone doesn't determine intent."
+
+  - expression: "icon: trash"
+    looks-like: "intent: delete"
+    not-equivalent-because: "Trash icon alone is ambiguous — it could mean 'move to trash' (undoable archive) or 'permanently delete'. The intent must be determined by context, not icon."
+
+# ============================================================================
+# AGENT INSTRUCTION
+# ============================================================================
+
+agent-instruction: |
+  When generating an Action in UISL:
+  1. ALWAYS use `intent` — never `type`, `onClick`, `handler`, `event`, `operation`
+  2. Map button variants to priority:
+     - primary/filled/solid → priority: primary
+     - secondary/outlined/ghost → priority: secondary
+     - text/link/icon-only → priority: tertiary
+     - danger/red/warning → priority: destructive
+  3. Destructive actions (delete, remove, clear-all) MUST have confirmation text
+  4. Actions with navigates-to are navigate intent, not submit intent
+  5. Icon-only buttons → priority: tertiary, trigger depends on location
+  6. Resolve intent from handler names: handleSubmit→submit, handleDelete→delete, handleClose→dismiss
+  7. Keyboard shortcuts must be platform-independent strings, not key codes

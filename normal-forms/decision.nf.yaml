@@ -1,0 +1,263 @@
+# Decision Normal Form
+# Canonical representation + equivalence mappings for the Decision concept.
+# Concept reference: ontology/decision.md
+# Taxonomy reference: taxonomy/decision.taxonomy.yaml
+
+concept: Decision
+ontology_ref: ontology/decision.md
+taxonomy_ref: taxonomy/decision.taxonomy.yaml
+description: "A branch point where the system chooses a path based on State, Data, or user choice"
+
+# ============================================================================
+# CANONICAL FORM
+# ============================================================================
+
+canonical-form:
+  decision:
+    id: string              # Unique name (e.g., "auth-outcome", "delete-confirmation-result")
+    description: string     # Human-readable explanation of what is being decided
+    trigger: TriggerType?   # automatic | user-choice | time-based | event-based
+    evaluates:              # What informs this decision
+      - state: StateRef
+      - data: DataRef
+      - constraint: ConstraintRef
+    branches:               # Possible outcomes
+      - condition: Condition
+        resolves-to: Reference   # Navigation, State, Action, or Feedback target
+        label: string            # Human-readable description of this path
+        priority: Priority?      # Preference when multiple conditions match
+    default-branch: Branch?  # Fallback when no conditions match
+
+# ============================================================================
+# CANONICAL PROPERTY NAMES
+# ============================================================================
+
+property-canonical-names:
+  id: { aliases: [name, key, decision-id, branch-point, flow] }
+  description: { aliases: [summary, what, purpose, question] }
+  trigger: { aliases: [initiated-by, caused-by, source, type] }
+  evaluates: { aliases: [checks, depends-on, considers, looks-at, inputs] }
+  branches: { aliases: [paths, outcomes, options, cases, routes, results] }
+  condition: { aliases: [when, if, guard, predicate, test] }
+  resolves-to: { aliases: [then, go-to, result, leads-to, outcome, target] }
+  label: { aliases: [text, description, name, path-name] }
+  priority: { aliases: [order, preference, weight, rank] }
+  default-branch: { aliases: [else, fallback, otherwise, default] }
+
+# ============================================================================
+# CANONICAL TRIGGER VALUES
+# ============================================================================
+
+trigger-values:
+  automatic:  { aliases: [system, auto, programmatic, state-driven, data-driven] }
+  user-choice: { aliases: [manual, interactive, prompt, dialog, user-selects] }
+  time-based: { aliases: [timeout, scheduled, expires, timer, interval] }
+  event-based: { aliases: [websocket, push, external, callback, listener] }
+
+# ============================================================================
+# EQUIVALENCE MAPPINGS
+# ============================================================================
+
+equivalences:
+  # --- If/else → Decision ---
+  - non-canonical:
+      if: "authState === 'authenticated'"
+      then: "navigate to home"
+      else: "show error message"
+    maps-to:
+      decision:
+        id: auth-outcome
+        description: "What happens after authentication attempt"
+        trigger: automatic
+        evaluates:
+          - state: auth-state
+        branches:
+          - condition: "State: Outcome.Success"
+            resolves-to: navigation:go-to-home
+            label: "Authentication succeeded"
+          - condition: "State: Outcome.Error"
+            resolves-to: feedback:auth-failed
+            label: "Authentication failed"
+    resolution:
+      - 'if/else → decision.branches'
+      - 'JS condition → canonical condition syntax'
+      - '"navigate to home" → Navigation reference'
+      - '"show error" → Feedback reference'
+
+  # --- Switch/case → Decision ---
+  - non-canonical:
+      switch: "userRole"
+      cases:
+        admin: "AdminDashboard"
+        editor: "EditorDashboard"
+        default: "ViewerDashboard"
+    maps-to:
+      decision:
+        id: role-based-routing
+        description: "Which dashboard to show based on user role"
+        trigger: automatic
+        evaluates:
+          - data: user-profile
+        branches:
+          - condition: "user-role == admin"
+            resolves-to: page:admin-dashboard
+            label: "Admin user"
+          - condition: "user-role == editor"
+            resolves-to: page:editor-dashboard
+            label: "Editor user"
+        default-branch:
+          resolves-to: page:viewer-dashboard
+          label: "Default viewer"
+    resolution:
+      - 'switch → decision with branches'
+      - 'cases → branch conditions'
+      - 'default → default-branch'
+
+  # --- Confirmation dialog → Decision ---
+  - non-canonical:
+      confirm:
+        message: "Are you sure you want to delete this project?"
+        onConfirm: deleteProject()
+        onCancel: closeDialog()
+    maps-to:
+      decision:
+        id: delete-confirmation
+        description: "User confirms or cancels deletion"
+        trigger: user-choice
+        branches:
+          - condition: "user confirms"
+            resolves-to: action:delete
+            label: "Proceed with deletion"
+          - condition: "user cancels"
+            resolves-to: action:dismiss
+            label: "Cancel deletion"
+    resolution:
+      - 'confirm → decision with trigger: user-choice'
+      - 'onConfirm → branch resolves-to action'
+      - 'onCancel → branch resolves-to action'
+
+  # --- Form dirty check → Decision ---
+  - non-canonical:
+      beforeUnload: (e) => {
+        if (hasUnsavedChanges) {
+          e.preventDefault();
+          return "You have unsaved changes";
+        }
+      }
+    maps-to:
+      decision:
+        id: form-dirty-navigate
+        description: "User tries to leave with unsaved changes"
+        trigger: user-choice
+        evaluates:
+          - state: dirty
+        branches:
+          - condition: "user chooses save"
+            resolves-to: action:submit
+            label: "Save then navigate"
+          - condition: "user chooses discard"
+            resolves-to: navigation:go-back
+            label: "Discard and navigate"
+          - condition: "user chooses cancel"
+            resolves-to: state:idle
+            label: "Stay on current page"
+    resolution:
+      - 'beforeUnload handler → decision'
+      - 'hasUnsavedChanges → evaluates state: dirty'
+      - 'Three choices → three branches'
+
+  # --- Empty state → Decision ---
+  - non-canonical:
+      if (items.length === 0) {
+        return <EmptyState canCreate={hasPermission} />;
+      }
+      return <ListView items={items} />;
+    maps-to:
+      decision:
+        id: empty-collection
+        description: "What to show when collection has no items"
+        trigger: automatic
+        evaluates:
+          - data: items
+        branches:
+          - condition: "items is empty AND user can create"
+            resolves-to: feedback:empty-state-with-cta
+            label: "Show empty state with create action"
+          - condition: "items is empty AND user cannot create"
+            resolves-to: feedback:read-only-empty-state
+            label: "Show read-only empty state"
+          - condition: "items is not empty"
+            resolves-to: state:idle
+            label: "Show normal list view"
+    resolution:
+      - 'conditional rendering → decision'
+      - 'items.length === 0 → condition: items is empty'
+      - 'canCreate prop → branch differentiation'
+
+  # --- Session expiry → Decision ---
+  - non-canonical:
+      useEffect(() => {
+        if (sessionExpired) {
+          if (hasUnsavedWork) {
+            showSavePrompt();
+          } else {
+            redirectToLogin();
+          }
+        }
+      }, [sessionExpired]);
+    maps-to:
+      decision:
+        id: session-expiry
+        description: "What happens when session expires"
+        trigger: event-based
+        evaluates:
+          - state: expired
+        branches:
+          - condition: "unsaved changes exist"
+            resolves-to: feedback:discard-changes-warning
+            label: "Prompt to save before redirect"
+          - condition: "no unsaved changes"
+            resolves-to: navigation:go-to-login
+            label: "Redirect to login"
+    resolution:
+      - 'useEffect with session check → event-based decision'
+      - 'branching logic → branches array'
+
+# ============================================================================
+# FALSE FRIENDS
+# ============================================================================
+
+false-friends:
+  - expression: "decision (branching)"
+    looks-like: "constraint (rule)"
+    not-equivalent-because: "Decision = one-time branch point triggered at a moment. Constraint = persistent rule always active. 'If auth fails → show error' is a Decision. 'Delete button disabled when no items' is a Constraint."
+
+  - expression: "decision (branching)"
+    looks-like: "navigation (movement)"
+    not-equivalent-because: "Decision chooses WHICH navigation to take. Navigation is the movement itself. Decision: auth-outcome → branch 1: Navigation.GoToHome, branch 2: Feedback.Error."
+
+  - expression: "trigger: automatic"
+    looks-like: "trigger: event-based"
+    not-equivalent-because: "Automatic = system decides based on State/Data (no external event). Event-based = triggered by external event (WebSocket, push notification). Different initiation patterns."
+
+  - expression: "default-branch omitted"
+    looks-like: "all cases covered"
+    not-equivalent-because: "Without a default-branch, unmatched conditions leave the system in an undefined state. Every decision SHOULD have a default-branch for robustness."
+
+# ============================================================================
+# AGENT INSTRUCTION
+# ============================================================================
+
+agent-instruction: |
+  When generating a Decision in UISL:
+  1. NEVER emit if/else, switch/case, or ternary expressions
+  2. ALWAYS include a description explaining WHAT is being decided
+  3. Every branch MUST have: condition, resolves-to, and label
+  4. resolves-to can be: navigation, state, action, or feedback references
+  5. trigger determines the initiation pattern:
+     - automatic → system-evaluated
+     - user-choice → presented to user (confirmation dialogs)
+     - time-based → timeout, expiry
+     - event-based → WebSocket, push notification
+  6. Default-branch is strongly recommended for robustness
+  7. Decision IS a branch point, NOT the action/navigation itself

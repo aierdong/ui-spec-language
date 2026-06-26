@@ -1,0 +1,226 @@
+# Section Taxonomy
+# Defines the hierarchy and inherited behavior of all Sections.
+# Concept reference: ontology/section.md
+
+concept: Section
+ontology_ref: ontology/section.md
+description: "A physical or logical partition of a Page that groups related Capabilities"
+
+taxonomy:
+
+  # =========================================================================
+  # Shell — Persistent application container sections
+  # =========================================================================
+  - id: Shell
+    description: "Persistent sections that frame the application across pages"
+    inherits:
+      persistent: true              # Present across most or all pages
+    children:
+
+      - id: NavigationHub
+        description: "Primary navigation sidebar or top bar with links and brand"
+        inherits:
+          layout-pattern: vertical-stack
+          zones: [top, middle, bottom]
+          static: false
+        aliases:
+          - navigation-hub
+          - sidebar
+          - nav-bar
+          - left-nav
+
+      - id: GlobalHeader
+        description: "Top bar with app-wide controls"
+        inherits:
+          layout-pattern: horizontal-strip
+          contains:
+            - "Capability: Presentation.SwitchLanguage"
+            - "Capability: Presentation.ToggleTheme"
+        aliases:
+          - global-header
+          - topbar
+          - header
+          - app-bar
+
+      - id: GlobalFooter
+        description: "Bottom bar with copyright, legal links, app version"
+        inherits:
+          layout-pattern: horizontal-strip
+          priority: tertiary
+          static: true
+        aliases:
+          - footer
+          - global-footer
+
+  # =========================================================================
+  # Content — Main content area sections
+  # =========================================================================
+  - id: Content
+    description: "Sections that contain the primary page content and Capabilities"
+    children:
+
+      - id: CenteredForm
+        description: "Single focused task with centered layout"
+        inherits:
+          layout-pattern: centered-column
+          max-width: narrow
+        aliases:
+          - auth-form
+          - credential-entry
+          - centered-column
+          - form-section
+
+      - id: EntityList
+        description: "A list or grid of data records"
+        inherits:
+          layout-pattern: vertical-stack
+          data:
+            type: collection
+        aliases:
+          - entity-list
+          - data-list
+          - record-list
+          - table-view
+
+      - id: DetailPanel
+        description: "Detailed view or editor for a single selected record"
+        inherits:
+          layout-pattern: vertical-stack
+          data:
+            type: singleton
+        aliases:
+          - detail-panel
+          - detail-view
+          - detail-section
+          - editor-panel
+
+      - id: DashboardGrid
+        description: "Overview page with cards or widgets in a grid"
+        inherits:
+          layout-pattern: grid
+          data:
+            type: collection
+        aliases:
+          - dashboard
+          - home-grid
+          - overview
+
+      - id: ActionBar
+        description: "Horizontal strip of actions for the current context"
+        inherits:
+          layout-pattern: horizontal-strip
+          priority: secondary
+        aliases:
+          - action-bar
+          - toolbar
+          - button-bar
+          - action-strip
+
+      - id: FilterPanel
+        description: "Sidebar or collapsible area with filtering controls"
+        inherits:
+          layout-pattern: vertical-stack
+          priority: secondary
+          collapsible: true
+        aliases:
+          - filter-panel
+          - filter-sidebar
+          - refinement-panel
+
+      - id: TabPanel
+        description: "Content split into tabs within the same section"
+        inherits:
+          layout-pattern: vertical-stack
+          zones: [tabs, content]
+        aliases:
+          - tab-panel
+          - tabs
+          - tab-view
+
+  # =========================================================================
+  # Overlay — Floating sections above the main page
+  # =========================================================================
+  - id: Overlay
+    description: "Content displayed above the main page flow"
+    inherits:
+      layout-pattern: overlay
+      blocks-background: true       # Typically dims the background
+    children:
+
+      - id: FocusOverlay
+        description: "Focused task in a floating overlay with backdrop"
+        inherits:
+          dismissable: true         # Can be closed by clicking outside or pressing ESC
+          zones: [header, body, footer]
+          provides:
+            - "Action: Navigate.Dismiss"
+        aliases:
+          - modal-dialog
+          - modal
+          - dialog
+          - project-form
+          - subset-project-form
+          - execution-history
+
+      - id: SideOverlay
+        description: "Panel appearing from one edge of the viewport"
+        inherits:
+          dismissable: true
+          origin: right
+          width: medium
+        aliases:
+          - drawer
+          - side-panel
+          - slide-panel
+
+      - id: ContextualMenu
+        description: "Compact floating menu of context-sensitive actions"
+        inherits:
+          dismissable: true
+          layout-pattern: vertical-stack
+          priority: tertiary
+        aliases:
+          - dropdown
+          - context-menu
+          - popup-menu
+          - overflow-menu
+
+  # =========================================================================
+  # Decorative — Non-interactive content sections
+  # =========================================================================
+  - id: Decorative
+    description: "Non-interactive sections for branding, marketing, or atmosphere"
+    inherits:
+      static: true
+      priority: tertiary
+    children:
+
+      - id: MarketingPanel
+        description: "Branding, copy, illustrations, or testimonials (not interactive)"
+        inherits:
+          layout-pattern: centered-column
+        aliases:
+          - marketing-panel
+          - hero
+          - brand-panel
+          - promotional
+
+      - id: BrandIdentity
+        description: "Logo and application name display"
+        inherits:
+          layout-pattern: horizontal-strip
+        aliases:
+          - brand-logo
+          - logo
+          - brand
+
+      - id: EmptyState
+        description: "Placeholder section shown when a view has no data"
+        inherits:
+          layout-pattern: centered-column
+          contains:
+            - "Feedback: Information.EmptyState"
+        aliases:
+          - empty-state-area
+          - no-data
+          - empty

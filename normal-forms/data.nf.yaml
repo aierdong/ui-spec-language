@@ -1,0 +1,270 @@
+# Data Normal Form
+# Canonical representation + equivalence mappings for the Data concept.
+# Concept reference: ontology/data.md
+# Taxonomy reference: taxonomy/data.taxonomy.yaml
+
+concept: Data
+ontology_ref: ontology/data.md
+taxonomy_ref: taxonomy/data.taxonomy.yaml
+description: "External or internal information that the UI consumes, displays, or mutates"
+
+# ============================================================================
+# CANONICAL FORM
+# ============================================================================
+
+canonical-form:
+  data:
+    id: string              # Unique name (e.g., "projects", "user-profile")
+    source: SourceType      # api | database | file | url-parameter | local-storage | session-storage | parent | context | computed
+    type: DataType?         # singleton | collection | tree | stream | dictionary
+    mutable: boolean?       # User can modify (default: false)
+    keyed-by: string?       # Field used as unique identifier for collection items
+    lazy: boolean?          # Loaded on demand vs eagerly (default: false)
+    freshness: Freshness?   # realtime | near-realtime | on-demand | cache-tolerant
+    scope: Scope?           # page | section | application | session
+    maps-to: InputRef[]?    # Inputs that bind to this data
+    feeds: SectionRef[]?    # Sections that display this data
+
+# ============================================================================
+# CANONICAL PROPERTY NAMES
+# ============================================================================
+
+property-canonical-names:
+  id: { aliases: [name, key, data-id, entity, model, resource] }
+  source: { aliases: [from, origin, provider, endpoint, storage] }
+  type: { aliases: [shape, structure, datatype, format] }
+  mutable: { aliases: [editable, writable, modifiable, read-write] }
+  keyed-by: { aliases: [id-field, primary-key, identifier, unique-by] }
+  lazy: { aliases: [deferred, on-demand, lazy-load, async, suspense] }
+  freshness: { aliases: [staleness, cache, ttl, realtime-ness, sync] }
+  scope: { aliases: [visibility, lifetime, range, sharing] }
+  maps-to: { aliases: [binds-to, feeds-input, input-binding, field-mapping] }
+  feeds: { aliases: [displayed-in, shown-in, rendered-by, used-by] }
+
+# ============================================================================
+# CANONICAL SOURCE VALUES
+# ============================================================================
+
+source-values:
+  api:              { aliases: [rest, graphql, grpc, endpoint, fetch, remote, server] }
+  database:         { aliases: [db, sql, query, store] }
+  file:             { aliases: [upload, static-file, asset, import] }
+  url-parameter:    { aliases: [query-string, path-param, route-param, search-params, hash] }
+  local-storage:    { aliases: [localStorage, browser-storage, device-storage, persistent-cache] }
+  session-storage:  { aliases: [sessionStorage, tab-storage, temporary-cache] }
+  parent:           { aliases: [inherited, props, passed-down, container, context-provider] }
+  context:          { aliases: [app-context, global, ambient, environment, theme, locale] }
+  computed:         { aliases: [derived, calculated, memoized, transformed, aggregated] }
+
+# ============================================================================
+# CANONICAL TYPE VALUES
+# ============================================================================
+
+type-values:
+  singleton:  { aliases: [single, record, object, item, entity, one] }
+  collection: { aliases: [list, array, items, records, set, many, rows] }
+  tree:       { aliases: [hierarchy, nested, recursive, parent-child, folder] }
+  stream:     { aliases: [live, realtime-feed, websocket, sse, subscription, observable] }
+  dictionary: { aliases: [map, key-value, lookup, hash, config, settings] }
+
+# ============================================================================
+# CANONICAL FRESHNESS VALUES
+# ============================================================================
+
+freshness-values:
+  realtime:        { aliases: [live, instant, immediate, push, websocket, streaming] }
+  near-realtime:   { aliases: [polling, frequent, stale-while-revalidate, swr, recent] }
+  on-demand:       { aliases: [fetch-on-click, lazy-load, manual, user-triggered, deferred] }
+  cache-tolerant:  { aliases: [cached, offline-capable, stored, persistent-data, static] }
+
+# ============================================================================
+# CANONICAL SCOPE VALUES
+# ============================================================================
+
+scope-values:
+  page:         { aliases: [local, page-level, component, view] }
+  section:      { aliases: [panel, region, area, subsection] }
+  application:  { aliases: [global, app-wide, shared, cross-page, everywhere] }
+  session:      { aliases: [login-session, user-session, tab-session, temporary] }
+
+# ============================================================================
+# EQUIVALENCE MAPPINGS
+# ============================================================================
+
+equivalences:
+  # --- API call → Data ---
+  - non-canonical:
+      fetch("/api/projects").then(res => res.json())
+    maps-to:
+      data:
+        id: projects
+        source: api
+        type: collection
+        mutable: true
+        freshness: on-demand
+        scope: page
+    resolution:
+      - 'fetch("/api/projects") → source: api'
+      - 'GET request → mutable: false (read); POST/PUT/PATCH → mutable: true'
+      - '.json() array → type: collection'
+
+  - non-canonical:
+      useQuery("projects", fetchProjects)
+    maps-to:
+      data:
+        id: projects
+        source: api
+        type: collection
+        freshness: cache-tolerant
+        lazy: false
+    resolution:
+      - 'useQuery → freshness: cache-tolerant (React Query caching)'
+      - 'Eager fetch by default'
+
+  # --- Redux/Zustand store → Data ---
+  - non-canonical:
+      store:
+        projects:
+          items: []
+          loading: false
+          error: null
+    maps-to:
+      data:
+        id: projects
+        source: api
+        type: collection
+        scope: application
+      # loading/error → State, NOT Data
+    resolution:
+      - 'Store slice → data with scope: application'
+      - 'items → the data itself'
+      - 'loading, error → extracted as State concepts'
+
+  # --- Props → Data ---
+  - non-canonical:
+      props:
+        project: { id: 123, name: "My Project" }
+        onSave: handleSave
+    maps-to:
+      data:
+        id: current-project
+        source: parent
+        type: singleton
+        mutable: false
+      # onSave → Action, not Data
+    resolution:
+      - 'props.project → data with source: parent'
+      - 'onSave → Action (handler), separate from data'
+
+  # --- localStorage → Data ---
+  - non-canonical:
+      localStorage.getItem("theme-preference")
+    maps-to:
+      data:
+        id: theme-preference
+        source: local-storage
+        type: singleton
+        mutable: true
+        freshness: cache-tolerant
+        scope: application
+    resolution:
+      - 'localStorage.getItem → source: local-storage'
+      - 'mutable: true (user can change)'
+
+  # --- URL params → Data ---
+  - non-canonical:
+      useParams().projectId
+    maps-to:
+      data:
+        id: project-id
+        source: url-parameter
+        type: singleton
+        scope: page
+    resolution:
+      - 'useParams → source: url-parameter'
+      - 'scope: page (URL params are page-specific)'
+
+  # --- Context → Data ---
+  - non-canonical:
+      useContext(AuthContext).user
+    maps-to:
+      data:
+        id: current-user
+        source: context
+        type: singleton
+        scope: application
+    resolution:
+      - 'useContext → source: context'
+      - 'scope: application (auth context is app-wide)'
+
+  # --- Computed/Derived → Data ---
+  - non-canonical:
+      useMemo(() => items.filter(i => i.active), [items])
+    maps-to:
+      data:
+        id: active-items
+        source: computed
+        type: collection
+        freshness: realtime
+    resolution:
+      - 'useMemo → source: computed'
+      - 'freshness: realtime (recomputed when dependency changes)'
+
+  # --- GraphQL → Data ---
+  - non-canonical:
+      query:
+        projects {
+          id
+          name
+          status
+        }
+    maps-to:
+      data:
+        id: projects
+        source: api
+        type: collection
+        freshness: on-demand
+    resolution:
+      - 'GraphQL query → source: api'
+      - 'Array result → type: collection'
+
+# ============================================================================
+# FALSE FRIENDS
+# ============================================================================
+
+false-friends:
+  - expression: "source: api, type: collection"
+    looks-like: "source: database, type: collection"
+    not-equivalent-because: "API implies HTTP request latency, error handling, caching. Database implies direct query (lower latency, different error model). The source determines the reliability contract."
+
+  - expression: "freshness: realtime"
+    looks-like: "freshness: near-realtime"
+    not-equivalent-because: "Realtime requires push (WebSocket/SSE). Near-realtime can use polling. Different implementation architectures. Choose correctly."
+
+  - expression: "data.id = 'form-values'"
+    looks-like: "input collection"
+    not-equivalent-because: "Form values are transient Input values, not persistent Data. They become Data only when submitted and saved. The form's current state is Input, not Data."
+
+  - expression: "mutable: true"
+    looks-like: "user can edit"
+    not-equivalent-because: "mutable: true means the data CAN be modified through the system. It does NOT mean the user currently has permission to edit. Permission is a Constraint on the Action, not a Data property."
+
+# ============================================================================
+# AGENT INSTRUCTION
+# ============================================================================
+
+agent-instruction: |
+  When generating a Data reference in UISL:
+  1. NEVER emit API URLs, fetch calls, or query functions
+  2. NEVER emit Redux/Zustand/Context API references
+  3. Map data sources to canonical SourceType:
+     - fetch/axios/react-query → source: api
+     - useContext → source: context
+     - useParams → source: url-parameter
+     - localStorage → source: local-storage
+     - useMemo → source: computed
+     - props → source: parent
+  4. Store slices containing { items, loading, error } → Data (items) + separate State concepts
+  5. type MUST be one of: singleton, collection, tree, stream, dictionary
+  6. freshness determines the caching/revalidation strategy
+  7. scope determines data sharing across the application

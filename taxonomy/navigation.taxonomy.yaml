@@ -1,0 +1,192 @@
+# Navigation Taxonomy
+# Defines the hierarchy and inherited behavior of all Navigation events.
+# Concept reference: ontology/navigation.md
+#
+# Taxonomy-specific properties (not in ontology):
+#   preserves-state: boolean  — Back-button returns to previous page state
+#   blocks-background: boolean — Overlay blocks interaction with background
+#   opens: value              — Target open mode (new-tab, overlay, inline)
+
+concept: Navigation
+ontology_ref: ontology/navigation.md
+description: "A movement between Pages, Sections, or Capabilities within an application"
+
+taxonomy:
+
+  # =========================================================================
+  # PageNavigation — Moving between full pages
+  # =========================================================================
+  - id: PageNavigation
+    description: "Full-page transitions between application views"
+    children:
+
+      - id: Push
+        description: "Navigate to a new page, preserving history for back-navigation"
+        inherits:
+          method: push
+          preserves-state: true       # Back button returns to previous state
+        aliases:
+          - navigate
+          - go-to
+          - open-page
+          - push
+
+      - id: Replace
+        description: "Navigate to a new page, replacing current in history"
+        inherits:
+          method: replace
+          preserves-state: false      # Cannot go back to the replaced page
+        aliases:
+          - redirect
+          - replace
+
+      - id: External
+        description: "Navigate to a URL outside the application"
+        inherits:
+          method: external
+          opens: new-tab               # Opens in new tab by default
+          carries-state: false         # Cannot carry app state to external
+        aliases:
+          - external-link
+          - oauth-redirect
+          - open-external
+
+  # =========================================================================
+  # OverlayNavigation — Opening and closing overlays
+  # =========================================================================
+  - id: OverlayNavigation
+    description: "Opening content above the current page without full navigation"
+    children:
+
+      - id: OpenDialog
+        description: "Open a modal dialog with focused content"
+        inherits:
+          method: overlay
+          blocks-background: true
+          dismissable: true
+        aliases:
+          - open-dialog
+          - open-modal
+          - show-dialog
+
+      - id: OpenDrawer
+        description: "Open a side panel"
+        inherits:
+          method: overlay
+          blocks-background: false     # Drawers typically don't block completely
+          dismissable: true
+        aliases:
+          - open-drawer
+          - show-panel
+
+      - id: DismissOverlay
+        description: "Close the current overlay and return to the underlying view"
+        inherits:
+          method: replace
+          discards-changes: true       # Overlay changes are discarded by default
+        aliases:
+          - close
+          - dismiss
+          - cancel
+          - back
+
+  # =========================================================================
+  # InlineNavigation — Moving within the same page
+  # =========================================================================
+  - id: InlineNavigation
+    description: "Content changes within the same page without URL change"
+    children:
+
+      - id: SwitchTab
+        description: "Switch between content panels within a tabbed section"
+        inherits:
+          method: inline
+          preserves-state: true        # Each tab remembers its state
+        aliases:
+          - switch-tab
+          - select-tab
+
+      - id: ToggleExpand
+        description: "Expand or collapse detail content inline"
+        inherits:
+          method: inline
+          animated: true
+        aliases:
+          - expand
+          - collapse
+          - accordion
+
+      - id: ScrollTo
+        description: "Scroll to a specific position within the page"
+        inherits:
+          method: scroll-to
+          animated: true
+        aliases:
+          - scroll-to
+          - scroll-to-top
+          - scroll-to-anchor
+
+  # =========================================================================
+  # AuthNavigation — Authentication flow navigation
+  # =========================================================================
+  - id: AuthNavigation
+    description: "Navigation patterns specific to authentication flows"
+    children:
+
+      - id: GoToLogin
+        description: "Redirect to the login page"
+        inherits:
+          method: replace              # Replace so user can't go back to protected page
+          clears-session: true
+        aliases:
+          - go-to-login
+          - sign-out-redirect
+
+      - id: GoToHome
+        description: "Redirect to the home/dashboard page after successful auth"
+        inherits:
+          method: replace              # Replace login page in history
+          carries-state:
+            - "State: Outcome.Success" # Carries authenticated outcome
+          carry-data:
+            - "Data: Inherited.ApplicationContext"  # User identity context
+        aliases:
+          - go-to-home
+          - go-to-dashboard
+          - post-login-redirect
+
+      - id: GoToRegister
+        description: "Navigate to the registration page"
+        inherits:
+          method: push                 # User may want to go back to login
+        aliases:
+          - go-to-register
+          - sign-up-link
+
+  # =========================================================================
+  # ResultNavigation — Navigation after an operation completes
+  # =========================================================================
+  - id: ResultNavigation
+    description: "Navigation based on the outcome of an operation"
+    children:
+
+      - id: GoToList
+        description: "Return to the list view after creating, updating, or deleting"
+        inherits:
+          method: push
+          carries-state:
+            - "Feedback: Confirmation.InlineSuccess"
+        aliases:
+          - back-to-list
+          - go-to-projects
+          - go-to-entities
+
+      - id: StayOnForm
+        description: "Stay on the current form for continued editing"
+        inherits:
+          method: inline
+          carries-state:
+            - "Feedback: Confirmation.InlineSuccess"
+        aliases:
+          - stay
+          - continue-editing

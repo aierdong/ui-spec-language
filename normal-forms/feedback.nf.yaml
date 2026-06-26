@@ -1,0 +1,247 @@
+# Feedback Normal Form
+# Canonical representation + equivalence mappings for the Feedback concept.
+# Concept reference: ontology/feedback.md
+# Taxonomy reference: taxonomy/feedback.taxonomy.yaml
+
+concept: Feedback
+ontology_ref: ontology/feedback.md
+taxonomy_ref: taxonomy/feedback.taxonomy.yaml
+description: "Information communicated to the user about the result of an Action or State change"
+
+# ============================================================================
+# CANONICAL FORM
+# ============================================================================
+
+canonical-form:
+  feedback:
+    id: string              # Unique name (e.g., "auth-failed-message", "save-success-toast")
+    kind: FeedbackKind      # Semantic type: confirmation | error-message | warning-notice | info-notice | validation-error | empty-state | progress | inline-help
+    message: string?        # The content communicated to the user
+    severity: Severity?     # success | error | warning | info
+    duration: Duration?     # transient | sticky | persistent
+    placement: Placement?   # inline | page-top | overlay | target-proximity
+    action: ActionRef?      # Optional action the user can take in response
+    visible-when: Condition?  # When this feedback is shown
+
+# ============================================================================
+# CANONICAL PROPERTY NAMES
+# ============================================================================
+
+property-canonical-names:
+  id: { aliases: [name, key, feedback-id, message-id] }
+  kind: { aliases: [type, category, feedback-type, style] }
+  message: { aliases: [text, content, body, description, detail, copy] }
+  severity: { aliases: [level, importance, tone, color, status] }
+  duration: { aliases: [timeout, lifespan, persistence, auto-dismiss, dismiss-after] }
+  placement: { aliases: [position, location, where, anchor, attach-to] }
+  action: { aliases: [response, follow-up, cta, button, link] }
+  visible-when: { aliases: [show-when, display-when, condition, trigger] }
+
+# ============================================================================
+# CANONICAL KIND VALUES
+# ============================================================================
+
+kind-values:
+  confirmation:    { aliases: [success, done, completed, saved, created, deleted, toast-success] }
+  error-message:   { aliases: [error, failed, failure, problem, alert-error, error-alert] }
+  warning-notice:  { aliases: [warning, caution, attention, heads-up, alert-warning] }
+  info-notice:     { aliases: [info, notice, tip, hint, information, alert-info] }
+  validation-error: { aliases: [field-error, input-error, invalid, requirement-error, form-error] }
+  empty-state:     { aliases: [no-data, zero-state, nothing-here, no-results, blank-slate] }
+  progress:        { aliases: [loading, spinner, skeleton, processing, uploading, fetching] }
+  inline-help:     { aliases: [help-text, tooltip, hint, description, explanation, guidance] }
+
+# ============================================================================
+# CANONICAL SEVERITY VALUES
+# ============================================================================
+
+severity-values:
+  success: { aliases: [ok, done, positive, green, pass] }
+  error:   { aliases: [fail, problem, negative, red, critical] }
+  warning: { aliases: [caution, amber, yellow, attention, alert] }
+  info:    { aliases: [neutral, blue, note, informational, notice] }
+
+# ============================================================================
+# CANONICAL DURATION VALUES
+# ============================================================================
+
+duration-values:
+  transient:  { aliases: [auto-dismiss, temporary, brief, short, 3s, 5s] }
+  sticky:     { aliases: [manual-dismiss, until-dismissed, persistent-until-action, dismissable] }
+  persistent: { aliases: [permanent, always, continuous, static, fixed] }
+
+# ============================================================================
+# CANONICAL PLACEMENT VALUES
+# ============================================================================
+
+placement-values:
+  inline:            { aliases: [in-content, in-flow, embedded, within] }
+  page-top:          { aliases: [banner, top, header, above-content, page-banner] }
+  overlay:           { aliases: [toast, snackbar, notification, popup, floating, corner] }
+  target-proximity:  { aliases: [adjacent, next-to, below-field, near, beside] }
+
+# ============================================================================
+# EQUIVALENCE MAPPINGS
+# ============================================================================
+
+equivalences:
+  # --- Toast/Notification → Feedback ---
+  - non-canonical:
+      toast:
+        message: "Project saved successfully"
+        type: success
+    maps-to:
+      feedback:
+        id: save-success
+        kind: confirmation
+        message: "Project saved successfully"
+        severity: success
+        duration: transient
+        placement: overlay
+    resolution:
+      - 'toast → feedback with placement: overlay, duration: transient'
+      - 'type "success" → severity: success, kind: confirmation'
+
+  - non-canonical:
+      alert:
+        variant: danger
+        children: "Authentication failed"
+    maps-to:
+      feedback:
+        id: auth-failed
+        kind: error-message
+        message: "Authentication failed"
+        severity: error
+        duration: sticky
+        placement: page-top
+    resolution:
+      - 'alert [variant: danger] → kind: error-message, severity: error'
+      - 'placement: page-top (banner-style alert)'
+
+  - non-canonical:
+      snackbar:
+        message: "Item deleted"
+        action: "Undo"
+    maps-to:
+      feedback:
+        id: delete-success
+        kind: confirmation
+        message: "Item deleted"
+        severity: success
+        duration: transient
+        placement: overlay
+        action:
+          intent: undo
+          label: "Undo"
+    resolution:
+      - 'snackbar → feedback with placement: overlay'
+      - 'action "Undo" → feedback.action'
+
+  # --- Empty state → Feedback ---
+  - non-canonical:
+      empty:
+        title: "No projects yet"
+        description: "Create your first project to get started"
+        cta: "Create Project"
+    maps-to:
+      feedback:
+        id: no-projects
+        kind: empty-state
+        message: "No projects yet. Create your first project to get started."
+        severity: info
+        duration: persistent
+        placement: inline
+        action:
+          intent: create
+          label: "Create Project"
+    resolution:
+      - 'empty → kind: empty-state, duration: persistent'
+      - 'title + description → combined message'
+      - 'cta → feedback.action'
+
+  # --- Loading/Progress → Feedback ---
+  - non-canonical:
+      spinner:
+        label: "Loading projects..."
+    maps-to:
+      feedback:
+        id: loading-projects
+        kind: progress
+        message: "Loading projects..."
+        severity: info
+        duration: persistent
+        placement: inline
+    resolution:
+      - 'spinner → kind: progress'
+      - 'duration: persistent (until loading completes)'
+
+  # --- Validation error → Feedback ---
+  - non-canonical:
+      field-error:
+        field: email
+        message: "Please enter a valid email address"
+    maps-to:
+      feedback:
+        id: validation-email-format
+        kind: validation-error
+        message: "Please enter a valid email address"
+        severity: error
+        duration: sticky
+        placement: target-proximity
+    resolution:
+      - 'field-error → kind: validation-error, placement: target-proximity'
+      - 'duration: sticky (until value corrected)'
+
+  # --- Tooltip → Feedback ---
+  - non-canonical:
+      tooltip: "This action cannot be undone"
+    maps-to:
+      feedback:
+        id: delete-warning-tooltip
+        kind: inline-help
+        message: "This action cannot be undone"
+        severity: warning
+        duration: transient
+        placement: overlay
+    resolution:
+      - 'tooltip → kind: inline-help, placement: overlay'
+      - 'duration: transient (disappears on hover-out)'
+
+# ============================================================================
+# FALSE FRIENDS
+# ============================================================================
+
+false-friends:
+  - expression: "kind: progress"
+    looks-like: "state: loading"
+    not-equivalent-because: "Progress is Feedback (what the user SEES). Loading is State (what IS happening). A progress bar is Feedback; the loading condition is State. They occur TOGETHER but are distinct concepts."
+
+  - expression: "severity: error, placement: inline"
+    looks-like: "kind: validation-error"
+    not-equivalent-because: "A general error-message at inline placement is NOT the same as a validation-error. Validation errors are input-specific and block submission; inline errors are general communication near content."
+
+  - expression: "component: AlertDialog"
+    looks-like: "feedback: { kind: error-message, placement: overlay }"
+    not-equivalent-because: "AlertDialog is a Section pattern. Feedback may be PRESENTED in a dialog, but Feedback is the message, not the container."
+
+  - expression: "toast vs snackbar vs notification"
+    looks-like: "three different feedback kinds"
+    not-equivalent-because: "Toast, snackbar, and notification are all placement: overlay with different material design naming. The Feedback kind and severity determine semantics, not the component library name."
+
+# ============================================================================
+# AGENT INSTRUCTION
+# ============================================================================
+
+agent-instruction: |
+  When generating Feedback in UISL:
+  1. NEVER emit component names: Toast, Snackbar, Alert, Notification, Spinner, Skeleton
+  2. Map component names to canonical properties:
+     - Toast/Snackbar → placement: overlay, duration: transient
+     - Alert/Banner → placement: page-top, duration: sticky
+     - Spinner/Skeleton → kind: progress, duration: persistent
+     - Tooltip → kind: inline-help, placement: overlay, duration: transient
+  3. Feedback IS the message, NOT the container
+  4. kind + severity + duration + placement = complete Feedback specification
+  5. kind: empty-state always has duration: persistent
+  6. kind: validation-error always has placement: target-proximity
+  7. If Feedback includes an action (like "Undo"), it's actionable feedback
