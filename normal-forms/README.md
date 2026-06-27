@@ -63,7 +63,7 @@ There is ONE canonical property name for each attribute. Aliases are documented 
 |-------------------|--------------------------|
 | `kind` | `type`, `role`, `category`, `input-type`, `field-type` |
 | `id` | `name`, `key`, `ref`, `identifier` |
-| `intent` | `purpose`, `goal`, `action-type`, `behavior` |
+| `intent` | `purpose`, `goal`, `action-type`, `behavior`, `description` |
 | `priority` | `importance`, `level`, `emphasis`, `weight` |
 | `label` | `title`, `display`, `text`, `caption` |
 | `requires` | `needs`, `inputs`, `dependencies`, `fields` |
@@ -104,6 +104,91 @@ For enumerations, there is exactly ONE valid string form.
 | `input.kind` | `credential`, `text`, `long-text`, `number`, `boolean`, `single-select`, `multi-select`, `date`, `datetime`, `duration`, `file`, `tag-list` | `email` → `credential`; `textarea` → `long-text`; `dropdown` → `single-select`; `checkbox` → `boolean` |
 | `action.priority` | `primary`, `secondary`, `tertiary`, `destructive` | `main` → `primary`; `danger` → `destructive` |
 | `state` | `idle`, `loading`, `empty`, `error`, `success`, `processing` | `fetching` → `loading`; `failed` → `error` |
+
+### Rule 6: Ref Types Use Concept.ID Format
+
+When a property references another concept, use the format `{concept}.{id}`:
+
+```yaml
+# Format: {concept}.{id}
+input.email          # references Input with id "email"
+action.submit        # references Action with id "submit"
+state.loading        # references State with id "loading"
+constraint.required  # references Constraint with id "required"
+input.user-mail      # compound id uses hyphen
+```
+
+**Case-insensitive**: `input.email`, `Input.Email`, `INPUT.EMAIL` are all valid.
+**Hyphen for compound words in id**: `input.user-mail`, not `input.userMail` or `input.user_mail`.
+
+**Valid concepts**: `input`, `action`, `state`, `constraint`, `data`, `feedback`, `decision`, `navigation`, `section`, `capability`, `page`
+
+### Rule 7: Required Properties
+
+Each concept has a set of required properties. Optional properties are marked with `?` in canonical-form definitions.
+
+| Concept | Required Properties |
+|---------|---------------------|
+| Capability | `id`, `intent` |
+| Action | `id`, `intent`, `label` |
+| Input | `id`, `kind`, `label` |
+| Page | `id`, `label` |
+| Section | `id` |
+| State | `id` |
+| Feedback | `id`, `kind` |
+| Navigation | `id`, `target` |
+| Constraint | `id`, `condition` |
+| Decision | `id`, `summary`, `branches` |
+| Data | `id`, `source` |
+
+### Rule 8: Shared Enum Types
+
+Some enum types are shared across concepts. Their canonical values are defined here and referenced by individual NF files.
+
+#### Priority
+
+Used by: `action`, `section`, `decision`
+
+| Canonical Value | Aliases |
+|-----------------|---------|
+| `primary` | `main`, `principal`, `default`, `filled`, `solid`, `strong`, `emphasized` |
+| `secondary` | `supporting`, `auxiliary`, `side` |
+| `tertiary` | `minor`, `subtle`, `peripheral`, `low-emphasis`, `footnote` |
+| `destructive` | `danger`, `critical`, `harmful`, `delete`, `remove` |
+
+#### Severity
+
+Used by: `constraint`, `feedback`
+
+| Canonical Value | Aliases |
+|-----------------|---------|
+| `error` | `fail`, `problem`, `negative`, `red`, `critical`, `block`, `reject`, `invalid` |
+| `warning` | `caution`, `amber`, `yellow`, `attention`, `alert`, `warn` |
+| `info` | `neutral`, `blue`, `note`, `informational`, `notice`, `hint` |
+| `success` | `ok`, `done`, `positive`, `green`, `pass` |
+
+#### Condition
+
+Used by: `constraint`, `input`, `section`, `decision`
+
+Condition syntax is canonical — no JS expressions, no React patterns:
+
+```
+State: Category.Leaf == value     # State check
+data-id.field == value            # Data check
+input-id is empty                 # Input check
+expression != value               # Negation
+value in [a, b, c]               # Membership
+expr1 AND expr2                   # Compound AND
+expr1 OR expr2                    # Compound OR
+value < N                         # Comparison (<, >, <=, >=)
+```
+
+Examples:
+- `State: Lifecycle.Processing is active`
+- `items.length == 0`
+- `user-role != admin`
+- `dialog-mode in [edit, clone] AND user-role == admin`
 
 ---
 

@@ -16,7 +16,7 @@ canonical-form:
   capability:
     id: string              # Unique machine-readable name (e.g., "authentication", "crud")
     label: string?          # Human-readable name (e.g., "Sign In")
-    description: string?    # What the user can accomplish
+    intent: string          # What the user can accomplish (required)
     requires:               # Inputs the user must provide
       - input: InputRef     # → see input.nf.yaml
     provides:               # Actions the user can trigger
@@ -40,7 +40,7 @@ canonical-form:
 property-canonical-names:
   id: { aliases: [name, key, capability-id, feature] }
   label: { aliases: [title, display-name, caption] }
-  description: { aliases: [summary, purpose, what-it-does] }
+  intent: { aliases: [purpose, goal, description, what-it-does, about] }
   requires: { aliases: [needs, inputs, fields, params, dependencies] }
   provides: { aliases: [offers, actions, operations, verbs] }
   produces: { aliases: [results-in, yields, states, outcomes] }
@@ -49,6 +49,20 @@ property-canonical-names:
   may-lead-to: { aliases: [branches, decisions, next-steps, flows] }
   consumes: { aliases: [reads, uses, data-sources, fetches-from] }
   layout-pattern: { aliases: [layout, pattern, presentation, display] }
+
+# ============================================================================
+# CANONICAL LAYOUT PATTERN VALUES
+# ============================================================================
+
+layout-pattern-values:
+  centered-column: { aliases: [centered, narrow, focused, single-column, form-layout] }
+  sidebar-shell: { aliases: [sidebar, side-nav, shell, app-layout, admin-layout] }
+  split-screen: { aliases: [split, two-column, two-panel, dual] }
+  vertical-stack: { aliases: [stack, list, column, vertical, top-to-bottom] }
+  horizontal-strip: { aliases: [strip, row, horizontal, toolbar, bar, left-to-right] }
+  grid: { aliases: [cards, tile, mosaic, dashboard-grid, masonry] }
+  overlay: { aliases: [modal, dialog, drawer, popup, floating, above] }
+  master-detail: { aliases: [list-detail, split-view, side-panel, browser] }
 
 # ============================================================================
 # EQUIVALENCE MAPPINGS — Ambiguous forms → Canonical
@@ -63,6 +77,8 @@ equivalences:
     maps-to:
       capability:
         id: authentication
+        label: "Sign In"
+        intent: "user provides credentials to verify identity"
         requires: [input.email, input.password]
         provides: [action.submit]
     resolution:
@@ -76,6 +92,8 @@ equivalences:
     maps-to:
       capability:
         id: authentication
+        label: "Sign In"
+        intent: "user provides credentials to verify identity"
         requires: [input.email, input.password]
         provides: [action.submit]
     resolution:
@@ -90,6 +108,7 @@ equivalences:
     maps-to:
       capability:
         id: crud
+        intent: "user manages data records (create, read, update, delete)"
         provides: [action.create, action.read, action.update, action.delete]
         layout-pattern: master-detail
     resolution:
@@ -105,6 +124,7 @@ equivalences:
     maps-to:
       capability:
         id: crud
+        intent: "user manages data records (create, read, update, delete)"
         provides: [action.read, action.update, action.delete]
         layout-pattern: master-detail
     resolution:
@@ -119,6 +139,7 @@ equivalences:
     maps-to:
       capability:
         id: search
+        intent: "user searches for items matching a query"
         requires: [input.search-query]
         provides: [action.search]
     resolution:
@@ -133,6 +154,7 @@ equivalences:
     maps-to:
       capability:
         id: upload
+        intent: "user uploads a file to the system"
         requires: [input.file]
         provides: [action.submit]
     resolution:
@@ -145,13 +167,22 @@ equivalences:
         - filter-by-status
         - sort-by-date
     maps-to:
-      capabilities:
-        - id: filter
-          provides: [action.toggle]
-        - id: sort
-          provides: [action.toggle]
+      capability:
+        id: filter
+        intent: "user filters items by criteria"
+        provides: [action.toggle]
     resolution:
       - 'Toolbar actions "filter-by-status" → Capability.Filter'
+      - '"sort-by-date" → Capability.Sort (separate capability)'
+  - non-canonical:
+      toolbar:
+        - sort-by-date
+    maps-to:
+      capability:
+        id: sort
+        intent: "user sorts items by criteria"
+        provides: [action.toggle]
+    resolution:
       - '"sort-by-date" → Capability.Sort'
 
 # ============================================================================
@@ -181,9 +212,10 @@ false-friends:
 
 agent-instruction: |
   When generating a Capability in UISL:
-  1. Use ONLY the canonical property names: id, requires, provides, produces, etc.
-  2. NEVER emit aliases: needs, fields, operations, results-in
+  1. Use ONLY the canonical property names: id, intent, requires, provides, produces, etc.
+  2. NEVER emit aliases: needs, fields, operations, results-in, description
   3. Resolve capability strings through Taxonomy aliases (e.g., "login" → "authentication")
   4. A capability MUST NOT be described by its visual representation (e.g., "form", "table", "modal")
   5. A capability answers "What can the user accomplish?" — if the answer is a widget name, it's wrong
-  6. All sub-references (requires → Input, provides → Action) MUST use canonical references
+  6. All sub-references (requires → Input, provides → Action) MUST use concept.id format (e.g., input.email, action.submit)
+  7. intent is REQUIRED — describe what the user can accomplish in plain text

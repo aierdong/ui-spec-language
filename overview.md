@@ -121,23 +121,22 @@ Counter Examples
 
 ```
 Authentication
-Definition
-Verify user identity.
+Definition: Verify user identity.
 Contains
-Credential
-Primary Action
-Feedback
+  - Credential
+  - Primary Action
+    - Feedback
 Produces
-Authenticated
-Authentication Failed
+  - Authenticated
+  - Authentication Failed
 Examples
-Login
-Register
-SSO
+  - Login
+  - Register
+  - SSO
 Counter Examples
-Button
-Input
-Modal
+  - Button
+  - Input
+  - Modal
 ```
 
 注意：

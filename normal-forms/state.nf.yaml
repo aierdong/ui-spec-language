@@ -29,12 +29,12 @@ canonical-form:
 
 property-canonical-names:
   id: { aliases: [name, key, state-id, status, condition] }
-  label: { aliases: [title, display, text, description] }
+  label: { aliases: [title, display, text, name] }
   values: { aliases: [options, variants, enum, choices, possible-values] }
   default: { aliases: [initial, starting, preset, fallback] }
   persistent: { aliases: [survives-navigation, keep-alive, retained, sticky-state] }
   visible-when: { aliases: [show-when, active-when, condition, trigger] }
-  message: { aliases: [description, detail, explanation, text] }
+  message: { aliases: [detail, explanation, text, info] }
   source: { aliases: [trigger, origin, caused-by, from] }
 
 # ============================================================================

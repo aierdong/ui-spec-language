@@ -18,7 +18,7 @@ canonical-form:
   page:
     id: string              # Unique application-wide identifier (e.g., "login", "home")
     label: string           # Human-readable name (e.g., "Sign In")
-    purpose: string?        # High-level purpose (e.g., "entry-point", "workspace")
+    intent: string?         # High-level purpose (e.g., "entry-point", "workspace")
     layout: PageLayout?     # Semantic page layout (sidebar-shell | split-screen | centered-column | full-canvas | master-detail | stacked)
     requires-auth: boolean?  # Whether authentication is required
     guarded-by:             # Constraints that gate access
@@ -39,7 +39,7 @@ canonical-form:
 property-canonical-names:
   id: { aliases: [name, key, page-id, route-name] }
   label: { aliases: [title, heading, display-name, page-title] }
-  purpose: { aliases: [role, function, page-purpose, intent] }
+  intent: { aliases: [purpose, role, function, page-purpose] }
   layout: { aliases: [layout-type, page-layout, template] }
   requires-auth: { aliases: [auth-required, protected, authenticated-only, private] }
   guarded-by: { aliases: [access-control, permissions, guards, restricted-by] }
@@ -137,7 +137,7 @@ false-friends:
 
 agent-instruction: |
   When generating a Page in UISL:
-  1. Use ONLY the canonical property names (id, label, purpose, layout, etc.)
+  1. Use ONLY the canonical property names (id, label, intent, layout, etc.)
   2. NEVER emit aliases (name, route, component, screen, protected)
   3. Map all incoming route/path/component references to canonical page.id
   4. A page with `layout: centered-column` and `requires-auth: false` containing an authentication capability → this is a login page

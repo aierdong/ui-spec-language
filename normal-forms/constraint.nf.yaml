@@ -28,7 +28,7 @@ property-canonical-names:
   id: { aliases: [name, key, rule, constraint-id, check] }
   condition: { aliases: [when, if, expression, test, predicate, rule] }
   applies-to: { aliases: [target, effect, scope, type, constraint-type, mode] }
-  message: { aliases: [error-message, text, description, hint, validation-message] }
+  message: { aliases: [error-message, text, hint, validation-message] }
   severity: { aliases: [level, importance, strictness, blocking] }
 
 # ============================================================================

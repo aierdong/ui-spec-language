@@ -60,12 +60,12 @@ equivalences:
     maps-to:
       navigation:
         id: open-project-detail
-        target: page:project-detail
+        target: page.project-detail
         method: push
         carry-data: [project-id: 123]
     resolution:
       - 'router.push → method: push'
-      - '"/projects/123" → target: page:project-detail'
+      - '"/projects/123" → target: page.project-detail'
       - '":123" → carry-data'
 
   - non-canonical:
@@ -73,7 +73,7 @@ equivalences:
     maps-to:
       navigation:
         id: go-to-login
-        target: page:login
+        target: page.login
         method: replace
     resolution:
       - 'router.replace → method: replace'
@@ -86,12 +86,12 @@ equivalences:
     maps-to:
       navigation:
         id: go-to-dashboard
-        target: page:dashboard
+        target: page.dashboard
         method: push
         label: "Go to Dashboard"
     resolution:
       - 'link [to] → navigation with target'
-      - 'to "/dashboard" → target: page:dashboard'
+      - 'to "/dashboard" → target: page.dashboard'
       - 'method: push (default for links)'
 
   - non-canonical:
@@ -114,7 +114,7 @@ equivalences:
     maps-to:
       navigation:
         id: open-create-dialog
-        target: section:project-form
+        target: section.project-form
         method: overlay
     resolution:
       - 'openModal → method: overlay'
@@ -126,7 +126,7 @@ equivalences:
     maps-to:
       navigation:
         id: switch-to-constraints
-        target: section:constraints-panel
+        target: section.constraints-panel
         method: inline
     resolution:
       - 'setActiveTab → method: inline'
@@ -139,7 +139,7 @@ equivalences:
     maps-to:
       navigation:
         id: go-to-home
-        target: page:home
+        target: page.home
         method: replace
     resolution:
       - 'redirect → method: replace'
@@ -162,7 +162,7 @@ equivalences:
     maps-to:
       navigation:
         id: scroll-to-top
-        target: section:page-top
+        target: section.page-top
         method: scroll-to
     resolution:
       - 'scrollTo → method: scroll-to'
@@ -178,11 +178,11 @@ false-friends:
     not-equivalent-because: "Push preserves history (user can go back). Replace overwrites history. Post-login redirect is always replace — you never go 'back' to the login page after authenticating."
 
   - expression: "target: page:login, method: push"
-    looks-like: "target: page:login, method: replace"
+    looks-like: "target: page.login, method: replace"
     not-equivalent-because: "push to login means 'back' returns to the protected page. replace to login means 'back' goes further back in history. Auth redirects should always use replace."
 
   - expression: "navigates-to: /login"
-    looks-like: "navigation: { target: page:login }"
+    looks-like: "navigation: { target: page.login }"
     not-equivalent-because: "navigates-to is an Action property (where the user goes after clicking). Navigation is the movement event itself. An Action MAY lead to Navigation, but they are distinct concepts."
 
   - expression: "href: #section-2"
@@ -197,7 +197,7 @@ agent-instruction: |
   When generating Navigation in UISL:
   1. ALWAYS use semantic method names: push, replace, overlay, inline, scroll-to, external
   2. NEVER emit router API calls: router.push, history.back, window.location
-  3. NEVER emit URL paths as targets — use page:id, section:id, or capability:id references
+  3. NEVER emit URL paths as targets — use page.id, section.id, or capability.id references
   4. External URLs are the ONLY valid string targets
   5. carry-state references State IDs, carry-data references Data IDs
   6. Post-authentication navigation is ALWAYS method: replace (not push)

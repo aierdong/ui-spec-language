@@ -15,7 +15,7 @@ description: "A branch point where the system chooses a path based on State, Dat
 canonical-form:
   decision:
     id: string              # Unique name (e.g., "auth-outcome", "delete-confirmation-result")
-    description: string     # Human-readable explanation of what is being decided
+    summary: string         # Human-readable explanation of what is being decided
     trigger: TriggerType?   # automatic | user-choice | time-based | event-based
     evaluates:              # What informs this decision
       - state: StateRef
@@ -34,13 +34,13 @@ canonical-form:
 
 property-canonical-names:
   id: { aliases: [name, key, decision-id, branch-point, flow] }
-  description: { aliases: [summary, what, purpose, question] }
+  summary: { aliases: [description, what, purpose, question, about] }
   trigger: { aliases: [initiated-by, caused-by, source, type] }
   evaluates: { aliases: [checks, depends-on, considers, looks-at, inputs] }
   branches: { aliases: [paths, outcomes, options, cases, routes, results] }
   condition: { aliases: [when, if, guard, predicate, test] }
   resolves-to: { aliases: [then, go-to, result, leads-to, outcome, target] }
-  label: { aliases: [text, description, name, path-name] }
+  label: { aliases: [text, name, path-name, display] }
   priority: { aliases: [order, preference, weight, rank] }
   default-branch: { aliases: [else, fallback, otherwise, default] }
 
@@ -67,16 +67,16 @@ equivalences:
     maps-to:
       decision:
         id: auth-outcome
-        description: "What happens after authentication attempt"
+        summary: "What happens after authentication attempt"
         trigger: automatic
         evaluates:
           - state: auth-state
         branches:
           - condition: "State: Outcome.Success"
-            resolves-to: navigation:go-to-home
+            resolves-to: navigation.go-to-home
             label: "Authentication succeeded"
           - condition: "State: Outcome.Error"
-            resolves-to: feedback:auth-failed
+            resolves-to: feedback.auth-failed
             label: "Authentication failed"
     resolution:
       - 'if/else → decision.branches'
@@ -94,19 +94,19 @@ equivalences:
     maps-to:
       decision:
         id: role-based-routing
-        description: "Which dashboard to show based on user role"
+        summary: "Which dashboard to show based on user role"
         trigger: automatic
         evaluates:
           - data: user-profile
         branches:
           - condition: "user-role == admin"
-            resolves-to: page:admin-dashboard
+            resolves-to: page.admin-dashboard
             label: "Admin user"
           - condition: "user-role == editor"
-            resolves-to: page:editor-dashboard
+            resolves-to: page.editor-dashboard
             label: "Editor user"
         default-branch:
-          resolves-to: page:viewer-dashboard
+          resolves-to: page.viewer-dashboard
           label: "Default viewer"
     resolution:
       - 'switch → decision with branches'
@@ -122,14 +122,14 @@ equivalences:
     maps-to:
       decision:
         id: delete-confirmation
-        description: "User confirms or cancels deletion"
+        summary: "User confirms or cancels deletion"
         trigger: user-choice
         branches:
           - condition: "user confirms"
-            resolves-to: action:delete
+            resolves-to: action.delete
             label: "Proceed with deletion"
           - condition: "user cancels"
-            resolves-to: action:dismiss
+            resolves-to: action.dismiss
             label: "Cancel deletion"
     resolution:
       - 'confirm → decision with trigger: user-choice'
@@ -147,19 +147,19 @@ equivalences:
     maps-to:
       decision:
         id: form-dirty-navigate
-        description: "User tries to leave with unsaved changes"
+        summary: "User tries to leave with unsaved changes"
         trigger: user-choice
         evaluates:
           - state: dirty
         branches:
           - condition: "user chooses save"
-            resolves-to: action:submit
+            resolves-to: action.submit
             label: "Save then navigate"
           - condition: "user chooses discard"
-            resolves-to: navigation:go-back
+            resolves-to: navigation.go-back
             label: "Discard and navigate"
           - condition: "user chooses cancel"
-            resolves-to: state:idle
+            resolves-to: state.idle
             label: "Stay on current page"
     resolution:
       - 'beforeUnload handler → decision'
@@ -175,19 +175,19 @@ equivalences:
     maps-to:
       decision:
         id: empty-collection
-        description: "What to show when collection has no items"
+        summary: "What to show when collection has no items"
         trigger: automatic
         evaluates:
           - data: items
         branches:
           - condition: "items is empty AND user can create"
-            resolves-to: feedback:empty-state-with-cta
+            resolves-to: feedback.empty-state-with-cta
             label: "Show empty state with create action"
           - condition: "items is empty AND user cannot create"
-            resolves-to: feedback:read-only-empty-state
+            resolves-to: feedback.read-only-empty-state
             label: "Show read-only empty state"
           - condition: "items is not empty"
-            resolves-to: state:idle
+            resolves-to: state.idle
             label: "Show normal list view"
     resolution:
       - 'conditional rendering → decision'
@@ -208,16 +208,16 @@ equivalences:
     maps-to:
       decision:
         id: session-expiry
-        description: "What happens when session expires"
+        summary: "What happens when session expires"
         trigger: event-based
         evaluates:
           - state: expired
         branches:
           - condition: "unsaved changes exist"
-            resolves-to: feedback:discard-changes-warning
+            resolves-to: feedback.discard-changes-warning
             label: "Prompt to save before redirect"
           - condition: "no unsaved changes"
-            resolves-to: navigation:go-to-login
+            resolves-to: navigation.go-to-login
             label: "Redirect to login"
     resolution:
       - 'useEffect with session check → event-based decision'
@@ -251,9 +251,9 @@ false-friends:
 agent-instruction: |
   When generating a Decision in UISL:
   1. NEVER emit if/else, switch/case, or ternary expressions
-  2. ALWAYS include a description explaining WHAT is being decided
+  2. ALWAYS include a summary explaining WHAT is being decided
   3. Every branch MUST have: condition, resolves-to, and label
-  4. resolves-to can be: navigation, state, action, or feedback references
+  4. resolves-to can be: navigation, state, action, or feedback references (concept-id format)
   5. trigger determines the initiation pattern:
      - automatic → system-evaluated
      - user-choice → presented to user (confirmation dialogs)

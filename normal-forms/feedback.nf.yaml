@@ -30,7 +30,7 @@ canonical-form:
 property-canonical-names:
   id: { aliases: [name, key, feedback-id, message-id] }
   kind: { aliases: [type, category, feedback-type, style] }
-  message: { aliases: [text, content, body, description, detail, copy] }
+  message: { aliases: [text, content, body, detail, copy] }
   severity: { aliases: [level, importance, tone, color, status] }
   duration: { aliases: [timeout, lifespan, persistence, auto-dismiss, dismiss-after] }
   placement: { aliases: [position, location, where, anchor, attach-to] }
@@ -49,7 +49,7 @@ kind-values:
   validation-error: { aliases: [field-error, input-error, invalid, requirement-error, form-error] }
   empty-state:     { aliases: [no-data, zero-state, nothing-here, no-results, blank-slate] }
   progress:        { aliases: [loading, spinner, skeleton, processing, uploading, fetching] }
-  inline-help:     { aliases: [help-text, tooltip, hint, description, explanation, guidance] }
+  inline-help:     { aliases: [help-text, tooltip, hint, explanation, guidance] }
 
 # ============================================================================
 # CANONICAL SEVERITY VALUES

@@ -41,7 +41,7 @@ property-canonical-names:
   validation: { aliases: [rules, constraints, checks, validators] }
   default: { aliases: [value, initial, preset, default-value] }
   placeholder: { aliases: [hint, example, ghost-text, watermark] }
-  help-text: { aliases: [description, tooltip, hint-text, explanation] }
+  help-text: { aliases: [tooltip, hint-text, explanation, guidance] }
   sensitive: { aliases: [secret, masked, hidden, password-field, protected] }
   multiple: { aliases: [multi, repeatable, array, list] }
   searchable: { aliases: [autocomplete, typeahead, filterable] }
@@ -57,7 +57,7 @@ property-canonical-names:
 kind-values:
   credential:  { aliases: [email, password, otp, pin, token, secret, passphrase] }
   text:        { aliases: [string, short-text, name, title, username, handle, label] }
-  long-text:   { aliases: [textarea, description, notes, comment, content, body, markdown, rich-text] }
+  long-text:   { aliases: [textarea, notes, comment, content, body, markdown, rich-text] }
   number:      { aliases: [integer, decimal, amount, quantity, count, price, percentage] }
   boolean:     { aliases: [checkbox, toggle, switch, yes-no, true-false, binary, agree] }
   single-select: { aliases: [select, dropdown, radio, picker, choose-one, combo, menu] }

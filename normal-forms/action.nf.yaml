@@ -127,10 +127,10 @@ equivalences:
         intent: navigate
         priority: secondary
         label: "Back to Projects"
-        navigates-to: "page:projects"
+        navigates-to: "page.projects"
     resolution:
       - 'link + href → action with intent: navigate + navigates-to'
-      - 'href "/projects" → navigates-to: page:projects'
+      - 'href "/projects" → navigates-to: page.projects'
 
   - non-canonical:
       icon-button:
@@ -168,10 +168,10 @@ equivalences:
     maps-to:
       action:
         intent: navigate
-        navigates-to: "page:home"
+        navigates-to: "page.home"
     resolution:
       - 'router.push → navigates-to'
-      - '/home → page:home'
+      - '/home → page.home'
 
   - non-canonical:
       type: reset
@@ -196,7 +196,7 @@ false-friends:
     not-equivalent-because: "Save implies persistence without navigation; Submit implies finalize-and-send. Save may not trigger validation; Submit always does."
 
   - expression: "button: { href: '/login', text: 'Go' }"
-    looks-like: "action: { intent: navigate, navigates-to: page:login }"
+    looks-like: "action: { intent: navigate, navigates-to: page.login }"
     not-equivalent-because: "A plain link navigates. A button might trigger state changes before navigation. The HTML element type alone doesn't determine intent."
 
   - expression: "icon: trash"
