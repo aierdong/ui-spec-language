@@ -127,7 +127,7 @@ equivalences:
         intent: navigate
         priority: secondary
         label: "Back to Projects"
-        navigates-to: "page.projects"
+        navigates-to: page.projects
     resolution:
       - 'link + href → action with intent: navigate + navigates-to'
       - 'href "/projects" → navigates-to: page.projects'
@@ -167,8 +167,9 @@ equivalences:
       onClick: () => router.push('/home')
     maps-to:
       action:
+        id: navigate-home
         intent: navigate
-        navigates-to: "page.home"
+        navigates-to: page.home
     resolution:
       - 'router.push → navigates-to'
       - '/home → page.home'
@@ -177,6 +178,7 @@ equivalences:
       type: reset
     maps-to:
       action:
+        id: reset
         intent: cancel
         label: "Reset"
     resolution:

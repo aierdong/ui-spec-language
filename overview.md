@@ -181,6 +181,22 @@ Input
 Email 属于 Credential。
 Credential 属于 Input。
 
+### Phase 2 产出
+
+| # | 文件 | 内容 |
+|---|------|------|
+| 1 | `taxonomy/action.taxonomy.yaml` | Action 分类与继承规则 |
+| 2 | `taxonomy/input.taxonomy.yaml` | Input 分类与继承规则 |
+| 3 | `taxonomy/state.taxonomy.yaml` | State 分类与继承规则 |
+| 4 | `taxonomy/feedback.taxonomy.yaml` | Feedback 分类与继承规则 |
+| 5 | `taxonomy/capability.taxonomy.yaml` | Capability 分类与继承规则 |
+| 6 | `taxonomy/section.taxonomy.yaml` | Section 分类与继承规则 |
+| 7 | `taxonomy/data.taxonomy.yaml` | Data 分类与继承规则 |
+| 8 | `taxonomy/constraint.taxonomy.yaml` | Constraint 分类与继承规则 |
+| 9 | `taxonomy/decision.taxonomy.yaml` | Decision 分类与继承规则 |
+| 10 | `taxonomy/navigation.taxonomy.yaml` | Navigation 分类与继承规则 |
+| 11 | `taxonomy/page.taxonomy.yaml` | 通用 Page role 与页面级默认值（不枚举具体 route/page） |
+
 ---
 
 # Phase 2.5：建立 Normal Forms ✅ 已完成
@@ -253,6 +269,13 @@ PrimaryAction
 每个 NF 文件包含：Canonical Form、Property Canonical Names、Equivalence Mappings、False Friends、Agent Instruction。
 
 `required-property-matrix.yaml` 是必填属性的单一事实来源；Ontology 与 Normal Forms 必须与它保持一致。
+
+当前约定：
+- NF canonical form 中未被矩阵规定为必填的字段必须用 `?` 标为可选。
+- Page 使用 `purpose`，不使用 `intent` 作为 canonical property。
+- layout 只属于 Page (`layout`) 和 Section (`layout-pattern`)，Capability 不携带 layout。
+- 本地 Spec 引用使用 `concept.id`；Taxonomy 引用使用 `Concept: Category.Leaf`。
+- Input validation 通过 ConstraintRef 表达，不在 Input 内 inline `format/min/max/required`。
 
 ---
 

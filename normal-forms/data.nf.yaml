@@ -100,7 +100,7 @@ equivalences:
         id: projects
         source: api
         type: collection
-        mutable: true
+        mutable: false
         freshness: on-demand
         scope: page
     resolution:

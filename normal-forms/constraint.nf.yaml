@@ -15,10 +15,10 @@ intent: "A condition that restricts when an Input, Action, State, or Capability 
 canonical-form:
   constraint:
     id: string # Unique name (e.g., "email-format", "auth-required")
-    condition: Condition # The expression that must be true
+    condition: Condition # The expression that triggers or applies this constraint
     applies-to: TargetType? # visibility | availability | validity (default: availability)
     message: string? # Human-readable explanation when violated
-    severity: Severity? # error | warning | info
+    severity: Severity? # error | warning | info | success
 
 # ============================================================================
 # CANONICAL PROPERTY NAMES
@@ -48,6 +48,7 @@ severity-values:
   error: { aliases: [block, reject, invalid, fail, strict] }
   warning: { aliases: [caution, warn, alert, soft, advisory-allow] }
   info: { aliases: [hint, note, suggestion, guidance] }
+  success: { aliases: [ok, pass, valid, positive] }
 
 # ============================================================================
 # CANONICAL CONDITION SYNTAX
@@ -55,11 +56,15 @@ severity-values:
 # All conditions use this syntax. No DSL variation.
 
 condition-syntax:
-  state-check: "State: Category.Leaf == value"
+  state-check: "State: Category.Leaf is active"
   data-check: "data-id.field == value"
   input-check: "input-id is empty"
+  input-non-empty: "input-id is not empty"
   negation: "expression != value"
   membership: "value in [a, b, c]"
+  non-membership: "value not in [a, b, c]"
+  pattern-match: "value matches pattern-id"
+  pattern-mismatch: "value does not match pattern-id"
   compound-and: "expr1 AND expr2"
   compound-or: "expr1 OR expr2"
   comparison: "value < N" # supports <, >, <=, >=
@@ -92,6 +97,7 @@ equivalences:
       disabled: true
     maps-to:
       constraint:
+        id: always-disabled
         applies-to: availability
         condition: always
     resolution:
@@ -133,7 +139,7 @@ equivalences:
     maps-to:
       constraint:
         id: admin-only-access
-        condition: "user-role != admin"
+        condition: "data.user-role != admin"
         applies-to: visibility
         severity: error
     resolution:
@@ -145,11 +151,11 @@ equivalences:
     maps-to:
       constraint:
         id: no-ops-on-empty
-        condition: "items.length == 0"
+        condition: "data.items is empty"
         applies-to: availability
     resolution:
       - "disabled prop with condition → availability constraint"
-      - "condition preserved as-is in canonical syntax"
+      - "items.length === 0 → semantic condition data.items is empty"
 
   # --- Form validation → Constraint ---
   - non-canonical:
@@ -188,7 +194,7 @@ equivalences:
     maps-to:
       constraint:
         id: role-required
-        condition: "user-role not in [admin, editor]"
+        condition: "data.user-role not in [admin, editor]"
         applies-to: visibility
         message: "You do not have permission to access this"
     resolution:
@@ -200,7 +206,7 @@ equivalences:
     maps-to:
       constraint:
         id: business-only
-        condition: "account-type == business"
+        condition: "input.account-type == business"
         applies-to: visibility
     resolution:
       - "visible-if → visibility constraint"
@@ -216,8 +222,8 @@ false-friends:
     not-equivalent-because: "Visibility constrains whether an element EXISTS — errors here mean the element is hidden, not invalid. Validity constrains whether the VALUE is acceptable. Different semantics."
 
   - expression: "condition: 'items.length == 0'"
-    looks-like: "condition: 'items is empty'"
-    not-equivalent-because: "Both express the same intent. Use the canonical form 'items is empty' (or the data-specific 'items.length == 0' if checking array length explicitly). The NF prefers semantic forms over technical ones."
+    looks-like: "condition: 'data.items is empty'"
+    not-equivalent-because: "They are equivalent only when items is known to be a collection DataRef. Canonical output prefers semantic DataRef conditions: data.items is empty."
 
   - expression: "constraint (validity)"
     looks-like: "decision (branching)"

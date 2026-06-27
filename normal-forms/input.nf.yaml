@@ -17,8 +17,7 @@ canonical-form:
     id: string              # Unique name within the Capability (e.g., "email", "password")
     label: string           # Human-readable name (e.g., "Email Address")
     kind: InputKind         # Semantic type: credential | text | long-text | number | boolean | single-select | multi-select | date | datetime | duration | file | tag-list
-    validation:             # Rules the value must satisfy
-      - constraint: ConstraintRef
+    validation: ConstraintRef[]? # Rules the value must satisfy
     default: any?            # Default value
     placeholder: string?     # Example or hint text
     help-text: string?       # Explanatory text
@@ -94,8 +93,7 @@ equivalences:
         id: email
         kind: credential
         label: "Email"
-        validation:
-          - format: email
+        validation: [constraint.email-format]
     resolution:
       - 'type "email" → kind: credential (Taxonomy: Input.Credential.Email)'
       - '"user-email" → canonical id: "email"'
@@ -122,11 +120,10 @@ equivalences:
     maps-to:
       input:
         kind: long-text
-        validation:
-          - max-length: 500
+        validation: [constraint.max-length]
     resolution:
       - 'type "textarea" → kind: long-text'
-      - 'max-length → validation.max-length'
+      - 'max-length → Constraint reference constraint.max-length'
 
   - non-canonical:
       role: form-field
@@ -158,12 +155,10 @@ equivalences:
     maps-to:
       input:
         kind: number
-        validation:
-          - min: 0
-          - max: 100
+        validation: [constraint.min-value, constraint.max-value]
     resolution:
       - 'type "number" → kind: number'
-      - 'min/max → validation constraints'
+      - 'min/max → validity Constraint references'
 
   - non-canonical:
       field: tags
@@ -187,12 +182,11 @@ equivalences:
       input:
         kind: text
         label: inferred
-        validation:
-          - required: true
+        validation: [constraint.required]
         placeholder: "Enter name"
     resolution:
       - 'HTML type "text" → kind: text'
-      - 'required attribute → validation.required'
+      - 'required attribute → Constraint reference constraint.required'
       - 'label must be inferred from context or explicit'
 
 # ============================================================================
@@ -233,7 +227,8 @@ agent-instruction: |
      - Toggle/Switch → boolean
   3. Password fields MUST have both kind: credential AND sensitive: true
   4. Email fields in auth context → kind: credential; in profile context → kind: text with format: email validation
-  5. Input kind determines implicit behavior:
+  5. Validation MUST reference Constraint IDs; never inline format/min/max/required fragments
+  6. Input kind determines implicit behavior:
      - credential → sensitive: true, required: true by Taxonomy default
      - long-text → multiline: true
      - multi-select → multiple: true, searchable: true

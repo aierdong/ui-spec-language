@@ -62,11 +62,11 @@ equivalences:
         id: open-project-detail
         target: page.project-detail
         method: push
-        carry-data: [project-id: 123]
+        carry-data: [data.project-id]
     resolution:
       - 'router.push → method: push'
       - '"/projects/123" → target: page.project-detail'
-      - '":123" → carry-data'
+      - '":123" → DataRef data.project-id'
 
   - non-canonical:
       router.replace("/login")
@@ -152,6 +152,7 @@ equivalences:
       navigation:
         id: go-back
         method: push
+        target: page.previous
         # back-target determined by history stack
     resolution:
       - 'history.back() → implicit back-target from navigation history'
@@ -166,7 +167,7 @@ equivalences:
         method: scroll-to
     resolution:
       - 'scrollTo → method: scroll-to'
-      - '"#top" → target: section:page-top'
+      - '"#top" → target: section.page-top'
 
 # ============================================================================
 # FALSE FRIENDS

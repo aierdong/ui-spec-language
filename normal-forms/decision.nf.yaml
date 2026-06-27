@@ -17,10 +17,7 @@ canonical-form:
     id: string # Unique name (e.g., "auth-outcome", "delete-confirmation-result")
     intent: string # Human-readable explanation of what is being decided
     trigger: TriggerType? # automatic | user-choice | time-based | event-based
-    evaluates: # What informs this decision
-      - state: StateRef
-      - data: DataRef
-      - constraint: ConstraintRef
+    evaluates: Reference[]? # Optional State/Data/Constraint refs that inform this decision
     branches: # Possible outcomes
       - condition: Condition
         resolves-to: Reference # Navigation, State, Action, or Feedback target
@@ -70,12 +67,12 @@ equivalences:
         intent: "What happens after authentication attempt"
         trigger: automatic
         evaluates:
-          - state: auth-state
+          - state.auth-state
         branches:
-          - condition: "State: Outcome.Success"
+          - condition: "State: Outcome.Success is active"
             resolves-to: navigation.go-to-home
             label: "Authentication succeeded"
-          - condition: "State: Outcome.Error"
+          - condition: "State: Outcome.Error is active"
             resolves-to: feedback.auth-failed
             label: "Authentication failed"
     resolution:
@@ -97,12 +94,12 @@ equivalences:
         intent: "Which dashboard to show based on user role"
         trigger: automatic
         evaluates:
-          - data: user-profile
+          - data.user-profile
         branches:
-          - condition: "user-role == admin"
+          - condition: "data.user-role == admin"
             resolves-to: page.admin-dashboard
             label: "Admin user"
-          - condition: "user-role == editor"
+          - condition: "data.user-role == editor"
             resolves-to: page.editor-dashboard
             label: "Editor user"
         default-branch:
@@ -125,10 +122,10 @@ equivalences:
         intent: "User confirms or cancels deletion"
         trigger: user-choice
         branches:
-          - condition: "user confirms"
+          - condition: "input.user-choice == confirm"
             resolves-to: action.delete
             label: "Proceed with deletion"
-          - condition: "user cancels"
+          - condition: "input.user-choice == cancel"
             resolves-to: action.dismiss
             label: "Cancel deletion"
     resolution:
@@ -151,15 +148,15 @@ equivalences:
         intent: "User tries to leave with unsaved changes"
         trigger: user-choice
         evaluates:
-          - state: dirty
+          - state.dirty
         branches:
-          - condition: "user chooses save"
+          - condition: "input.user-choice == save"
             resolves-to: action.submit
             label: "Save then navigate"
-          - condition: "user chooses discard"
+          - condition: "input.user-choice == discard"
             resolves-to: navigation.go-back
             label: "Discard and navigate"
-          - condition: "user chooses cancel"
+          - condition: "input.user-choice == cancel"
             resolves-to: state.idle
             label: "Stay on current page"
     resolution:
@@ -179,15 +176,15 @@ equivalences:
         intent: "What to show when collection has no items"
         trigger: automatic
         evaluates:
-          - data: items
+          - data.items
         branches:
-          - condition: "items is empty AND user can create"
+          - condition: "data.items is empty AND data.user-permission == create"
             resolves-to: feedback.empty-state-with-cta
             label: "Show empty state with create action"
-          - condition: "items is empty AND user cannot create"
+          - condition: "data.items is empty AND data.user-permission != create"
             resolves-to: feedback.read-only-empty-state
             label: "Show read-only empty state"
-          - condition: "items is not empty"
+          - condition: "data.items is not empty"
             resolves-to: state.idle
             label: "Show normal list view"
     resolution:
@@ -212,12 +209,12 @@ equivalences:
         intent: "What happens when session expires"
         trigger: event-based
         evaluates:
-          - state: expired
+          - state.expired
         branches:
-          - condition: "unsaved changes exist"
+          - condition: "state.unsaved-changes is active"
             resolves-to: feedback.discard-changes-warning
             label: "Prompt to save before redirect"
-          - condition: "no unsaved changes"
+          - condition: "state.unsaved-changes is not active"
             resolves-to: navigation.go-to-login
             label: "Redirect to login"
     resolution:
@@ -252,9 +249,9 @@ false-friends:
 agent-instruction: |
   When generating a Decision in UISL:
   1. NEVER emit if/else, switch/case, or ternary expressions
-  2. ALWAYS include a summary explaining WHAT is being decided
+  2. ALWAYS include `intent` explaining WHAT is being decided
   3. Every branch MUST have: condition, resolves-to, and label
-  4. resolves-to can be: navigation, state, action, or feedback references (concept-id format)
+  4. resolves-to can be: navigation, state, action, or feedback references (concept.id format)
   5. trigger determines the initiation pattern:
      - automatic → system-evaluated
      - user-choice → presented to user (confirmation dialogs)

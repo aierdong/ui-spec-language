@@ -16,17 +16,13 @@ canonical-form:
   section:
     id: string               # Unique name within this page (e.g., "sidebar", "credential-entry")
     label: string?           # Human-readable name (e.g., "Navigation Hub")
-    contains:                # Capabilities grouped within
-      - capability: CapabilityRef
-    sections:                # Nested sections (hierarchical partition)
-      - section: SectionRef
+    contains: CapabilityRef[]? # Capabilities grouped within this section
+    sections: SectionRef[]?  # Nested sections (hierarchical partition)
     layout-pattern: LayoutPattern?  # Semantic layout: centered-column | sidebar-shell | split-screen | vertical-stack | horizontal-strip | grid | overlay | master-detail
-    zones:                   # Named sub-areas within the section
-      - zone: string         # e.g., "top", "middle", "bottom", "header", "body", "footer"
+    zones: string[]?         # Named sub-areas within the section (e.g., top, middle, bottom, header, body, footer)
     static: boolean?         # Non-interactive decoration (marketing, branding)
     priority: Priority?      # Visual emphasis: primary | secondary | tertiary
-    obeys:                   # Constraints
-      - constraint: ConstraintRef
+    obeys: ConstraintRef[]?  # Constraints
 
 # ============================================================================
 # CANONICAL PROPERTY NAMES
@@ -35,8 +31,8 @@ canonical-form:
 property-canonical-names:
   id: { aliases: [name, key, section-id, area, region] }
   label: { aliases: [title, heading, display-name, section-title] }
-  contains: { aliases: [children, capabilities, features, content, items] }
-  sections: { aliases: [sub-sections, nested, children-sections, sub-areas] }
+  contains: { aliases: [capabilities, features, content, items] }
+  sections: { aliases: [sub-sections, nested-sections, nested, sub-areas] }
   layout-pattern: { aliases: [layout, pattern, arrangement, display, format] }
   zones: { aliases: [slots, areas, sub-regions, positions] }
   static: { aliases: [decorative, non-interactive, display-only, read-only-section] }
@@ -95,7 +91,7 @@ equivalences:
         layout-pattern: overlay
         zones: [header, body, footer]
         contains:
-          - capability: create
+          - capability.create
     resolution:
       - 'modal → section with layout-pattern: overlay'
       - 'Taxonomy: Section.Overlay.FocusOverlay'
@@ -124,9 +120,9 @@ equivalences:
         layout-pattern: horizontal-strip
         priority: secondary
         contains:
-          - capability: filter
-          - capability: sort
-          - capability: search
+          - capability.filter
+          - capability.sort
+          - capability.search
     resolution:
       - 'toolbar → section with layout-pattern: horizontal-strip'
       - 'items → canonical: contains → Capability references'
@@ -170,7 +166,7 @@ equivalences:
         layout-pattern: centered-column
         static: false
         contains:
-          - capability: create
+          - capability.create
       # Feedback: Information.EmptyState provides the message
     resolution:
       - 'empty-placeholder → Taxonomy: Section.Decorative.EmptyState'
@@ -213,5 +209,5 @@ agent-instruction: |
      - Tabs → Section.Content.TabPanel
   3. Use layout-pattern to express spatial intent, NOT CSS
   4. A Section with static: true contains NO capabilities — it's pure decoration
-  5. Nested sections express hierarchical spatial partition
+  5. Nested sections express hierarchical spatial partition; use `sections` for Section refs and `contains` only for Capability refs
   6. Section answers "How is the page organized?" — not "What component library is used?"

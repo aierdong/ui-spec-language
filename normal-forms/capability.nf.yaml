@@ -17,21 +17,13 @@ canonical-form:
     id: string              # Unique machine-readable name (e.g., "authentication", "crud")
     label: string?          # Human-readable name (e.g., "Sign In")
     intent: string          # What the user can accomplish (required)
-    requires:               # Inputs the user must provide
-      - input: InputRef     # → see input.nf.yaml
-    provides:               # Actions the user can trigger
-      - action: ActionRef   # → see action.nf.yaml
-    produces:               # States that can arise
-      - state: StateRef     # → see state.nf.yaml
-    obeys:                  # Constraints that limit this capability
-      - constraint: ConstraintRef
-    feedback:               # Feedback mechanisms
-      - feedback: FeedbackRef
-    may-lead-to:            # Branch decisions
-      - decision: DecisionRef
-    consumes:               # External data this capability reads
-      - data: DataRef
-    layout-pattern: LayoutPattern?  # Semantic layout hint (centered-column, master-detail, overlay)
+    requires: InputRef[]?   # Inputs the user must provide
+    provides: ActionRef[]?  # Actions the user can trigger
+    produces: StateRef[]?   # States that can arise
+    obeys: ConstraintRef[]? # Constraints that limit this capability
+    feedback: FeedbackRef[]? # Feedback mechanisms
+    may-lead-to: DecisionRef[]? # Branch decisions
+    consumes: DataRef[]?    # External data this capability reads
 
 # ============================================================================
 # CANONICAL PROPERTY NAMES
@@ -48,22 +40,6 @@ property-canonical-names:
   feedback: { aliases: [messages, notifications, alerts] }
   may-lead-to: { aliases: [branches, decisions, next-steps, flows] }
   consumes: { aliases: [reads, uses, data-sources, fetches-from] }
-  layout-pattern: { aliases: [layout, pattern, presentation, display] }
-
-# ============================================================================
-# CANONICAL LAYOUT PATTERN VALUES
-# ============================================================================
-
-layout-pattern-values:
-  centered-column: { aliases: [centered, narrow, focused, single-column, form-layout] }
-  sidebar-shell: { aliases: [sidebar, side-nav, shell, app-layout, admin-layout] }
-  split-screen: { aliases: [split, two-column, two-panel, dual] }
-  vertical-stack: { aliases: [stack, list, column, vertical, top-to-bottom] }
-  horizontal-strip: { aliases: [strip, row, horizontal, toolbar, bar, left-to-right] }
-  grid: { aliases: [cards, tile, mosaic, dashboard-grid, masonry] }
-  overlay: { aliases: [modal, dialog, drawer, popup, floating, above] }
-  master-detail: { aliases: [list-detail, split-view, side-panel, browser] }
-
 # ============================================================================
 # EQUIVALENCE MAPPINGS — Ambiguous forms → Canonical
 # ============================================================================
@@ -110,7 +86,6 @@ equivalences:
         id: crud
         intent: "user manages data records (create, read, update, delete)"
         provides: [action.create, action.read, action.update, action.delete]
-        layout-pattern: master-detail
     resolution:
       - '"project-management" → Taxonomy alias for CRUD'
       - '"operations" → canonical: provides'
@@ -126,7 +101,6 @@ equivalences:
         id: crud
         intent: "user manages data records (create, read, update, delete)"
         provides: [action.read, action.update, action.delete]
-        layout-pattern: master-detail
     resolution:
       - 'data-grid → Capability pattern → CRUD'
       - 'row-actions → canonical: provides'
@@ -215,7 +189,8 @@ agent-instruction: |
   1. Use ONLY the canonical property names: id, intent, requires, provides, produces, etc.
   2. NEVER emit aliases: needs, fields, operations, results-in, description
   3. Resolve capability strings through Taxonomy aliases (e.g., "login" → "authentication")
-  4. A capability MUST NOT be described by its visual representation (e.g., "form", "table", "modal")
+  4. A capability MUST NOT be described by its visual representation or layout (e.g., "form", "table", "modal", "grid")
   5. A capability answers "What can the user accomplish?" — if the answer is a widget name, it's wrong
   6. All sub-references (requires → Input, provides → Action) MUST use concept.id format (e.g., input.email, action.submit)
   7. intent is REQUIRED — describe what the user can accomplish in plain text
+  8. Layout belongs to Page.layout or Section.layout-pattern, never Capability
