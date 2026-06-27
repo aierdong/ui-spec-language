@@ -130,12 +130,10 @@ equivalences:
         severity: success
         duration: transient
         placement: overlay
-        action:
-          intent: undo
-          label: "Undo"
+        action: action.undo-delete
     resolution:
       - 'snackbar → feedback with placement: overlay'
-      - 'action "Undo" → feedback.action'
+      - 'action "Undo" → ActionRef action.undo-delete'
 
   # --- Empty state → Feedback ---
   - non-canonical:
@@ -151,13 +149,11 @@ equivalences:
         severity: info
         duration: persistent
         placement: inline
-        action:
-          intent: create
-          label: "Create Project"
+        action: action.create
     resolution:
       - 'empty → kind: empty-state, duration: persistent'
       - 'title + description → combined message'
-      - 'cta → feedback.action'
+      - 'cta → ActionRef action.create'
 
   # --- Loading/Progress → Feedback ---
   - non-canonical:
@@ -244,4 +240,5 @@ agent-instruction: |
   4. kind + severity + duration + placement = complete Feedback specification
   5. kind: empty-state always has duration: persistent
   6. kind: validation-error always has placement: target-proximity
-  7. If Feedback includes an action (like "Undo"), it's actionable feedback
+  7. If Feedback includes an action (like "Undo"), reference an ActionRef
+  8. Spinner/Skeleton/Progress are Feedback; create State.loading only when the underlying condition is explicit

@@ -43,7 +43,7 @@ property-canonical-names:
 
 state-id-values:
   idle:       { aliases: [ready, normal, default, initial, interactive] }
-  loading:    { aliases: [fetching, in-progress, waiting, pending, spinner-visible, skeleton] }
+  loading:    { aliases: [fetching, in-progress, waiting, pending] }
   empty:      { aliases: [no-data, no-results, nothing-here, blank, zero-state] }
   error:      { aliases: [failed, failure, broken, problem, issue, exception] }
   success:    { aliases: [completed, done, finished, ok, resolved] }
@@ -125,25 +125,6 @@ equivalences:
       - 'possible → values'
       - 'current → default'
 
-  # --- Visual state indicators → State ---
-  - non-canonical:
-      showSpinner: true
-    maps-to:
-      state:
-        id: loading
-    resolution:
-      - 'showSpinner → state.id = "loading"'
-      - 'NOT Feedback.Progress — the spinner is the VISUAL, loading is the STATE'
-
-  - non-canonical:
-      skeleton: true
-    maps-to:
-      state:
-        id: loading
-    resolution:
-      - 'skeleton screen → state.id = "loading"'
-      - 'The skeleton is the rendering; loading is the concept'
-
   # --- Redux/Store state → State ---
   - non-canonical:
       store:
@@ -167,6 +148,14 @@ equivalences:
 # ============================================================================
 
 false-friends:
+  - expression: "showSpinner: true"
+    looks-like: "state: loading"
+    not-equivalent-because: "Spinner is Feedback.Progress — what the user sees. Loading is the underlying State. Only infer State.loading when the loading condition is explicit."
+
+  - expression: "skeleton: true"
+    looks-like: "state: loading"
+    not-equivalent-because: "Skeleton is Feedback.Progress. It may accompany State.loading but is not itself a State."
+
   - expression: "isLoading: true"
     looks-like: "state: processing"
     not-equivalent-because: "loading = fetching data (blocks navigation less). processing = executing action (blocks navigation more). Taxonomy distinguishes them: Lifecycle.Loading vs Lifecycle.Processing."
@@ -192,8 +181,9 @@ agent-instruction: |
   1. Use semantic state IDs: loading, empty, error, success — never isLoading, hasError
   2. State ≠ visual representation — strip all CSS/component references
   3. State ≠ React hook — extract semantic meaning from variable names
-  4. Boolean flags (isLoading, hasError, isEmpty) → state.id with the semantic name
-  5. State machine definitions → state with values[] and default
+  4. Boolean condition flags (isLoading, hasError, isEmpty) → state.id with the semantic name
+  5. Visual progress indicators (showSpinner, skeleton) → Feedback.progress, not State
+  6. State machine definitions → state with values[] and default
   6. Taxonomy provides implicit behavior:
      - loading → blocks Action.Submit
      - processing → blocks Action.Submit + Action.Navigate.NavigateTo

@@ -38,7 +38,6 @@ taxonomy:
               placement: page-top
           may-lead-to:
             - "Decision: Authentication.AuthOutcome"
-          layout-pattern: centered-column
         aliases:
           - login
           - sign-in
@@ -102,7 +101,6 @@ taxonomy:
           states:
             - "State: Selection.Unselected"
             - "State: Lifecycle.Loading"
-          layout-pattern: master-detail
         aliases:
           - "project-management"
           - "entity-list"
@@ -205,7 +203,6 @@ taxonomy:
             - "Input: Selection.Boolean"    # Confirm/Cancel
           provides:
             - "Action: Toggle.Selection"
-          layout-pattern: overlay
         aliases:
           - confirm
           - verify

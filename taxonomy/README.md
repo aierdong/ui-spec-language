@@ -75,15 +75,15 @@ The Agent resolves the action through the Taxonomy:
    - SubmitAuth: feedback(error)=auth-failed-message (overrides parent)
 4. Resolved:
    priority: primary (from Submit)
-   produces: [loading, success, error] (from Submit)
+   produces: [State: Lifecycle.Loading, State: Outcome.Success, State: Outcome.Error] (from Submit)
    feedback.error: auth-failed-message (from SubmitAuth, overrode Submit)
-   may-lead-to: auth-outcome (from SubmitAuth)
+   may-lead-to: Decision: Authentication.AuthOutcome (from SubmitAuth)
 5. Agent writes code with these defaults — no need to declare in Spec
 ```
 
 ## Cross-Reference Format
 
-Taxonomy files reference nodes across concepts using a unified format.
+Taxonomy files reference nodes across concepts using a unified format. Local UISL specs use lowercase `concept.id` references; taxonomy files use the full `Concept: Category.Child` form below.
 
 ### Format
 
@@ -155,15 +155,13 @@ Agent reads: "Action: Submit" (subtree)
 | 8 | `constraint.taxonomy.yaml` | ✓ Complete |
 | 9 | `decision.taxonomy.yaml` | ✓ Complete |
 | 10 | `navigation.taxonomy.yaml` | ✓ Complete |
+| 11 | `page.taxonomy.yaml` | ✓ Minimal |
 
-### Why no `page.taxonomy.yaml`?
+### Page taxonomy scope
 
-Page is intentionally excluded from the taxonomy. Unlike other concepts, Pages are not hierarchically categorized — each application defines its own unique set of Pages with no shared "is-a" inheritance tree. A Page's behavior is fully determined by:
-- Its Sections (what regions it contains)
-- Its Capabilities (what it can do)
-- Its Navigation connections (how it links to other Pages)
+Page taxonomy exists only for generic page roles and inherited page-level defaults, such as entry points, workspaces, detail pages, settings pages, flow steps, and error-recovery pages. It must not enumerate concrete application pages, routes, or URLs.
 
-There is no "type of page" that inherits from another "type of page" — all pages are equal siblings in the application graph.
+Concrete pages remain application-defined in specs and registries. Page taxonomy helps Agents infer defaults such as `layout` and `requires-auth` from a generic role, not from a route name.
 
 ## Taxonomy-Specific Properties
 
@@ -191,7 +189,7 @@ Some concepts appear both as Capabilities and as Actions in the taxonomy. This i
 | **Sort** | A capability for ordering data columns (column header clicks, sort direction state) | The trigger event that applies sort (click column header) |
 | **Filter** | A capability for data filtering (filter panel, active filter chips, clear-all) | The trigger event that applies a filter (select filter option) |
 
-**Rule**: A Capability *provides* Actions. When a concept appears in both trees, the Capability describes the function space, and the Action describes the trigger. The Agent uses context to determine which level is being referenced. |
+**Rule**: A Capability *provides* Actions. When a concept appears in both trees, the Capability describes the function space, and the Action describes the trigger. The Agent uses context to determine which level is being referenced.
 
 ---
 
