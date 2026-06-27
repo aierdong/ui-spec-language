@@ -6,7 +6,7 @@
 concept: Capability
 ontology_ref: ontology/capability.md
 taxonomy_ref: taxonomy/capability.taxonomy.yaml
-description: "A user-facing function that the system provides within a specific context"
+intent: "A user-facing function that the system provides within a specific context"
 
 # ============================================================================
 # CANONICAL FORM

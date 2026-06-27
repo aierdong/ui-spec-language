@@ -29,10 +29,10 @@ Page
                                   │              └─ obeys → Constraint
                                   ├─ provides → Action
                                   │              ├─ triggers → State
-                                  │              ├─ produces → Feedback
                                   │              └─ obeys → Constraint
                                   ├─ produces → State
                                   │              └─ may-lead-to → Navigation
+                                  ├─ feedback → Feedback
                                   ├─ consumes → Data
                                   ├─ explains → Decision
                                   │              ├─ evaluates → State

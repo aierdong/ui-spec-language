@@ -92,11 +92,13 @@ authenticate
 
 ```
 ui-ontology/
+    page.md
     capability.md
     section.md
     action.md
     state.md
     input.md
+    data.md
     feedback.md
     navigation.md
     constraint.md
@@ -235,6 +237,7 @@ PrimaryAction
 | # | 文件 | 内容 |
 |---|------|------|
 | 0 | `normal-forms/README.md` | Normal Form 规则体系、等价映射参考、Agent 决策树 |
+| 0.1 | `normal-forms/required-property-matrix.yaml` | Required Property Matrix，统一 Ontology 与 Normal Forms 的必填属性 |
 | 1 | `normal-forms/page.nf.yaml` | Page 规范形式 + 路由→页面映射 |
 | 2 | `normal-forms/capability.nf.yaml` | Capability 规范形式 + feature/component→capability 映射 |
 | 3 | `normal-forms/input.nf.yaml` | Input 规范形式 + widget/HTML→InputKind 映射 |
@@ -248,6 +251,8 @@ PrimaryAction
 | 11 | `normal-forms/data.nf.yaml` | Data 规范形式 + fetch/store→source 映射 |
 
 每个 NF 文件包含：Canonical Form、Property Canonical Names、Equivalence Mappings、False Friends、Agent Instruction。
+
+`required-property-matrix.yaml` 是必填属性的单一事实来源；Ontology 与 Normal Forms 必须与它保持一致。
 
 ---
 

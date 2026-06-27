@@ -6,7 +6,7 @@
 concept: Feedback
 ontology_ref: ontology/feedback.md
 taxonomy_ref: taxonomy/feedback.taxonomy.yaml
-description: "Information communicated to the user about the result of an Action or State change"
+intent: "Information communicated to the user about the result of an Action or State change"
 
 # ============================================================================
 # CANONICAL FORM

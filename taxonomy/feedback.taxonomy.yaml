@@ -7,7 +7,7 @@
 
 concept: Feedback
 ontology_ref: ontology/feedback.md
-description: "Information communicated to the user about the result of an Action or State change"
+intent: "Information communicated to the user about the result of an Action or State change"
 
 taxonomy:
 
@@ -15,13 +15,13 @@ taxonomy:
   # Confirmation — Action completed successfully
   # =========================================================================
   - id: Confirmation
-    description: "Notify the user that an operation completed successfully"
+    intent: "Notify the user that an operation completed successfully"
     inherits:
       severity: success
     children:
 
       - id: InlineSuccess
-        description: "Success message embedded within the page content"
+        intent: "Success message embedded within the page content"
         inherits:
           placement: inline
           duration: transient        # Auto-dismiss (e.g., 3 seconds)
@@ -31,7 +31,7 @@ taxonomy:
           - "delete-success"
 
       - id: ToastSuccess
-        description: "Success message floating above content (toast notification)"
+        intent: "Success message floating above content (toast notification)"
         inherits:
           placement: overlay
           duration: transient
@@ -43,14 +43,14 @@ taxonomy:
   # Error — Action failed; communicates what went wrong
   # =========================================================================
   - id: Error
-    description: "Inform the user that an operation failed and why"
+    intent: "Inform the user that an operation failed and why"
     inherits:
       severity: error
       duration: sticky              # User must read and dismiss or correct
     children:
 
       - id: InlineError
-        description: "Error message adjacent to the specific element that caused it"
+        intent: "Error message adjacent to the specific element that caused it"
         inherits:
           placement: target-proximity
           duration: sticky           # Until corrected
@@ -59,7 +59,7 @@ taxonomy:
           - "field-error"
 
       - id: BannerError
-        description: "Page or section-level error banner"
+        intent: "Page or section-level error banner"
         inherits:
           placement: page-top
           duration: sticky
@@ -69,7 +69,7 @@ taxonomy:
           - "error-message"
 
       - id: DialogError
-        description: "Blocking error that requires user acknowledgment"
+        intent: "Blocking error that requires user acknowledgment"
         inherits:
           placement: overlay
           duration: sticky
@@ -82,13 +82,13 @@ taxonomy:
   # Warning — Action succeeded but with caveats; or user should be cautious
   # =========================================================================
   - id: Warning
-    description: "Caution the user about consequences or partial success"
+    intent: "Caution the user about consequences or partial success"
     inherits:
       severity: warning
     children:
 
       - id: InlineWarning
-        description: "Warning message near related content"
+        intent: "Warning message near related content"
         inherits:
           placement: inline
           duration: sticky
@@ -97,7 +97,7 @@ taxonomy:
           - "partial-results-warning"
 
       - id: ConfirmationWarning
-        description: "Warning shown before executing a destructive or irreversible action"
+        intent: "Warning shown before executing a destructive or irreversible action"
         inherits:
           placement: overlay
           duration: sticky
@@ -114,13 +114,13 @@ taxonomy:
   # Information — Neutral, non-actionable communication
   # =========================================================================
   - id: Information
-    description: "Communicate neutral information to the user"
+    intent: "Communicate neutral information to the user"
     inherits:
       severity: info
     children:
 
       - id: EmptyState
-        description: "Shown when a collection or view has no data"
+        intent: "Shown when a collection or view has no data"
         inherits:
           placement: inline
           duration: persistent        # Visible until data exists
@@ -131,7 +131,7 @@ taxonomy:
           - "no-data"
 
       - id: Progress
-        description: "Shows ongoing operation progress (loading bar, spinner)"
+        intent: "Shows ongoing operation progress (loading bar, spinner)"
         inherits:
           placement: inline
           duration: persistent        # Visible until operation completes
@@ -142,7 +142,7 @@ taxonomy:
           - "processing"
 
       - id: InlineHelp
-        description: "Contextual guidance or explanation near an element"
+        intent: "Contextual guidance or explanation near an element"
         inherits:
           placement: inline
           duration: persistent
@@ -153,7 +153,7 @@ taxonomy:
           - "table-generation-order"
 
       - id: Tooltip
-        description: "Brief clarification shown on hover or focus"
+        intent: "Brief clarification shown on hover or focus"
         inherits:
           placement: overlay
           duration: transient         # Disappears on mouse-out or click-away
@@ -165,11 +165,11 @@ taxonomy:
   # Validation — Input validation feedback
   # =========================================================================
   - id: Validation
-    description: "Feedback about requirement validation"
+    intent: "Feedback about requirement validation"
     children:
 
       - id: ValidationError
-        description: "Individual requirement-level validation error"
+        intent: "Individual requirement-level validation error"
         inherits:
           placement: target-proximity
           duration: sticky            # Until value corrected
@@ -179,7 +179,7 @@ taxonomy:
           - "field-error"
 
       - id: ValidationSummary
-        description: "Summary of all validation errors at form level"
+        intent: "Summary of all validation errors at form level"
         inherits:
           placement: page-top
           duration: sticky
@@ -192,11 +192,11 @@ taxonomy:
   # Background — System-level feedback requiring no immediate action
   # =========================================================================
   - id: Background
-    description: "System-level events that don't require immediate user action"
+    intent: "System-level events that don't require immediate user action"
     children:
 
       - id: BackgroundNotification
-        description: "Non-blocking notification of a background event"
+        intent: "Non-blocking notification of a background event"
         inherits:
           placement: overlay
           duration: transient

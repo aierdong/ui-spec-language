@@ -6,7 +6,7 @@
 concept: Decision
 ontology_ref: ontology/decision.md
 taxonomy_ref: taxonomy/decision.taxonomy.yaml
-description: "A branch point where the system chooses a path based on State, Data, or user choice"
+intent: "A branch point where the system chooses a path based on State, Data, or user choice"
 
 # ============================================================================
 # CANONICAL FORM
@@ -14,19 +14,19 @@ description: "A branch point where the system chooses a path based on State, Dat
 
 canonical-form:
   decision:
-    id: string              # Unique name (e.g., "auth-outcome", "delete-confirmation-result")
-    summary: string         # Human-readable explanation of what is being decided
-    trigger: TriggerType?   # automatic | user-choice | time-based | event-based
-    evaluates:              # What informs this decision
+    id: string # Unique name (e.g., "auth-outcome", "delete-confirmation-result")
+    intent: string # Human-readable explanation of what is being decided
+    trigger: TriggerType? # automatic | user-choice | time-based | event-based
+    evaluates: # What informs this decision
       - state: StateRef
       - data: DataRef
       - constraint: ConstraintRef
-    branches:               # Possible outcomes
+    branches: # Possible outcomes
       - condition: Condition
-        resolves-to: Reference   # Navigation, State, Action, or Feedback target
-        label: string            # Human-readable description of this path
-        priority: Priority?      # Preference when multiple conditions match
-    default-branch: Branch?  # Fallback when no conditions match
+        resolves-to: Reference # Navigation, State, Action, or Feedback target
+        label: string # Human-readable description of this path
+        priority: Priority? # Preference when multiple conditions match
+    default-branch: Branch? # Fallback when no conditions match
 
 # ============================================================================
 # CANONICAL PROPERTY NAMES
@@ -34,7 +34,7 @@ canonical-form:
 
 property-canonical-names:
   id: { aliases: [name, key, decision-id, branch-point, flow] }
-  summary: { aliases: [description, what, purpose, question, about] }
+  intent: { aliases: [description, summary, what, purpose, question, about] }
   trigger: { aliases: [initiated-by, caused-by, source, type] }
   evaluates: { aliases: [checks, depends-on, considers, looks-at, inputs] }
   branches: { aliases: [paths, outcomes, options, cases, routes, results] }
@@ -67,7 +67,7 @@ equivalences:
     maps-to:
       decision:
         id: auth-outcome
-        summary: "What happens after authentication attempt"
+        intent: "What happens after authentication attempt"
         trigger: automatic
         evaluates:
           - state: auth-state
@@ -79,8 +79,8 @@ equivalences:
             resolves-to: feedback.auth-failed
             label: "Authentication failed"
     resolution:
-      - 'if/else → decision.branches'
-      - 'JS condition → canonical condition syntax'
+      - "if/else → decision.branches"
+      - "JS condition → canonical condition syntax"
       - '"navigate to home" → Navigation reference'
       - '"show error" → Feedback reference'
 
@@ -94,7 +94,7 @@ equivalences:
     maps-to:
       decision:
         id: role-based-routing
-        summary: "Which dashboard to show based on user role"
+        intent: "Which dashboard to show based on user role"
         trigger: automatic
         evaluates:
           - data: user-profile
@@ -109,9 +109,9 @@ equivalences:
           resolves-to: page.viewer-dashboard
           label: "Default viewer"
     resolution:
-      - 'switch → decision with branches'
-      - 'cases → branch conditions'
-      - 'default → default-branch'
+      - "switch → decision with branches"
+      - "cases → branch conditions"
+      - "default → default-branch"
 
   # --- Confirmation dialog → Decision ---
   - non-canonical:
@@ -122,7 +122,7 @@ equivalences:
     maps-to:
       decision:
         id: delete-confirmation
-        summary: "User confirms or cancels deletion"
+        intent: "User confirms or cancels deletion"
         trigger: user-choice
         branches:
           - condition: "user confirms"
@@ -132,22 +132,23 @@ equivalences:
             resolves-to: action.dismiss
             label: "Cancel deletion"
     resolution:
-      - 'confirm → decision with trigger: user-choice'
-      - 'onConfirm → branch resolves-to action'
-      - 'onCancel → branch resolves-to action'
+      - "confirm → decision with trigger: user-choice"
+      - "onConfirm → branch resolves-to action"
+      - "onCancel → branch resolves-to action"
 
   # --- Form dirty check → Decision ---
   - non-canonical:
-      beforeUnload: (e) => {
-        if (hasUnsavedChanges) {
-          e.preventDefault();
-          return "You have unsaved changes";
+      beforeUnload: |
+        (e) => {
+          if (hasUnsavedChanges) {
+            e.preventDefault();
+            return "You have unsaved changes";
+          }
         }
-      }
     maps-to:
       decision:
         id: form-dirty-navigate
-        summary: "User tries to leave with unsaved changes"
+        intent: "User tries to leave with unsaved changes"
         trigger: user-choice
         evaluates:
           - state: dirty
@@ -162,12 +163,12 @@ equivalences:
             resolves-to: state.idle
             label: "Stay on current page"
     resolution:
-      - 'beforeUnload handler → decision'
-      - 'hasUnsavedChanges → evaluates state: dirty'
-      - 'Three choices → three branches'
+      - "beforeUnload handler → decision"
+      - "hasUnsavedChanges → evaluates state: dirty"
+      - "Three choices → three branches"
 
   # --- Empty state → Decision ---
-  - non-canonical:
+  - non-canonical: |
       if (items.length === 0) {
         return <EmptyState canCreate={hasPermission} />;
       }
@@ -175,7 +176,7 @@ equivalences:
     maps-to:
       decision:
         id: empty-collection
-        summary: "What to show when collection has no items"
+        intent: "What to show when collection has no items"
         trigger: automatic
         evaluates:
           - data: items
@@ -190,12 +191,12 @@ equivalences:
             resolves-to: state.idle
             label: "Show normal list view"
     resolution:
-      - 'conditional rendering → decision'
-      - 'items.length === 0 → condition: items is empty'
-      - 'canCreate prop → branch differentiation'
+      - "conditional rendering → decision"
+      - "items.length === 0 → condition: items is empty"
+      - "canCreate prop → branch differentiation"
 
   # --- Session expiry → Decision ---
-  - non-canonical:
+  - non-canonical: |
       useEffect(() => {
         if (sessionExpired) {
           if (hasUnsavedWork) {
@@ -208,7 +209,7 @@ equivalences:
     maps-to:
       decision:
         id: session-expiry
-        summary: "What happens when session expires"
+        intent: "What happens when session expires"
         trigger: event-based
         evaluates:
           - state: expired
@@ -220,8 +221,8 @@ equivalences:
             resolves-to: navigation.go-to-login
             label: "Redirect to login"
     resolution:
-      - 'useEffect with session check → event-based decision'
-      - 'branching logic → branches array'
+      - "useEffect with session check → event-based decision"
+      - "branching logic → branches array"
 
 # ============================================================================
 # FALSE FRIENDS

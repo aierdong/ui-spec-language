@@ -5,7 +5,7 @@
 
 concept: Page
 ontology_ref: ontology/page.md
-description: "A single screen in the application's navigation map"
+intent: "A single screen in the application's navigation map"
 
 # ============================================================================
 # CANONICAL FORM

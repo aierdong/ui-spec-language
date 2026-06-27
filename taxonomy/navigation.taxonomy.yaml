@@ -9,7 +9,7 @@
 
 concept: Navigation
 ontology_ref: ontology/navigation.md
-description: "A movement between Pages, Sections, or Capabilities within an application"
+intent: "A movement between Pages, Sections, or Capabilities within an application"
 
 taxonomy:
 
@@ -17,11 +17,11 @@ taxonomy:
   # PageNavigation — Moving between full pages
   # =========================================================================
   - id: PageNavigation
-    description: "Full-page transitions between application views"
+    intent: "Full-page transitions between application views"
     children:
 
       - id: Push
-        description: "Navigate to a new page, preserving history for back-navigation"
+        intent: "Navigate to a new page, preserving history for back-navigation"
         inherits:
           method: push
           preserves-state: true       # Back button returns to previous state
@@ -32,7 +32,7 @@ taxonomy:
           - push
 
       - id: Replace
-        description: "Navigate to a new page, replacing current in history"
+        intent: "Navigate to a new page, replacing current in history"
         inherits:
           method: replace
           preserves-state: false      # Cannot go back to the replaced page
@@ -41,7 +41,7 @@ taxonomy:
           - replace
 
       - id: External
-        description: "Navigate to a URL outside the application"
+        intent: "Navigate to a URL outside the application"
         inherits:
           method: external
           opens: new-tab               # Opens in new tab by default
@@ -55,11 +55,11 @@ taxonomy:
   # OverlayNavigation — Opening and closing overlays
   # =========================================================================
   - id: OverlayNavigation
-    description: "Opening content above the current page without full navigation"
+    intent: "Opening content above the current page without full navigation"
     children:
 
       - id: OpenDialog
-        description: "Open a modal dialog with focused content"
+        intent: "Open a modal dialog with focused content"
         inherits:
           method: overlay
           blocks-background: true
@@ -70,7 +70,7 @@ taxonomy:
           - show-dialog
 
       - id: OpenDrawer
-        description: "Open a side panel"
+        intent: "Open a side panel"
         inherits:
           method: overlay
           blocks-background: false     # Drawers typically don't block completely
@@ -80,7 +80,7 @@ taxonomy:
           - show-panel
 
       - id: DismissOverlay
-        description: "Close the current overlay and return to the underlying view"
+        intent: "Close the current overlay and return to the underlying view"
         inherits:
           method: replace
           discards-changes: true       # Overlay changes are discarded by default
@@ -94,11 +94,11 @@ taxonomy:
   # InlineNavigation — Moving within the same page
   # =========================================================================
   - id: InlineNavigation
-    description: "Content changes within the same page without URL change"
+    intent: "Content changes within the same page without URL change"
     children:
 
       - id: SwitchTab
-        description: "Switch between content panels within a tabbed section"
+        intent: "Switch between content panels within a tabbed section"
         inherits:
           method: inline
           preserves-state: true        # Each tab remembers its state
@@ -107,7 +107,7 @@ taxonomy:
           - select-tab
 
       - id: ToggleExpand
-        description: "Expand or collapse detail content inline"
+        intent: "Expand or collapse detail content inline"
         inherits:
           method: inline
           animated: true
@@ -117,7 +117,7 @@ taxonomy:
           - accordion
 
       - id: ScrollTo
-        description: "Scroll to a specific position within the page"
+        intent: "Scroll to a specific position within the page"
         inherits:
           method: scroll-to
           animated: true
@@ -130,11 +130,11 @@ taxonomy:
   # AuthNavigation — Authentication flow navigation
   # =========================================================================
   - id: AuthNavigation
-    description: "Navigation patterns specific to authentication flows"
+    intent: "Navigation patterns specific to authentication flows"
     children:
 
       - id: GoToLogin
-        description: "Redirect to the login page"
+        intent: "Redirect to the login page"
         inherits:
           method: replace              # Replace so user can't go back to protected page
           clears-session: true
@@ -143,7 +143,7 @@ taxonomy:
           - sign-out-redirect
 
       - id: GoToHome
-        description: "Redirect to the home/dashboard page after successful auth"
+        intent: "Redirect to the home/dashboard page after successful auth"
         inherits:
           method: replace              # Replace login page in history
           carries-state:
@@ -156,7 +156,7 @@ taxonomy:
           - post-login-redirect
 
       - id: GoToRegister
-        description: "Navigate to the registration page"
+        intent: "Navigate to the registration page"
         inherits:
           method: push                 # User may want to go back to login
         aliases:
@@ -167,11 +167,11 @@ taxonomy:
   # ResultNavigation — Navigation after an operation completes
   # =========================================================================
   - id: ResultNavigation
-    description: "Navigation based on the outcome of an operation"
+    intent: "Navigation based on the outcome of an operation"
     children:
 
       - id: GoToList
-        description: "Return to the list view after creating, updating, or deleting"
+        intent: "Return to the list view after creating, updating, or deleting"
         inherits:
           method: push
           carries-state:
@@ -182,7 +182,7 @@ taxonomy:
           - go-to-entities
 
       - id: StayOnForm
-        description: "Stay on the current form for continued editing"
+        intent: "Stay on the current form for continued editing"
         inherits:
           method: inline
           carries-state:

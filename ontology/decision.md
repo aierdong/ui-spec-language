@@ -26,7 +26,7 @@ Capability
 | Property | Type | Description |
 |----------|------|-------------|
 | `id` | identifier | Unique name (e.g., `auth-outcome`, `delete-confirmation-result`) |
-| `description` | string | Human-readable explanation of what is being decided |
+| `intent` | string | Human-readable explanation of what is being decided |
 | `branches` | Branch[] | The possible outcomes of this decision |
 
 ## Branch Properties

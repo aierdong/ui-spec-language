@@ -6,7 +6,7 @@
 concept: State
 ontology_ref: ontology/state.md
 taxonomy_ref: taxonomy/state.taxonomy.yaml
-description: "A transient condition of the UI at a given moment"
+intent: "A transient condition of the UI at a given moment"
 
 # ============================================================================
 # CANONICAL FORM

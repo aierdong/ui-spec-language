@@ -4,7 +4,7 @@
 
 concept: Data
 ontology_ref: ontology/data.md
-description: "External or internal information that the UI consumes, displays, or mutates"
+intent: "External or internal information that the UI consumes, displays, or mutates"
 
 taxonomy:
 
@@ -12,7 +12,7 @@ taxonomy:
   # Remote — Data from server-side sources
   # =========================================================================
   - id: Remote
-    description: "Data fetched from a remote server or service"
+    intent: "Data fetched from a remote server or service"
     inherits:
       freshness: on-demand
       lazy: false                   # Fetched eagerly by default
@@ -20,7 +20,7 @@ taxonomy:
     children:
 
       - id: ApiCollection
-        description: "A paginated or full collection from a REST/GraphQL endpoint"
+        intent: "A paginated or full collection from a REST/GraphQL endpoint"
         inherits:
           source: api
           type: collection
@@ -32,7 +32,7 @@ taxonomy:
           - list
 
       - id: ApiSingleton
-        description: "A single record from a REST/GraphQL endpoint"
+        intent: "A single record from a REST/GraphQL endpoint"
         inherits:
           source: api
           type: singleton
@@ -43,7 +43,7 @@ taxonomy:
           - config
 
       - id: ApiMutableCollection
-        description: "A collection the user can modify (CRUD)"
+        intent: "A collection the user can modify (CRUD)"
         inherits:
           source: api
           type: collection
@@ -54,7 +54,7 @@ taxonomy:
           - editable-table
 
       - id: RealTimeStream
-        description: "Continuously updating data via WebSocket or SSE"
+        intent: "Continuously updating data via WebSocket or SSE"
         inherits:
           source: api
           type: stream
@@ -68,14 +68,14 @@ taxonomy:
   # Local — Data stored on the client device
   # =========================================================================
   - id: Local
-    description: "Data stored in the user's browser or device"
+    intent: "Data stored in the user's browser or device"
     inherits:
       mutable: true
       lazy: false                   # Loaded on access
     children:
 
       - id: PersistentPreference
-        description: "User preferences that survive browser restarts"
+        intent: "User preferences that survive browser restarts"
         inherits:
           source: local-storage
           type: dictionary
@@ -87,7 +87,7 @@ taxonomy:
           - settings
 
       - id: SessionScoped
-        description: "Temporary data cleared when the session ends"
+        intent: "Temporary data cleared when the session ends"
         inherits:
           source: session-storage
           type: dictionary
@@ -97,7 +97,7 @@ taxonomy:
           - temp-state
 
       - id: RecentItems
-        description: "Short history of recently accessed items"
+        intent: "Short history of recently accessed items"
         inherits:
           source: local-storage
           type: collection
@@ -112,13 +112,13 @@ taxonomy:
   # Inherited — Data passed from parent or context
   # =========================================================================
   - id: Inherited
-    description: "Data received from a parent Capability, Section, or application context"
+    intent: "Data received from a parent Capability, Section, or application context"
     inherits:
       mutable: false                # Inherited data is typically read-only
     children:
 
       - id: ParentData
-        description: "Data passed from a parent Capability or Section"
+        intent: "Data passed from a parent Capability or Section"
         inherits:
           source: parent
           scope: section
@@ -128,7 +128,7 @@ taxonomy:
           - inherited-context
 
       - id: ApplicationContext
-        description: "Application-wide context data (user info, permissions, env)"
+        intent: "Application-wide context data (user info, permissions, env)"
         inherits:
           source: context
           scope: application
@@ -145,7 +145,7 @@ taxonomy:
   # Derived — Computed from other data sources
   # =========================================================================
   - id: Derived
-    description: "Data computed or derived from other data sources"
+    intent: "Data computed or derived from other data sources"
     inherits:
       source: computed
       mutable: false
@@ -153,7 +153,7 @@ taxonomy:
     children:
 
       - id: FilteredView
-        description: "A filtered subset of a parent collection"
+        intent: "A filtered subset of a parent collection"
         inherits:
           type: collection
           depends-on: "Data: Remote.ApiCollection"
@@ -162,7 +162,7 @@ taxonomy:
           - search-results
 
       - id: Aggregation
-        description: "Aggregated statistics from a collection (count, sum, avg)"
+        intent: "Aggregated statistics from a collection (count, sum, avg)"
         inherits:
           type: singleton
         aliases:
@@ -171,7 +171,7 @@ taxonomy:
           - totals
 
       - id: JoinedView
-        description: "Combined view from multiple data sources"
+        intent: "Combined view from multiple data sources"
         inherits:
           type: collection
         aliases:
@@ -182,11 +182,11 @@ taxonomy:
   # File — Data from static or uploaded files
   # =========================================================================
   - id: File
-    description: "Data loaded from files (static assets or user uploads)"
+    intent: "Data loaded from files (static assets or user uploads)"
     children:
 
       - id: StaticAsset
-        description: "Predefined data bundled with the application"
+        intent: "Predefined data bundled with the application"
         inherits:
           source: file
           type: dictionary
@@ -198,7 +198,7 @@ taxonomy:
           - static-config
 
       - id: UploadedFile
-        description: "Data from a user-uploaded file"
+        intent: "Data from a user-uploaded file"
         inherits:
           source: file
           mutable: true
@@ -211,11 +211,11 @@ taxonomy:
   # Navigation — Data from URL parameters
   # =========================================================================
   - id: Navigation
-    description: "Data extracted from the current URL or navigation event"
+    intent: "Data extracted from the current URL or navigation event"
     children:
 
       - id: UrlParameter
-        description: "A value from the query string or path parameter"
+        intent: "A value from the query string or path parameter"
         inherits:
           source: url-parameter
           type: singleton
@@ -226,7 +226,7 @@ taxonomy:
           - url-param
 
       - id: CarriedData
-        description: "Data explicitly passed during a navigation event"
+        intent: "Data explicitly passed during a navigation event"
         inherits:
           source: parent
           scope: page

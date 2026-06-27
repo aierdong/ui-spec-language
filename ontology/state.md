@@ -24,12 +24,12 @@ Capability
 | Property | Type | Description |
 |----------|------|-------------|
 | `id` | identifier | Unique name (e.g., `loading`, `empty`, `error`, `selected`) |
-| `label` | string | Human-readable name (e.g., "Loading", "No Results", "Submission Failed") |
 
 ## Optional Properties
 
 | Property | Type | Description |
 |----------|------|-------------|
+| `label` | string | Human-readable name (e.g., "Loading", "No Results", "Submission Failed") |
 | `values` | string[] | Enumerated possible values (e.g., `[success, failed, partial-failed]`) |
 | `default` | string | The initial value when the page or component mounts |
 | `persistent` | boolean | Whether this state survives page navigation (default: `false`) |

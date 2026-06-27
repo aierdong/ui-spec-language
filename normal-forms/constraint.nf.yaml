@@ -6,7 +6,7 @@
 concept: Constraint
 ontology_ref: ontology/constraint.md
 taxonomy_ref: taxonomy/constraint.taxonomy.yaml
-description: "A condition that restricts when an Input, Action, State, or Capability is available, visible, or valid"
+intent: "A condition that restricts when an Input, Action, State, or Capability is available, visible, or valid"
 
 # ============================================================================
 # CANONICAL FORM
@@ -14,11 +14,11 @@ description: "A condition that restricts when an Input, Action, State, or Capabi
 
 canonical-form:
   constraint:
-    id: string              # Unique name (e.g., "email-format", "auth-required")
-    condition: Condition    # The expression that must be true
+    id: string # Unique name (e.g., "email-format", "auth-required")
+    condition: Condition # The expression that must be true
     applies-to: TargetType? # visibility | availability | validity (default: availability)
-    message: string?        # Human-readable explanation when violated
-    severity: Severity?     # error | warning | info
+    message: string? # Human-readable explanation when violated
+    severity: Severity? # error | warning | info
 
 # ============================================================================
 # CANONICAL PROPERTY NAMES
@@ -36,18 +36,18 @@ property-canonical-names:
 # ============================================================================
 
 applies-to-values:
-  visibility:   { aliases: [show, hide, display, render, visible] }
+  visibility: { aliases: [show, hide, display, render, visible] }
   availability: { aliases: [enable, disable, interactive, editable, active] }
-  validity:     { aliases: [validate, check, rule, requirement, format, pattern] }
+  validity: { aliases: [validate, check, rule, requirement, format, pattern] }
 
 # ============================================================================
 # CANONICAL SEVERITY VALUES
 # ============================================================================
 
 severity-values:
-  error:   { aliases: [block, reject, invalid, fail, strict] }
+  error: { aliases: [block, reject, invalid, fail, strict] }
   warning: { aliases: [caution, warn, alert, soft, advisory-allow] }
-  info:    { aliases: [hint, note, suggestion, guidance] }
+  info: { aliases: [hint, note, suggestion, guidance] }
 
 # ============================================================================
 # CANONICAL CONDITION SYNTAX
@@ -55,14 +55,14 @@ severity-values:
 # All conditions use this syntax. No DSL variation.
 
 condition-syntax:
-  state-check:        "State: Category.Leaf == value"
-  data-check:         "data-id.field == value"
-  input-check:        "input-id is empty"
-  negation:           "expression != value"
-  membership:         "value in [a, b, c]"
-  compound-and:       "expr1 AND expr2"
-  compound-or:        "expr1 OR expr2"
-  comparison:         "value < N"  # supports <, >, <=, >=
+  state-check: "State: Category.Leaf == value"
+  data-check: "data-id.field == value"
+  input-check: "input-id is empty"
+  negation: "expression != value"
+  membership: "value in [a, b, c]"
+  compound-and: "expr1 AND expr2"
+  compound-or: "expr1 OR expr2"
+  comparison: "value < N" # supports <, >, <=, >=
   # Examples:
   #   "State: Lifecycle.Processing is active"
   #   "items.length == 0"
@@ -85,7 +85,7 @@ equivalences:
         severity: error
         message: "This field is required"
     resolution:
-      - 'HTML required attribute → validity constraint'
+      - "HTML required attribute → validity constraint"
       - 'condition: "value is empty" (canonical empty check)'
 
   - non-canonical:
@@ -95,8 +95,8 @@ equivalences:
         applies-to: availability
         condition: always
     resolution:
-      - 'HTML disabled attribute → availability constraint'
-      - 'condition: always (permanently disabled)' — BUT this is unusual; typically disabled is conditional
+      - "HTML disabled attribute → availability constraint"
+      - "condition: always (permanently disabled) — BUT this is unusual; typically disabled is conditional"
 
   - non-canonical:
       minlength: 8
@@ -112,7 +112,7 @@ equivalences:
           applies-to: validity
           severity: error
     resolution:
-      - 'HTML minlength/maxlength → validity constraints'
+      - "HTML minlength/maxlength → validity constraints"
       - 'condition format: "value.length < N"'
 
   - non-canonical:
@@ -124,11 +124,11 @@ equivalences:
         applies-to: validity
         severity: error
     resolution:
-      - 'HTML pattern attribute → validity constraint'
-      - 'pattern stored as condition reference, not literal regex'
+      - "HTML pattern attribute → validity constraint"
+      - "pattern stored as condition reference, not literal regex"
 
   # --- React conditional rendering → Constraint ---
-  - non-canonical:
+  - non-canonical: |
       {isAdmin && <AdminPanel />}
     maps-to:
       constraint:
@@ -137,10 +137,10 @@ equivalences:
         applies-to: visibility
         severity: error
     resolution:
-      - 'conditional render → visibility constraint'
-      - 'condition extracted from guard expression'
+      - "conditional render → visibility constraint"
+      - "condition extracted from guard expression"
 
-  - non-canonical:
+  - non-canonical: |
       disabled={items.length === 0}
     maps-to:
       constraint:
@@ -148,8 +148,8 @@ equivalences:
         condition: "items.length == 0"
         applies-to: availability
     resolution:
-      - 'disabled prop with condition → availability constraint'
-      - 'condition preserved as-is in canonical syntax'
+      - "disabled prop with condition → availability constraint"
+      - "condition preserved as-is in canonical syntax"
 
   # --- Form validation → Constraint ---
   - non-canonical:
@@ -162,8 +162,8 @@ equivalences:
         severity: error
         message: "Invalid email"
     resolution:
-      - 'validation function → validity constraint'
-      - 'condition expressed declaratively, not as function body'
+      - "validation function → validity constraint"
+      - "condition expressed declaratively, not as function body"
 
   - non-canonical:
       yup:
@@ -179,8 +179,8 @@ equivalences:
           applies-to: validity
           severity: error
     resolution:
-      - 'Yup schema → multiple validity constraints'
-      - 'email() → format-match; required() → required'
+      - "Yup schema → multiple validity constraints"
+      - "email() → format-match; required() → required"
 
   # --- Role-based access → Constraint ---
   - non-canonical:
@@ -192,7 +192,7 @@ equivalences:
         applies-to: visibility
         message: "You do not have permission to access this"
     resolution:
-      - 'can array → visibility constraint with role check'
+      - "can array → visibility constraint with role check"
 
   # --- Conditional visibility → Constraint ---
   - non-canonical:
@@ -203,8 +203,8 @@ equivalences:
         condition: "account-type == business"
         applies-to: visibility
     resolution:
-      - 'visible-if → visibility constraint'
-      - 'JS condition → canonical condition syntax'
+      - "visible-if → visibility constraint"
+      - "JS condition → canonical condition syntax"
 
 # ============================================================================
 # FALSE FRIENDS

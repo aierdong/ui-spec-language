@@ -1,0 +1,68 @@
+# Required Property Matrix
+# Source of truth for required properties across Ontology and Normal Forms.
+#
+# Rules:
+# - Only properties listed under `required` are mandatory for a concept.
+# - Properties not listed here are optional, even if strongly recommended.
+# - Ontology documents and Normal Form files must match this matrix.
+# - Use canonical property names only. Aliases such as `description` or `summary`
+#   may be accepted on read, but Agents must never emit them.
+
+version: 0.1.0-draft
+scope: ontology-and-normal-forms
+
+concepts:
+  capability:
+    required:
+      - id
+      - intent
+
+  action:
+    required:
+      - id
+      - intent
+
+  input:
+    required:
+      - id
+      - kind
+      - label
+
+  page:
+    required:
+      - id
+      - label
+
+  section:
+    required:
+      - id
+
+  state:
+    required:
+      - id
+
+  feedback:
+    required:
+      - id
+      - kind
+
+  navigation:
+    required:
+      - id
+      - target
+
+  constraint:
+    required:
+      - id
+      - condition
+
+  decision:
+    required:
+      - id
+      - intent
+      - branches
+
+  data:
+    required:
+      - id
+      - source

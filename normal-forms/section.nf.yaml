@@ -6,7 +6,7 @@
 concept: Section
 ontology_ref: ontology/section.md
 taxonomy_ref: taxonomy/section.taxonomy.yaml
-description: "A physical or logical partition of a Page that groups related Capabilities"
+intent: "A physical or logical partition of a Page that groups related Capabilities"
 
 # ============================================================================
 # CANONICAL FORM

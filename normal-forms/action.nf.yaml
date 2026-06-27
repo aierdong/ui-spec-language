@@ -6,7 +6,7 @@
 concept: Action
 ontology_ref: ontology/action.md
 taxonomy_ref: taxonomy/action.taxonomy.yaml
-description: "A behavior the user can trigger within a Capability"
+intent: "A behavior the user can trigger within a Capability"
 
 # ============================================================================
 # CANONICAL FORM

@@ -23,12 +23,12 @@ Page
 | Property | Type | Description |
 |----------|------|-------------|
 | `id` | identifier | Unique name within this page (e.g., `sidebar`, `main-content`) |
-| `label` | string | Human-readable name (e.g., "Navigation Hub", "Main Workspace") |
 
 ## Optional Properties
 
 | Property | Type | Description |
 |----------|------|-------------|
+| `label` | string | Human-readable name (e.g., "Navigation Hub", "Main Workspace") |
 | `contains` | Capability[] | Capabilities grouped within this section |
 | `layout-pattern` | LayoutPattern | Semantic layout intent (e.g., `centered-column`, `sidebar-shell`, `split-screen`, `vertical-stack`, `grid`) |
 | `zones` | Zone[] | Named sub-areas within the section (e.g., `top`, `middle`, `bottom`) |

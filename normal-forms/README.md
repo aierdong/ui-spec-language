@@ -63,7 +63,7 @@ There is ONE canonical property name for each attribute. Aliases are documented 
 |-------------------|--------------------------|
 | `kind` | `type`, `role`, `category`, `input-type`, `field-type` |
 | `id` | `name`, `key`, `ref`, `identifier` |
-| `intent` | `purpose`, `goal`, `action-type`, `behavior`, `description` |
+| `intent` | `purpose`, `goal`, `action-type`, `behavior`, `description`, `summary` |
 | `priority` | `importance`, `level`, `emphasis`, `weight` |
 | `label` | `title`, `display`, `text`, `caption` |
 | `requires` | `needs`, `inputs`, `dependencies`, `fields` |
@@ -125,12 +125,12 @@ input.user-mail      # compound id uses hyphen
 
 ### Rule 7: Required Properties
 
-Each concept has a set of required properties. Optional properties are marked with `?` in canonical-form definitions.
+Required properties are defined in [`required-property-matrix.yaml`](required-property-matrix.yaml). This matrix is the source of truth for both Ontology and Normal Forms.
 
 | Concept | Required Properties |
 |---------|---------------------|
 | Capability | `id`, `intent` |
-| Action | `id`, `intent`, `label` |
+| Action | `id`, `intent` |
 | Input | `id`, `kind`, `label` |
 | Page | `id`, `label` |
 | Section | `id` |
@@ -138,7 +138,7 @@ Each concept has a set of required properties. Optional properties are marked wi
 | Feedback | `id`, `kind` |
 | Navigation | `id`, `target` |
 | Constraint | `id`, `condition` |
-| Decision | `id`, `summary`, `branches` |
+| Decision | `id`, `intent`, `branches` |
 | Data | `id`, `source` |
 
 ### Rule 8: Shared Enum Types

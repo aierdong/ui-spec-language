@@ -7,7 +7,7 @@
 
 concept: Capability
 ontology_ref: ontology/capability.md
-description: "A user-facing function that the system provides within a specific context"
+intent: "A user-facing function that the system provides within a specific context"
 
 taxonomy:
 
@@ -15,11 +15,11 @@ taxonomy:
   # Identity — Verify who the user is
   # =========================================================================
   - id: Identity
-    description: "Capabilities related to user identity verification and management"
+    intent: "Capabilities related to user identity verification and management"
     children:
 
       - id: Authentication
-        description: "Verify the user's identity to grant system access"
+        intent: "Verify the user's identity to grant system access"
         inherits:
           requires:
             - "Input: Credential.Email"
@@ -46,7 +46,7 @@ taxonomy:
           - authenticate
 
       - id: Registration
-        description: "Create a new user identity in the system"
+        intent: "Create a new user identity in the system"
         inherits:
           requires:
             - "Input: Credential.Email"
@@ -70,7 +70,7 @@ taxonomy:
           - create-account
 
       - id: AccountRecovery
-        description: "Recover access to a locked or forgotten account"
+        intent: "Recover access to a locked or forgotten account"
         inherits:
           requires:
             - "Input: Credential.Email"
@@ -85,11 +85,11 @@ taxonomy:
   # DataManagement — Work with data records
   # =========================================================================
   - id: DataManagement
-    description: "Capabilities for creating, viewing, searching, and managing data"
+    intent: "Capabilities for creating, viewing, searching, and managing data"
     children:
 
       - id: CRUD
-        description: "Full Create-Read-Update-Delete lifecycle for records"
+        intent: "Full Create-Read-Update-Delete lifecycle for records"
         inherits:
           provides:
             - "Action: CRUD.Create"
@@ -109,7 +109,7 @@ taxonomy:
           - "data-grid"
 
       - id: Search
-        description: "Find records matching user-specified criteria"
+        intent: "Find records matching user-specified criteria"
         inherits:
           requires:
             - "Input: Text.SearchQuery"
@@ -125,7 +125,7 @@ taxonomy:
           - find
 
       - id: Filter
-        description: "Narrow a collection to items matching conditions"
+        intent: "Narrow a collection to items matching conditions"
         inherits:
           provides:
             - "Action: Toggle"
@@ -136,7 +136,7 @@ taxonomy:
           - refine
 
       - id: Sort
-        description: "Reorder a collection by a chosen attribute"
+        intent: "Reorder a collection by a chosen attribute"
         inherits:
           provides:
             - "Action: Toggle"
@@ -149,11 +149,11 @@ taxonomy:
   # Transfer — Move data in and out of the system
   # =========================================================================
   - id: Transfer
-    description: "Capabilities for moving data across system boundaries"
+    intent: "Capabilities for moving data across system boundaries"
     children:
 
       - id: Upload
-        description: "Transfer files from the user's device to the system"
+        intent: "Transfer files from the user's device to the system"
         inherits:
           requires:
             - "Input: File"
@@ -170,7 +170,7 @@ taxonomy:
           - import
 
       - id: Download
-        description: "Transfer data from the system to the user's device"
+        intent: "Transfer data from the system to the user's device"
         inherits:
           provides:
             - "Action: Export.Download"
@@ -184,11 +184,11 @@ taxonomy:
   # Communication — Notify and inform users
   # =========================================================================
   - id: Communication
-    description: "Capabilities for notifying and informing users"
+    intent: "Capabilities for notifying and informing users"
     children:
 
       - id: Notification
-        description: "Alert the user to time-sensitive or relevant events"
+        intent: "Alert the user to time-sensitive or relevant events"
         inherits:
           produces:
             - "State: Visibility.Visible"
@@ -199,7 +199,7 @@ taxonomy:
           - alert
 
       - id: Confirmation
-        description: "Explicit acknowledgment from the user before proceeding"
+        intent: "Explicit acknowledgment from the user before proceeding"
         inherits:
           requires:
             - "Input: Selection.Boolean"    # Confirm/Cancel
@@ -214,11 +214,11 @@ taxonomy:
   # Presentation — Control how the application appears
   # =========================================================================
   - id: Presentation
-    description: "Capabilities that control the application's visual presentation"
+    intent: "Capabilities that control the application's visual presentation"
     children:
 
       - id: ToggleTheme
-        description: "Switch between visual presentations (light/dark mode)"
+        intent: "Switch between visual presentations (light/dark mode)"
         inherits:
           provides:
             - "Action: Toggle.ToggleTheme"
@@ -229,7 +229,7 @@ taxonomy:
           - dark-mode
 
       - id: SwitchLanguage
-        description: "Change the application display language"
+        intent: "Change the application display language"
         inherits:
           provides:
             - "Action: System.SwitchLanguage"
@@ -243,7 +243,7 @@ taxonomy:
           - locale
 
       - id: ToggleView
-        description: "Switch between layout views (e.g., list vs grid)"
+        intent: "Switch between layout views (e.g., list vs grid)"
         inherits:
           provides:
             - "Action: Toggle"
@@ -257,11 +257,11 @@ taxonomy:
   # Workflow — Execute multi-step operations
   # =========================================================================
   - id: Workflow
-    description: "Capabilities that execute multi-step business processes"
+    intent: "Capabilities that execute multi-step business processes"
     children:
 
       - id: Run
-        description: "Execute a predefined process or pipeline"
+        intent: "Execute a predefined process or pipeline"
         inherits:
           provides:
             - "Action: Run"

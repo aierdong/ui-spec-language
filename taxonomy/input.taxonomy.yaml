@@ -4,7 +4,7 @@
 
 concept: Input
 ontology_ref: ontology/input.md
-description: "What information the user provides to fulfill a Capability"
+intent: "What information the user provides to fulfill a Capability"
 
 taxonomy:
 
@@ -12,7 +12,7 @@ taxonomy:
   # Credential — Identity verification values
   # =========================================================================
   - id: Credential
-    description: "Information used to verify the user's identity"
+    intent: "Information used to verify the user's identity"
     inherits:
       sensitive: true              # All credentials are masked by default
       validation:
@@ -20,7 +20,7 @@ taxonomy:
     children:
 
       - id: Email
-        description: "User's email address for identification"
+        intent: "User's email address for identification"
         inherits:
           validation:
             - format: email
@@ -30,7 +30,7 @@ taxonomy:
           - email
 
       - id: Password
-        description: "User's secret for authentication"
+        intent: "User's secret for authentication"
         inherits:
           validation:
             - min-length: 8
@@ -40,7 +40,7 @@ taxonomy:
           - passphrase
 
       - id: OTP
-        description: "One-time passcode, typically numeric and short-lived"
+        intent: "One-time passcode, typically numeric and short-lived"
         inherits:
           validation:
             - format: numeric
@@ -56,12 +56,12 @@ taxonomy:
   # Text — Free-form character input
   # =========================================================================
   - id: Text
-    description: "Free-form character input"
+    intent: "Free-form character input"
     inherits: {}
     children:
 
       - id: ShortText
-        description: "Short single-line text (names, titles, labels)"
+        intent: "Short single-line text (names, titles, labels)"
         inherits:
           validation:
             - max-length: 255
@@ -74,7 +74,7 @@ taxonomy:
           - project-name
 
       - id: LongText
-        description: "Multi-line free-form text (descriptions, notes, comments)"
+        intent: "Multi-line free-form text (descriptions, notes, comments)"
         inherits:
           multiline: true
           validation:
@@ -86,7 +86,7 @@ taxonomy:
           - comment
 
       - id: SearchQuery
-        description: "Text input for search functionality"
+        intent: "Text input for search functionality"
         inherits:
           short-lived: true         # Typically cleared after search
           multiline: false
@@ -99,14 +99,14 @@ taxonomy:
   # Numeric — Numbers and quantities
   # =========================================================================
   - id: Numeric
-    description: "Numeric values"
+    intent: "Numeric values"
     inherits:
       validation:
         - type: number
     children:
 
       - id: Integer
-        description: "Whole number values"
+        intent: "Whole number values"
         inherits:
           validation:
             - integer: true
@@ -117,7 +117,7 @@ taxonomy:
           - ordered-index
 
       - id: Decimal
-        description: "Numbers with decimal precision"
+        intent: "Numbers with decimal precision"
         inherits:
           validation:
             - decimal: true
@@ -127,7 +127,7 @@ taxonomy:
           - percentage
 
       - id: Duration
-        description: "A span of time"
+        intent: "A span of time"
         inherits:
           display-format: humanized  # "2h 30m" rather than raw seconds
         aliases:
@@ -139,12 +139,12 @@ taxonomy:
   # Selection — Choose from predefined options
   # =========================================================================
   - id: Selection
-    description: "Value chosen from a predefined or dynamic set of options"
+    intent: "Value chosen from a predefined or dynamic set of options"
     inherits: {}
     children:
 
       - id: SingleSelect
-        description: "Choose exactly one option from a list"
+        intent: "Choose exactly one option from a list"
         inherits:
           multiple: false
         aliases:
@@ -156,7 +156,7 @@ taxonomy:
           - clear-strategy
 
       - id: MultiSelect
-        description: "Choose zero or more options from a list"
+        intent: "Choose zero or more options from a list"
         inherits:
           multiple: true
           searchable: true           # Multi-selects benefit from search
@@ -166,7 +166,7 @@ taxonomy:
           - tag-selector
 
       - id: Boolean
-        description: "True/false binary choice"
+        intent: "True/false binary choice"
         inherits:
           default: false
         aliases:
@@ -181,12 +181,12 @@ taxonomy:
   # Temporal — Date and time values
   # =========================================================================
   - id: Temporal
-    description: "Date and time values"
+    intent: "Date and time values"
     inherits: {}
     children:
 
       - id: Date
-        description: "Calendar date without time"
+        intent: "Calendar date without time"
         inherits:
           format: date
         aliases:
@@ -195,7 +195,7 @@ taxonomy:
           - end-date
 
       - id: DateTime
-        description: "Calendar date with time component"
+        intent: "Calendar date with time component"
         inherits:
           format: datetime
         aliases:
@@ -208,13 +208,13 @@ taxonomy:
   # File — User-provided file uploads
   # =========================================================================
   - id: File
-    description: "A file provided by the user"
+    intent: "A file provided by the user"
     inherits:
       upload: true
     children:
 
       - id: Image
-        description: "Image file upload"
+        intent: "Image file upload"
         inherits:
           accept: "image/*"
           validation:
@@ -226,7 +226,7 @@ taxonomy:
           - avatar
 
       - id: Document
-        description: "Document file upload"
+        intent: "Document file upload"
         inherits:
           accept: ".pdf,.doc,.docx,.xls,.xlsx,.csv"
           validation:
@@ -240,11 +240,11 @@ taxonomy:
   # Structured — Composite or list values
   # =========================================================================
   - id: Structured
-    description: "Composite or list-based information"
+    intent: "Composite or list-based information"
     children:
 
       - id: TagList
-        description: "A collection of labels or keywords"
+        intent: "A collection of labels or keywords"
         inherits:
           multiple: true
           display: inline            # Show as compact chips/badges
@@ -254,7 +254,7 @@ taxonomy:
           - labels
 
       - id: KeyValue
-        description: "Key-value pair input"
+        intent: "Key-value pair input"
         inherits:
           composite: true
         aliases:
@@ -265,7 +265,7 @@ taxonomy:
   # Display — Read-only presentation of information
   # =========================================================================
   - id: Display
-    description: "Read-only presentation of data. Not editable by the user."
+    intent: "Read-only presentation of data. Not editable by the user."
     inherits:
       editable: false
       validation: []                 # No validation needed for display

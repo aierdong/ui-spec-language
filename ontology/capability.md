@@ -15,7 +15,7 @@ Section
                   ├─ provides → Action         (what the user can trigger)
                   ├─ produces → State          (what conditions arise)
                   ├─ obeys → Constraint        (what limits apply)
-                  ├─ triggers → Feedback       (what the system communicates)
+                  ├─ feedback → Feedback       (what the system communicates)
                   ├─ may-lead-to → Decision    (what branch happens next)
                   └─ consumes → Data           (what data it reads)
 ```
@@ -25,18 +25,18 @@ Section
 | Property | Type | Description |
 |----------|------|-------------|
 | `id` | identifier | Unique machine-readable name (e.g., `authentication`) |
-| `label` | string | Human-readable name (e.g., "Sign In") |
-| `description` | string | What the user can accomplish |
+| `intent` | string | What the user can accomplish |
 
 ## Optional Properties
 
 | Property | Type | Description |
 |----------|------|-------------|
+| `label` | string | Human-readable name (e.g., "Sign In") |
 | `requires` | Input[] | Inputs the user must provide |
 | `provides` | Action[] | Actions the user can trigger |
 | `produces` | State[] | States that can arise from this capability |
 | `obeys` | Constraint[] | Constraints that limit this capability |
-| `feeds-back` | Feedback[] | Feedback mechanisms available |
+| `feedback` | Feedback[] | Feedback mechanisms available |
 | `may-lead-to` | Decision[] | Branch decisions this capability can trigger |
 | `consumes` | Data[] | External data this capability reads |
 

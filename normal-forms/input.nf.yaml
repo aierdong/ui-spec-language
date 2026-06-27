@@ -6,7 +6,7 @@
 concept: Input
 ontology_ref: ontology/input.md
 taxonomy_ref: taxonomy/input.taxonomy.yaml
-description: "A piece of information the user provides to fulfill a Capability"
+intent: "A piece of information the user provides to fulfill a Capability"
 
 # ============================================================================
 # CANONICAL FORM

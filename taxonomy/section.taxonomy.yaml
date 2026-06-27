@@ -4,7 +4,7 @@
 
 concept: Section
 ontology_ref: ontology/section.md
-description: "A physical or logical partition of a Page that groups related Capabilities"
+intent: "A physical or logical partition of a Page that groups related Capabilities"
 
 taxonomy:
 
@@ -12,13 +12,13 @@ taxonomy:
   # Shell — Persistent application container sections
   # =========================================================================
   - id: Shell
-    description: "Persistent sections that frame the application across pages"
+    intent: "Persistent sections that frame the application across pages"
     inherits:
       persistent: true              # Present across most or all pages
     children:
 
       - id: NavigationHub
-        description: "Primary navigation sidebar or top bar with links and brand"
+        intent: "Primary navigation sidebar or top bar with links and brand"
         inherits:
           layout-pattern: vertical-stack
           zones: [top, middle, bottom]
@@ -30,7 +30,7 @@ taxonomy:
           - left-nav
 
       - id: GlobalHeader
-        description: "Top bar with app-wide controls"
+        intent: "Top bar with app-wide controls"
         inherits:
           layout-pattern: horizontal-strip
           contains:
@@ -43,7 +43,7 @@ taxonomy:
           - app-bar
 
       - id: GlobalFooter
-        description: "Bottom bar with copyright, legal links, app version"
+        intent: "Bottom bar with copyright, legal links, app version"
         inherits:
           layout-pattern: horizontal-strip
           priority: tertiary
@@ -56,11 +56,11 @@ taxonomy:
   # Content — Main content area sections
   # =========================================================================
   - id: Content
-    description: "Sections that contain the primary page content and Capabilities"
+    intent: "Sections that contain the primary page content and Capabilities"
     children:
 
       - id: CenteredForm
-        description: "Single focused task with centered layout"
+        intent: "Single focused task with centered layout"
         inherits:
           layout-pattern: centered-column
           max-width: narrow
@@ -71,7 +71,7 @@ taxonomy:
           - form-section
 
       - id: EntityList
-        description: "A list or grid of data records"
+        intent: "A list or grid of data records"
         inherits:
           layout-pattern: vertical-stack
           data:
@@ -83,7 +83,7 @@ taxonomy:
           - table-view
 
       - id: DetailPanel
-        description: "Detailed view or editor for a single selected record"
+        intent: "Detailed view or editor for a single selected record"
         inherits:
           layout-pattern: vertical-stack
           data:
@@ -95,7 +95,7 @@ taxonomy:
           - editor-panel
 
       - id: DashboardGrid
-        description: "Overview page with cards or widgets in a grid"
+        intent: "Overview page with cards or widgets in a grid"
         inherits:
           layout-pattern: grid
           data:
@@ -106,7 +106,7 @@ taxonomy:
           - overview
 
       - id: ActionBar
-        description: "Horizontal strip of actions for the current context"
+        intent: "Horizontal strip of actions for the current context"
         inherits:
           layout-pattern: horizontal-strip
           priority: secondary
@@ -117,7 +117,7 @@ taxonomy:
           - action-strip
 
       - id: FilterPanel
-        description: "Sidebar or collapsible area with filtering controls"
+        intent: "Sidebar or collapsible area with filtering controls"
         inherits:
           layout-pattern: vertical-stack
           priority: secondary
@@ -128,7 +128,7 @@ taxonomy:
           - refinement-panel
 
       - id: TabPanel
-        description: "Content split into tabs within the same section"
+        intent: "Content split into tabs within the same section"
         inherits:
           layout-pattern: vertical-stack
           zones: [tabs, content]
@@ -141,14 +141,14 @@ taxonomy:
   # Overlay — Floating sections above the main page
   # =========================================================================
   - id: Overlay
-    description: "Content displayed above the main page flow"
+    intent: "Content displayed above the main page flow"
     inherits:
       layout-pattern: overlay
       blocks-background: true       # Typically dims the background
     children:
 
       - id: FocusOverlay
-        description: "Focused task in a floating overlay with backdrop"
+        intent: "Focused task in a floating overlay with backdrop"
         inherits:
           dismissable: true         # Can be closed by clicking outside or pressing ESC
           zones: [header, body, footer]
@@ -163,7 +163,7 @@ taxonomy:
           - execution-history
 
       - id: SideOverlay
-        description: "Panel appearing from one edge of the viewport"
+        intent: "Panel appearing from one edge of the viewport"
         inherits:
           dismissable: true
           origin: right
@@ -174,7 +174,7 @@ taxonomy:
           - slide-panel
 
       - id: ContextualMenu
-        description: "Compact floating menu of context-sensitive actions"
+        intent: "Compact floating menu of context-sensitive actions"
         inherits:
           dismissable: true
           layout-pattern: vertical-stack
@@ -189,14 +189,14 @@ taxonomy:
   # Decorative — Non-interactive content sections
   # =========================================================================
   - id: Decorative
-    description: "Non-interactive sections for branding, marketing, or atmosphere"
+    intent: "Non-interactive sections for branding, marketing, or atmosphere"
     inherits:
       static: true
       priority: tertiary
     children:
 
       - id: MarketingPanel
-        description: "Branding, copy, illustrations, or testimonials (not interactive)"
+        intent: "Branding, copy, illustrations, or testimonials (not interactive)"
         inherits:
           layout-pattern: centered-column
         aliases:
@@ -206,7 +206,7 @@ taxonomy:
           - promotional
 
       - id: BrandIdentity
-        description: "Logo and application name display"
+        intent: "Logo and application name display"
         inherits:
           layout-pattern: horizontal-strip
         aliases:
@@ -215,7 +215,7 @@ taxonomy:
           - brand
 
       - id: EmptyState
-        description: "Placeholder section shown when a view has no data"
+        intent: "Placeholder section shown when a view has no data"
         inherits:
           layout-pattern: centered-column
           contains:

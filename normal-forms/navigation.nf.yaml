@@ -6,7 +6,7 @@
 concept: Navigation
 ontology_ref: ontology/navigation.md
 taxonomy_ref: taxonomy/navigation.taxonomy.yaml
-description: "A movement between Pages, Sections, or Capabilities within an application"
+intent: "A movement between Pages, Sections, or Capabilities within an application"
 
 # ============================================================================
 # CANONICAL FORM

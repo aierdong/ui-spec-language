@@ -6,7 +6,7 @@
 concept: Data
 ontology_ref: ontology/data.md
 taxonomy_ref: taxonomy/data.taxonomy.yaml
-description: "External or internal information that the UI consumes, displays, or mutates"
+intent: "External or internal information that the UI consumes, displays, or mutates"
 
 # ============================================================================
 # CANONICAL FORM

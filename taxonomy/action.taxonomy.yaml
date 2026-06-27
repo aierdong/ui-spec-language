@@ -11,7 +11,7 @@
 
 concept: Action
 ontology_ref: ontology/action.md
-description: "What the user can trigger within a Capability"
+intent: "What the user can trigger within a Capability"
 
 taxonomy:
 
@@ -19,7 +19,7 @@ taxonomy:
   # Submit — Finalize and send user-provided information to the system
   # =========================================================================
   - id: Submit
-    description: "Finalize and send user input to the system for processing"
+    intent: "Finalize and send user input to the system for processing"
     inherits:
       priority: primary
       blocking: true               # Submit blocks the UI during processing
@@ -41,7 +41,7 @@ taxonomy:
     children:
 
       - id: SubmitAuth
-        description: "Authenticate with provided credentials"
+        intent: "Authenticate with provided credentials"
         inherits:
           feedback:
             error:
@@ -53,7 +53,7 @@ taxonomy:
           - authenticate
 
       - id: SubmitForm
-        description: "Submit form data for processing (create or update)"
+        intent: "Submit form data for processing (create or update)"
         inherits:
           produces:
             - "State: Validation.Validating"
@@ -63,7 +63,7 @@ taxonomy:
           - apply
 
       - id: SubmitPayment
-        description: "Submit payment information for processing"
+        intent: "Submit payment information for processing"
         inherits:
           requires:
             - "Input: Numeric"      # payment amount
@@ -79,11 +79,11 @@ taxonomy:
   # CRUD — Create, Read, Update, Delete operations on data records
   # =========================================================================
   - id: CRUD
-    description: "Operations that create, read, update, or delete data records"
+    intent: "Operations that create, read, update, or delete data records"
     children:
 
       - id: Create
-        description: "Open a form to create a new record"
+        intent: "Open a form to create a new record"
         inherits:
           priority: primary
           opens: overlay             # Typically opens a dialog/modal
@@ -106,7 +106,7 @@ taxonomy:
           - create-record
 
       - id: Read
-        description: "View or expand record details without modifying data"
+        intent: "View or expand record details without modifying data"
         inherits:
           priority: tertiary
           modifies-data: false       # Read-only, no data mutation
@@ -119,7 +119,7 @@ taxonomy:
           - show-detail
 
       - id: Update
-        description: "Open a form to modify an existing record"
+        intent: "Open a form to modify an existing record"
         inherits:
           priority: secondary
           opens: overlay
@@ -143,7 +143,7 @@ taxonomy:
           - edit-project
 
       - id: Delete
-        description: "Permanently remove a record"
+        intent: "Permanently remove a record"
         inherits:
           priority: destructive
           requires: confirmation     # MUST show confirmation before executing
@@ -164,7 +164,7 @@ taxonomy:
           - delete-record
 
       - id: Clone
-        description: "Create a copy of an existing record"
+        intent: "Create a copy of an existing record"
         inherits:
           priority: secondary
           opens: overlay
@@ -182,13 +182,13 @@ taxonomy:
   # Navigate — Move between views, pages, or dismiss overlays
   # =========================================================================
   - id: Navigate
-    description: "Move the user to a different view or dismiss the current one"
+    intent: "Move the user to a different view or dismiss the current one"
     inherits:
       modifies-data: false
     children:
 
       - id: NavigateTo
-        description: "Go to another page or section of the application"
+        intent: "Go to another page or section of the application"
         inherits:
           priority: secondary
           method: push               # Preserves history, allows back-navigation
@@ -198,7 +198,7 @@ taxonomy:
           - open-page
 
       - id: Dismiss
-        description: "Close the current overlay or return to previous view"
+        intent: "Close the current overlay or return to previous view"
         inherits:
           priority: tertiary
           discards-changes: true     # Does not save unsaved input
@@ -209,7 +209,7 @@ taxonomy:
           - dismiss
 
       - id: ScrollTo
-        description: "Scroll to a specific position within the current view"
+        intent: "Scroll to a specific position within the current view"
         inherits:
           priority: tertiary
           method: scroll-to
@@ -221,14 +221,14 @@ taxonomy:
   # Toggle — Switch between binary or enumerated states
   # =========================================================================
   - id: Toggle
-    description: "Switch between states without submitting data"
+    intent: "Switch between states without submitting data"
     inherits:
       modifies-data: false
       instant: true                 # Takes effect immediately, no loading state
     children:
 
       - id: ToggleTheme
-        description: "Switch between visual presentations (light/dark mode)"
+        intent: "Switch between visual presentations (light/dark mode)"
         inherits:
           priority: tertiary
           scope: application         # Affects entire application
@@ -237,7 +237,7 @@ taxonomy:
           - switch-theme
 
       - id: ToggleSelection
-        description: "Select or deselect one or more items"
+        intent: "Select or deselect one or more items"
         inherits:
           priority: tertiary
           scope: section
@@ -247,7 +247,7 @@ taxonomy:
           - toggle-selection
 
       - id: ToggleExpand
-        description: "Expand or collapse detail content"
+        intent: "Expand or collapse detail content"
         inherits:
           priority: tertiary
           opens: inline
@@ -260,11 +260,11 @@ taxonomy:
   # System — Application-level operations
   # =========================================================================
   - id: System
-    description: "Application-level operations that affect the user session or environment"
+    intent: "Application-level operations that affect the user session or environment"
     children:
 
       - id: SignOut
-        description: "End the current user session"
+        intent: "End the current user session"
         inherits:
           priority: tertiary
           requires: confirmation     # Explicitly modified from Delete's pattern
@@ -276,7 +276,7 @@ taxonomy:
           - log-out
 
       - id: SignIn
-        description: "Begin authentication via external provider"
+        intent: "Begin authentication via external provider"
         inherits:
           priority: secondary
           opens: external            # Redirect to OAuth provider
@@ -285,7 +285,7 @@ taxonomy:
           - social-login
 
       - id: SwitchLanguage
-        description: "Change the application display language"
+        intent: "Change the application display language"
         inherits:
           priority: tertiary
           scope: application
@@ -297,7 +297,7 @@ taxonomy:
   # Export — Download or copy data from the system
   # =========================================================================
   - id: Export
-    description: "Extract data from the system in a portable format"
+    intent: "Extract data from the system in a portable format"
     inherits:
       priority: secondary
       produces:
@@ -312,7 +312,7 @@ taxonomy:
     children:
 
       - id: Download
-        description: "Download data as a file"
+        intent: "Download data as a file"
         inherits:
           triggers-download: true
         aliases:
@@ -321,7 +321,7 @@ taxonomy:
           - download-pdf
 
       - id: CopyToClipboard
-        description: "Copy data to the system clipboard"
+        intent: "Copy data to the system clipboard"
         inherits:
           instant: true
         aliases:
@@ -331,7 +331,7 @@ taxonomy:
   # Run — Execute a process or workflow
   # =========================================================================
   - id: Run
-    description: "Execute a process, task, or workflow"
+    intent: "Execute a process, task, or workflow"
     inherits:
       priority: primary
       blocking: true
@@ -357,7 +357,7 @@ taxonomy:
   # Search — Query and filter data
   # =========================================================================
   - id: Search
-    description: "Query the system for matching records"
+    intent: "Query the system for matching records"
     inherits:
       priority: primary
       produces:
