@@ -66,12 +66,11 @@ Each `.md` file follows this structure:
 
 ## Next Steps
 
-- Phase 3: Formalize Relationships
 - Phase 4: Design Canonical Schema (YAML structure)
 - Phase 5: Build Vocabulary Registry
 
 ---
 
 **Version**: 0.1.0-draft
-**Status**: Phase 1 — Vocabulary Definition + Phase 2 — Taxonomy Complete
-**Last Updated**: 2026-06-26
+**Status**: Phase 1 — Vocabulary Definition + Phase 2 — Taxonomy + Phase 3 — Relationships Complete
+**Last Updated**: 2026-06-27

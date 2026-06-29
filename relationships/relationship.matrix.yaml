@@ -1,0 +1,760 @@
+# Relationship Matrix
+# Source of truth for valid relationships between UISL ontology concepts.
+#
+# Rules:
+# - `relationship` is the canonical name Agents may emit.
+# - `aliases` may be accepted on read, but Agents must never emit them.
+# - `source` and `targets` name ontology concepts, not YAML paths.
+# - `cardinality` describes relationship count, not required properties.
+# - Required properties remain defined by normal-forms/required-property-matrix.yaml.
+
+version: 0.1.0-draft
+scope: ontology-relationships
+updated: 2026-06-27
+
+concepts:
+  - page
+  - section
+  - capability
+  - input
+  - action
+  - state
+  - feedback
+  - decision
+  - navigation
+  - data
+  - constraint
+
+relationship_categories:
+  structural:
+    description: Stable composition and application topology.
+    relationships: [contains, navigation-in, navigation-out]
+  dependency:
+    description: What a concept needs, reads, or binds to.
+    relationships: [requires, consumes, maps-to, sources-from]
+  flow:
+    description: User-triggered behavior, outcomes, branching, and movement.
+    relationships: [provides, triggers, produces, may-trigger, may-lead-to, explains, evaluates, resolves-to]
+  rule:
+    description: Persistent visibility, availability, validity, or access rules.
+    relationships: [obeys, guarded-by, applies-to]
+  navigation-context:
+    description: Navigation endpoints and context carried across movement.
+    relationships: [source, target, carry-state, carry-data]
+
+relationships:
+  # ---------------------------------------------------------------------------
+  # Structural relationships
+  # ---------------------------------------------------------------------------
+  - id: page-contains-section
+    category: structural
+    source: page
+    relationship: contains
+    targets: [section]
+    cardinality: 1..*
+    required: false
+    recommended: true
+    aliases: [has-sections, includes, composed-of]
+    inverse: belongs-to
+    meaning: A page is partitioned into one or more sections.
+    canonical_property: sections
+    rules:
+      - Page must not contain Capability directly.
+      - Section is the required semantic boundary between Page and Capability.
+
+  - id: page-guarded-by-constraint
+    category: rule
+    source: page
+    relationship: guarded-by
+    targets: [constraint]
+    cardinality: 0..*
+    required: false
+    aliases: [requires-auth, protected-by, access-controlled-by]
+    inverse: guards
+    meaning: Page access is gated by persistent rules.
+    canonical_property: guarded-by
+
+  - id: page-navigation-in
+    category: structural
+    source: page
+    relationship: navigation-in
+    targets: [navigation]
+    cardinality: 0..*
+    required: false
+    aliases: [incoming-navigation, inbound, reachable-by]
+    inverse: target
+    meaning: Navigation events that arrive at this page.
+    canonical_property: navigation-in
+
+  - id: page-navigation-out
+    category: structural
+    source: page
+    relationship: navigation-out
+    targets: [navigation]
+    cardinality: 0..*
+    required: false
+    aliases: [outgoing-navigation, outbound, leads-to]
+    inverse: source
+    meaning: Navigation events that leave this page.
+    canonical_property: navigation-out
+
+  - id: section-contains-capability
+    category: structural
+    source: section
+    relationship: contains
+    targets: [capability]
+    cardinality: 0..*
+    required: false
+    aliases: [groups, includes, has-capabilities]
+    inverse: belongs-to
+    meaning: A section groups user-facing capabilities.
+    canonical_property: contains
+    rules:
+      - Section arranges capabilities; it does not perform them.
+
+  - id: section-contains-section
+    category: structural
+    source: section
+    relationship: contains
+    targets: [section]
+    cardinality: 0..*
+    required: false
+    aliases: [has-child-sections, nests, partitions-into]
+    inverse: parent-section
+    meaning: A section may contain nested sections when spatial partitioning is hierarchical.
+    canonical_property: contains
+
+  - id: section-obeys-constraint
+    category: rule
+    source: section
+    relationship: obeys
+    targets: [constraint]
+    cardinality: 0..*
+    required: false
+    aliases: [visible-when, constrained-by, follows]
+    inverse: applies-to
+    meaning: Section visibility or availability follows persistent rules.
+    canonical_property: obeys
+
+  - id: section-receives-data
+    category: dependency
+    source: section
+    relationship: receives
+    targets: [data]
+    cardinality: 0..*
+    required: false
+    aliases: [displays, fed-by, presents]
+    inverse: feeds
+    meaning: A section receives data for presentation.
+    canonical_property: receives
+    generation: avoid-unless-needed
+    rules:
+      - Prefer Capability consumes Data when data enables user work.
+      - Use Section receives Data only for read-only presentation regions.
+
+  # ---------------------------------------------------------------------------
+  # Capability relationships
+  # ---------------------------------------------------------------------------
+  - id: capability-requires-input
+    category: dependency
+    source: capability
+    relationship: requires
+    targets: [input]
+    cardinality: 0..*
+    required: false
+    aliases: [needs, inputs, fields, dependencies]
+    inverse: required-by
+    meaning: Information the user must provide for the capability to work.
+    canonical_property: requires
+    rules:
+      - Use requires for user-provided information only.
+      - Do not use contains for Input.
+
+  - id: capability-provides-action
+    category: flow
+    source: capability
+    relationship: provides
+    targets: [action]
+    cardinality: 0..*
+    required: false
+    aliases: [offers, actions, operations, enables]
+    inverse: provided-by
+    meaning: Actions the user can trigger within the capability.
+    canonical_property: provides
+    rules:
+      - Do not describe actions as buttons or handlers.
+
+  - id: capability-produces-state
+    category: flow
+    source: capability
+    relationship: produces
+    targets: [state]
+    cardinality: 0..*
+    required: false
+    aliases: [results-in, yields, outcomes, states]
+    inverse: produced-by
+    meaning: UI conditions that can arise from this capability.
+    canonical_property: produces
+
+  - id: capability-feedback-feedback
+    category: flow
+    source: capability
+    relationship: feedback
+    targets: [feedback]
+    cardinality: 0..*
+    required: false
+    aliases: [messages, notifications, communicates]
+    inverse: belongs-to
+    meaning: User-facing communication available in this capability.
+    canonical_property: feedback
+
+  - id: capability-consumes-data
+    category: dependency
+    source: capability
+    relationship: consumes
+    targets: [data]
+    cardinality: 0..*
+    required: false
+    aliases: [reads, uses, fetches, depends-on]
+    inverse: consumed-by
+    meaning: Data read by this capability.
+    canonical_property: consumes
+
+  - id: capability-obeys-constraint
+    category: rule
+    source: capability
+    relationship: obeys
+    targets: [constraint]
+    cardinality: 0..*
+    required: false
+    aliases: [constrained-by, follows, limited-by]
+    inverse: applies-to
+    meaning: Persistent rules limiting the whole capability.
+    canonical_property: obeys
+
+  - id: capability-explains-decision
+    category: flow
+    source: capability
+    relationship: explains
+    targets: [decision]
+    cardinality: 0..*
+    required: false
+    aliases: [branches-through, has-flow, decisions]
+    inverse: explained-by
+    meaning: Branching logic inside the capability.
+    canonical_property: may-lead-to
+    rules:
+      - Use explains for decisions owned by the capability.
+      - Do not flatten branches into unrelated navigation entries.
+
+  # ---------------------------------------------------------------------------
+  # Input relationships
+  # ---------------------------------------------------------------------------
+  - id: input-obeys-constraint
+    category: rule
+    source: input
+    relationship: obeys
+    targets: [constraint]
+    cardinality: 0..*
+    required: false
+    aliases: [validation, validates-with, constrained-by, visible-when, enabled-when]
+    inverse: applies-to
+    meaning: Validation, visibility, or availability rules for an input.
+    canonical_property: validation
+
+  - id: input-maps-to-data
+    category: dependency
+    source: input
+    relationship: maps-to
+    targets: [data]
+    cardinality: 0..1
+    required: false
+    aliases: [binds-to, writes-to, field, model]
+    inverse: maps-to
+    meaning: Data field the input value binds to.
+    canonical_property: maps-to
+
+  - id: input-sources-from-data
+    category: dependency
+    source: input
+    relationship: sources-from
+    targets: [data]
+    cardinality: 0..1
+    required: false
+    aliases: [options-from, source, choices-from, default-from]
+    inverse: supplies
+    meaning: Data source for selectable values, defaults, or lookup choices.
+    canonical_property: source
+
+  # ---------------------------------------------------------------------------
+  # Action relationships
+  # ---------------------------------------------------------------------------
+  - id: action-triggers-state
+    category: flow
+    source: action
+    relationship: triggers
+    targets: [state]
+    cardinality: 0..*
+    required: false
+    aliases: [starts, initiates, sets-state, causes]
+    inverse: is-triggered-by
+    meaning: State that begins when the action is invoked.
+    canonical_property: triggers
+
+  - id: action-produces-feedback
+    category: flow
+    source: action
+    relationship: produces
+    targets: [feedback]
+    cardinality: 0..*
+    required: false
+    aliases: [shows, communicates, notifies, emits]
+    inverse: produced-by
+    meaning: User communication caused by the action.
+    canonical_property: produces
+
+  - id: action-obeys-constraint
+    category: rule
+    source: action
+    relationship: obeys
+    targets: [constraint]
+    cardinality: 0..*
+    required: false
+    aliases: [disabled-when, visible-when, available-when, constrained-by]
+    inverse: applies-to
+    meaning: Availability or visibility rules for the action.
+    canonical_property: obeys
+
+  - id: action-may-lead-to-decision
+    category: flow
+    source: action
+    relationship: may-lead-to
+    targets: [decision]
+    cardinality: 0..1
+    required: false
+    aliases: [branches-to, opens-decision, prompts]
+    inverse: triggered-by
+    meaning: Branch point after the action.
+    canonical_property: may-lead-to
+    rules:
+      - Use this when multiple next paths can result from the action.
+
+  - id: action-may-lead-to-navigation
+    category: flow
+    source: action
+    relationship: may-lead-to
+    targets: [navigation]
+    cardinality: 0..1
+    required: false
+    aliases: [navigates-to, goes-to, redirects-to]
+    inverse: initiated-by
+    meaning: Movement after the action.
+    canonical_property: navigates-to
+    rules:
+      - Use this only when no branch needs to be explained.
+      - If outcome-dependent movement exists, use Decision first.
+
+  - id: action-can-target-capability
+    category: flow
+    source: action
+    relationship: can-target
+    targets: [capability]
+    cardinality: 0..1
+    required: false
+    aliases: [target, affects, operates-on]
+    inverse: targeted-by
+    meaning: Capability affected by this action.
+    canonical_property: target
+
+  # ---------------------------------------------------------------------------
+  # State relationships
+  # ---------------------------------------------------------------------------
+  - id: state-is-triggered-by-action
+    category: flow
+    source: state
+    relationship: is-triggered-by
+    targets: [action]
+    cardinality: 0..*
+    required: false
+    aliases: [caused-by, started-by]
+    inverse: triggers
+    meaning: Action that causes this state.
+    canonical_property: source
+    generation: read-side-only
+    rules:
+      - Prefer Action triggers State when emitting canonical relationships.
+
+  - id: state-may-trigger-feedback
+    category: flow
+    source: state
+    relationship: may-trigger
+    targets: [feedback]
+    cardinality: 0..*
+    required: false
+    aliases: [shows, communicates, causes-feedback]
+    inverse: triggered-by
+    meaning: Feedback shown when a state occurs.
+    canonical_property: may-trigger
+
+  - id: state-may-lead-to-decision
+    category: flow
+    source: state
+    relationship: may-lead-to
+    targets: [decision]
+    cardinality: 0..1
+    required: false
+    aliases: [branches-to, evaluated-by]
+    inverse: evaluates
+    meaning: State-driven branching.
+    canonical_property: may-lead-to
+
+  - id: state-may-lead-to-navigation
+    category: flow
+    source: state
+    relationship: may-lead-to
+    targets: [navigation]
+    cardinality: 0..1
+    required: false
+    aliases: [auto-navigates, redirects]
+    inverse: triggered-by
+    meaning: State-driven movement.
+    canonical_property: may-lead-to
+    rules:
+      - Prefer Decision when multiple state outcomes exist.
+
+  - id: state-obeys-constraint
+    category: rule
+    source: state
+    relationship: obeys
+    targets: [constraint]
+    cardinality: 0..*
+    required: false
+    aliases: [visible-when, active-when, constrained-by]
+    inverse: applies-to
+    meaning: Persistent rules controlling when the state is active or shown.
+    canonical_property: obeys
+
+  # ---------------------------------------------------------------------------
+  # Feedback relationships
+  # ---------------------------------------------------------------------------
+  - id: feedback-triggered-by-state
+    category: flow
+    source: feedback
+    relationship: triggered-by
+    targets: [state]
+    cardinality: 0..*
+    required: false
+    aliases: [shown-when, caused-by, appears-on]
+    inverse: may-trigger
+    meaning: State that causes this feedback to appear.
+    canonical_property: triggered-by
+
+  - id: feedback-produced-by-action
+    category: flow
+    source: feedback
+    relationship: produced-by
+    targets: [action]
+    cardinality: 0..*
+    required: false
+    aliases: [from-action, after-action]
+    inverse: produces
+    meaning: Action that causes this feedback.
+    canonical_property: produced-by
+    generation: read-side-only
+    rules:
+      - Prefer Action produces Feedback when emitting canonical relationships.
+
+  - id: feedback-obeys-constraint
+    category: rule
+    source: feedback
+    relationship: obeys
+    targets: [constraint]
+    cardinality: 0..*
+    required: false
+    aliases: [visible-when, shown-when, constrained-by]
+    inverse: applies-to
+    meaning: Rules controlling when feedback is shown.
+    canonical_property: visible-when
+
+  - id: feedback-may-lead-to-decision
+    category: flow
+    source: feedback
+    relationship: may-lead-to
+    targets: [decision]
+    cardinality: 0..1
+    required: false
+    aliases: [offers-choice, prompts, branches-to]
+    inverse: triggered-by
+    meaning: Feedback offers a choice or next step.
+    canonical_property: action
+
+  # ---------------------------------------------------------------------------
+  # Decision relationships
+  # ---------------------------------------------------------------------------
+  - id: decision-evaluates-state
+    category: flow
+    source: decision
+    relationship: evaluates
+    targets: [state]
+    cardinality: 0..*
+    required: false
+    aliases: [checks, reads-state, depends-on-state]
+    inverse: evaluated-by
+    meaning: State informing branch selection.
+    canonical_property: evaluates
+
+  - id: decision-evaluates-data
+    category: flow
+    source: decision
+    relationship: evaluates
+    targets: [data]
+    cardinality: 0..*
+    required: false
+    aliases: [checks, reads-data, depends-on-data]
+    inverse: evaluated-by
+    meaning: Data informing branch selection.
+    canonical_property: evaluates
+
+  - id: decision-evaluates-constraint
+    category: flow
+    source: decision
+    relationship: evaluates
+    targets: [constraint]
+    cardinality: 0..*
+    required: false
+    aliases: [checks-rule, considers-rule, depends-on-constraint]
+    inverse: evaluated-by
+    meaning: Rules considered by branch selection.
+    canonical_property: evaluates
+
+  - id: decision-resolves-to-navigation
+    category: flow
+    source: decision
+    relationship: resolves-to
+    targets: [navigation]
+    cardinality: 0..*
+    required: false
+    aliases: [then-navigate, leads-to-navigation, chooses-navigation]
+    inverse: resolved-by
+    meaning: Branch outcome is movement.
+    canonical_property: branches.resolves-to
+
+  - id: decision-resolves-to-state
+    category: flow
+    source: decision
+    relationship: resolves-to
+    targets: [state]
+    cardinality: 0..*
+    required: false
+    aliases: [sets-state, leads-to-state, chooses-state]
+    inverse: resolved-by
+    meaning: Branch outcome is a UI condition.
+    canonical_property: branches.resolves-to
+
+  - id: decision-resolves-to-action
+    category: flow
+    source: decision
+    relationship: resolves-to
+    targets: [action]
+    cardinality: 0..*
+    required: false
+    aliases: [then-action, invokes-action, chooses-action]
+    inverse: resolved-by
+    meaning: Branch outcome is another user/system action.
+    canonical_property: branches.resolves-to
+
+  - id: decision-resolves-to-feedback
+    category: flow
+    source: decision
+    relationship: resolves-to
+    targets: [feedback]
+    cardinality: 0..*
+    required: false
+    aliases: [then-feedback, shows-feedback, chooses-feedback]
+    inverse: resolved-by
+    meaning: Branch outcome is user communication.
+    canonical_property: branches.resolves-to
+
+  # ---------------------------------------------------------------------------
+  # Navigation relationships
+  # ---------------------------------------------------------------------------
+  - id: navigation-source
+    category: navigation-context
+    source: navigation
+    relationship: source
+    targets: [page, section, capability]
+    cardinality: 0..1
+    required: false
+    aliases: [from, origin, starts-at]
+    inverse: navigation-out
+    meaning: Where movement starts.
+    canonical_property: source
+
+  - id: navigation-target
+    category: navigation-context
+    source: navigation
+    relationship: target
+    targets: [page, section, capability, external]
+    cardinality: 1..1
+    required: true
+    aliases: [to, destination, href, route, path, url]
+    inverse: navigation-in
+    meaning: Where movement arrives.
+    canonical_property: target
+    rules:
+      - Internal targets must use concept.id references.
+      - External targets may be URLs.
+      - Routes are not valid internal targets.
+
+  - id: navigation-carry-state
+    category: navigation-context
+    source: navigation
+    relationship: carry-state
+    targets: [state]
+    cardinality: 0..*
+    required: false
+    aliases: [preserve-state, keep-state, pass-state]
+    inverse: carried-by
+    meaning: State preserved across movement.
+    canonical_property: carry-state
+
+  - id: navigation-carry-data
+    category: navigation-context
+    source: navigation
+    relationship: carry-data
+    targets: [data]
+    cardinality: 0..*
+    required: false
+    aliases: [pass-data, transfer-data, payload, params]
+    inverse: carried-by
+    meaning: Data context passed with movement.
+    canonical_property: carry-data
+
+  # ---------------------------------------------------------------------------
+  # Data relationships
+  # ---------------------------------------------------------------------------
+  - id: data-feeds-section
+    category: dependency
+    source: data
+    relationship: feeds
+    targets: [section]
+    cardinality: 0..*
+    required: false
+    aliases: [displayed-by, presented-in, supplies]
+    inverse: receives
+    meaning: Sections that present this data.
+    canonical_property: feeds
+
+  - id: data-maps-to-input
+    category: dependency
+    source: data
+    relationship: maps-to
+    targets: [input]
+    cardinality: 0..*
+    required: false
+    aliases: [bound-to, writes-through, supplies-input]
+    inverse: maps-to
+    meaning: Inputs bound to this data.
+    canonical_property: maps-to
+    generation: read-side-only
+    rules:
+      - Prefer Input maps-to Data when emitting canonical relationships.
+
+  - id: data-affects-state
+    category: dependency
+    source: data
+    relationship: affects
+    targets: [state]
+    cardinality: 0..*
+    required: false
+    aliases: [causes-state, determines-state, influences]
+    inverse: affected-by
+    meaning: Data values affect UI conditions.
+    canonical_property: affects
+
+  - id: data-affects-constraint
+    category: dependency
+    source: data
+    relationship: affects
+    targets: [constraint]
+    cardinality: 0..*
+    required: false
+    aliases: [drives-rule, determines-rule, influences]
+    inverse: affected-by
+    meaning: Data values affect persistent rules.
+    canonical_property: affects
+
+  - id: data-affects-decision
+    category: dependency
+    source: data
+    relationship: affects
+    targets: [decision]
+    cardinality: 0..*
+    required: false
+    aliases: [drives-branch, determines-branch, influences]
+    inverse: evaluates
+    meaning: Data values affect branch selection.
+    canonical_property: affects
+    generation: read-side-only
+    rules:
+      - Prefer Decision evaluates Data when emitting canonical relationships.
+
+  # ---------------------------------------------------------------------------
+  # Constraint relationships
+  # ---------------------------------------------------------------------------
+  - id: constraint-applies-to-target
+    category: rule
+    source: constraint
+    relationship: applies-to
+    targets: [input, action, state, capability, section, page, feedback]
+    cardinality: 1..*
+    required: false
+    recommended: true
+    aliases: [targets, constrains, governs]
+    inverse: obeys
+    meaning: Targets governed by this persistent rule.
+    canonical_property: applies-to
+    generation: read-side-only
+    rules:
+      - Prefer Target obeys Constraint when emitting canonical relationships.
+      - Constraint must not resolve to Navigation.
+
+forbidden_relationships:
+  - source: page
+    relationship: contains
+    target: capability
+    reason: Capability must live inside Section.
+  - source: capability
+    relationship: contains
+    target: input
+    reason: Capability requires Input; it does not contain it.
+  - source: capability
+    relationship: contains
+    target: action
+    reason: Capability provides Action; it does not contain it.
+  - source: constraint
+    relationship: resolves-to
+    target: navigation
+    reason: Constraint is a persistent rule; Decision handles branching and movement.
+  - source: state
+    relationship: renders
+    target: feedback
+    reason: Rendering is implementation. Use State may-trigger Feedback.
+  - source: action
+    relationship: calls
+    target: api
+    reason: API calls are implementation details outside UISL ontology.
+  - source: navigation
+    relationship: target
+    target: route
+    reason: Internal navigation targets semantic concepts; routes are implementation details.
+
+agent_instruction: |
+  When generating relationships:
+  1. Emit only canonical relationship names from this matrix.
+  2. Preserve canonical direction whenever possible.
+  3. Use inverse relationships only for reading or explanatory prose.
+  4. Never connect concepts to components, DOM nodes, CSS properties, routes, handlers, or API calls.
+  5. Use Decision for branching; use Constraint for persistent rules.
+  6. Use Navigation for movement; use Action for user intent.
+  7. Use State for conditions; use Feedback for communication about conditions.

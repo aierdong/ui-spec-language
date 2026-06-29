@@ -256,7 +256,9 @@ PrimaryAction
 
 ---
 
-# Phase 3：定义 Relationship
+# Phase 3：定义 Relationship ✅ 已完成
+
+> **详见 [`relationships/`](relationships/) 目录**
 
 这是我觉得最关键的一步。
 不要设计字段，而是设计关系。例如：
@@ -286,6 +288,27 @@ Capability
 ```
 
 以后 YAML 就不会乱。
+
+### Phase 3 产出
+
+| # | 文件 | 内容 |
+|---|------|------|
+| 1 | `relationships/README.md` | Relationship 设计原则、关系图、关系分类、方向性、基数、示例与反例 |
+| 2 | `relationships/relationship.matrix.yaml` | 机器可读的关系矩阵：source、relationship、target、cardinality、aliases、forbidden relationships |
+
+Relationship 的作用不是替代 Normal Forms，而是定义 Agent 推理时允许连接哪些概念：
+
+```
+Page contains Section
+Section contains Capability
+Capability requires Input
+Capability provides Action
+Action triggers State
+Decision resolves-to Navigation
+Constraint applies-to Action
+```
+
+Phase 4 的 Canonical Schema 应该从这张关系矩阵推导字段，而不是凭空设计字段。
 
 ---
 

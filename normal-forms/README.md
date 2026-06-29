@@ -381,8 +381,7 @@ false-friends:
 
 ## Next Steps
 
-- Phase 3: Define formal Relationships between concepts
-- Phase 4: Design Canonical Schema (YAML structure conforming to NFs)
+- Phase 4: Design Canonical Schema (YAML structure conforming to NFs and Relationship Matrix)
 - Phase 5: Build Vocabulary Registry (enforce NFs at registry entry)
 
 ---
