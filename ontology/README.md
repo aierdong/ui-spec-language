@@ -23,25 +23,26 @@ These concepts are platform-independent, semantic, and designed for Agentic Codi
 
 ```
 Page
-  └─ contains → Section
-                  └─ contains → Capability
+  ├─ contains → Section
+  ├─ navigation-in → Navigation
+  └─ navigation-out → Navigation
+                  ├─ contains → Capability
+                  ├─ sections → Section
+                  └─ obeys → Constraint
                                   ├─ requires → Input
-                                  │              └─ obeys → Constraint
+                                  │              └─ validation → Constraint
                                   ├─ provides → Action
                                   │              ├─ triggers → State
                                   │              └─ obeys → Constraint
                                   ├─ produces → State
-                                  │              └─ may-lead-to → Navigation
                                   ├─ feedback → Feedback
                                   ├─ consumes → Data
-                                  ├─ explains → Decision
-                                  │              ├─ evaluates → State
-                                  │              └─ resolves-to → Navigation
+                                  ├─ may-lead-to → Decision
+                                  │              ├─ evaluates → State/Data/Constraint
+                                  │              └─ resolves-to → Navigation/State/Action/Feedback/Page
                                   └─ obeys → Constraint
 
-                         ┌─ source ──┐
-Navigation connects Pages into an application map.
-                         └─ target ──┘
+Navigation connects Pages into an application map through source/target relationships.
 ```
 
 ## Design Principles (from Phase 0)

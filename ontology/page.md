@@ -4,7 +4,7 @@
 A single screen in the application's navigation map — the smallest complete unit visible to the user at one time.
 A Page answers the question: **"What screen is the user looking at right now?"**
 
-A Page is the root container of the UI Spec. It is the target of Navigation events and the source of
+A Page is classified by generic Page taxonomy roles (EntryPoint, Workspace, Detail, Settings, FlowStep, ErrorRecovery), but concrete pages remain application-defined. A Page is the root container of the UI Spec. It is the target of Navigation events and the source of
 further Navigation. It is NOT a route, NOT a URL pattern, NOT a component — it is a semantic unit
 of the user's experience. The same Page may appear at different routes (e.g., `/projects/:id` and
 `/projects/:id?tab=history` are the same Page).
@@ -15,8 +15,8 @@ of the user's experience. The same Page may appear at different routes (e.g., `/
 Application
   └─ maps-to → Page
                   ├─ contains → Section        (what regions make up this screen)
-                  ├─ in-navigation → Navigation (how the user gets to this page)
-                  └─ out-navigation → Navigation (where the user can go from here)
+                  ├─ navigation-in → Navigation (how the user gets to this page)
+                  └─ navigation-out → Navigation (where the user can go from here)
 
 Navigation
   └─ target → Page        (Pages are the destinations of navigation)

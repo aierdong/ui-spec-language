@@ -1,10 +1,11 @@
 # Page Normal Form
 # Canonical representation + equivalence mappings for the Page concept.
 # Concept reference: ontology/page.md
-# Taxonomy reference: taxonomy/ (Page has no taxonomy — root-level concept)
+# Taxonomy reference: taxonomy/page.taxonomy.yaml
 
 concept: Page
 ontology_ref: ontology/page.md
+taxonomy_ref: taxonomy/page.taxonomy.yaml
 intent: "A single screen in the application's navigation map"
 
 # ============================================================================
@@ -18,17 +19,13 @@ canonical-form:
   page:
     id: string              # Unique application-wide identifier (e.g., "login", "home")
     label: string           # Human-readable name (e.g., "Sign In")
-    intent: string?         # High-level purpose (e.g., "entry-point", "workspace")
+    purpose: string?        # High-level purpose (e.g., "entry-point", "workspace")
     layout: PageLayout?     # Semantic page layout (sidebar-shell | split-screen | centered-column | full-canvas | master-detail | stacked)
     requires-auth: boolean?  # Whether authentication is required
-    guarded-by:             # Constraints that gate access
-      - constraint: ConstraintRef
-    sections:               # Sections that partition this page
-      - section: SectionRef  # → see section.nf.yaml
-    navigation-in:          # How users arrive at this page
-      - navigation: NavigationRef
-    navigation-out:         # Where users can go from here
-      - navigation: NavigationRef
+    guarded-by: ConstraintRef[]?      # Constraints that gate access
+    sections: SectionRef[]?           # Sections that partition this page
+    navigation-in: NavigationRef[]?   # How users arrive at this page
+    navigation-out: NavigationRef[]?  # Where users can go from here
 
 # ============================================================================
 # CANONICAL PROPERTY NAMES
@@ -39,7 +36,7 @@ canonical-form:
 property-canonical-names:
   id: { aliases: [name, key, page-id, route-name] }
   label: { aliases: [title, heading, display-name, page-title] }
-  intent: { aliases: [purpose, role, function, page-purpose] }
+  purpose: { aliases: [intent, role, function, page-purpose] }
   layout: { aliases: [layout-type, page-layout, template] }
   requires-auth: { aliases: [auth-required, protected, authenticated-only, private] }
   guarded-by: { aliases: [access-control, permissions, guards, restricted-by] }
@@ -137,8 +134,8 @@ false-friends:
 
 agent-instruction: |
   When generating a Page in UISL:
-  1. Use ONLY the canonical property names (id, label, intent, layout, etc.)
-  2. NEVER emit aliases (name, route, component, screen, protected)
-  3. Map all incoming route/path/component references to canonical page.id
+  1. Use ONLY the canonical property names (id, label, purpose, layout, etc.)
+  2. NEVER emit aliases (name, route, component, screen, protected, intent)
+  3. Map all incoming route/path/component references to canonical page.id and Page taxonomy roles
   4. A page with `layout: centered-column` and `requires-auth: false` containing an authentication capability → this is a login page
   5. Pages are targets of Navigation events; define `navigation-out` for where users go from here

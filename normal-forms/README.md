@@ -2,27 +2,9 @@
 
 ## Purpose
 
-Many Agents fail not because they cannot write YAML, but because **the same semantic intent can be expressed in many different YAML shapes**. An Agent that encounters any of these three forms:
+A Normal Form (NF) defines the one canonical representation for each semantic entity in UISL. Agents may read alternative expressions, but must emit only canonical forms.
 
-```yaml
-# Form A
-role: form-field
-type: email
-
-# Form B
-field:
-  kind: email
-
-# Form C
-credential:
-  type: email
-```
-
-...must recognize them as **semantically equivalent** — all three describe a credential input for an email address. Without a Normal Form, the Agent sees three different patterns and cannot reliably map, validate, or compose them.
-
-> **A Normal Form (NF) defines the ONE canonical YAML structure for each semantic entity. All equivalent expressions are mapped to this single form.**
-
-This is borrowed from database normalization theory: just as 3NF eliminates update anomalies, UISL Normal Forms eliminate **Agent reasoning anomalies**.
+Normal Forms eliminate Agent reasoning anomalies: the same semantic intent should not be expressible in multiple output shapes.
 
 ---
 
@@ -30,102 +12,13 @@ This is borrowed from database normalization theory: just as 3NF eliminates upda
 
 ### Rule 1: One Canonical Form per Semantic Entity
 
-For every concept in the Ontology, there is exactly ONE canonical YAML shape.
+Every ontology concept has one `.nf.yaml` file and one canonical output shape. Equivalent input expressions are read-side only and must normalize to that shape.
 
-| Semantic Entity | Canonical Expression |
-|----------------|---------------------|
-| An email credential input | `input: { id: email, kind: credential, label: "Email" }` |
-| A primary submit action | `action: { id: submit, intent: submit, priority: primary }` |
-| An authentication capability | `capability: { id: authentication, requires: [email, password], provides: [submit] }` |
+### Rule 2: Required Properties Come From the Matrix
 
-The canonical form is the **only form** an Agent should output when generating UISL. The Agent may READ alternative forms (input parsing), but must WRITE only canonical forms (output generation).
+[`required-property-matrix.yaml`](required-property-matrix.yaml) is the single source of truth for required properties.
 
-### Rule 2: Equivalence Mapping (Read-side Tolerance)
-
-For every canonical form, the NF document lists **equivalent alternative expressions** that map to it. This allows the Agent to consume diverse inputs without confusion.
-
-```
-Non-canonical:  role: form-field, type: email
-              → maps to: input.kind = credential, input.id = email
-
-Non-canonical:  field: { kind: email }
-              → maps to: input.kind = credential, input.id = email
-
-Non-canonical:  credential: { type: email }
-              → maps to: input.kind = credential, input.id = email
-```
-
-### Rule 3: Property Names are Canonical
-
-There is ONE canonical property name for each attribute. Aliases are documented but never generated.
-
-| Canonical Property | Aliases (never generate) |
-|-------------------|--------------------------|
-| `kind` | `type`, `role`, `category`, `input-type`, `field-type` |
-| `id` | `name`, `key`, `ref`, `identifier` |
-| `intent` | `purpose`, `goal`, `action-type`, `behavior`, `description`, `summary` |
-| `priority` | `importance`, `level`, `emphasis`, `weight` |
-| `label` | `title`, `display`, `text`, `caption` |
-| `requires` | `needs`, `inputs`, `dependencies`, `fields` |
-| `provides` | `offers`, `actions`, `operations` |
-| `produces` | `results-in`, `yields`, `creates`, `outcomes` |
-| `obeys` | `follows`, `constrained-by`, `rules`, `validations` |
-| `consumes` | `reads`, `uses`, `fetches`, `depends-on` |
-
-### Rule 4: Structure is Canonical
-
-The nesting / containment structure is fixed. No flattening, no reordering of semantic layers.
-
-```
-✅ Canonical:
-capability:
-  id: authentication
-  requires:
-    - input:
-        id: email
-        kind: credential
-
-❌ Non-canonical (flattened):
-capability: authentication
-requires-email: credential    # Missing Input wrapper
-
-❌ Non-canonical (inverted):
-inputs:
-  - email: credential         # Input is not the outer key
-capability: authentication
-```
-
-### Rule 5: Value Types are Canonical
-
-For enumerations, there is exactly ONE valid string form.
-
-| Concept | Canonical Values | Aliases |
-|---------|-----------------|---------|
-| `input.kind` | `credential`, `text`, `long-text`, `number`, `boolean`, `single-select`, `multi-select`, `date`, `datetime`, `duration`, `file`, `tag-list` | `email` → `credential`; `textarea` → `long-text`; `dropdown` → `single-select`; `checkbox` → `boolean` |
-| `action.priority` | `primary`, `secondary`, `tertiary`, `destructive` | `main` → `primary`; `danger` → `destructive` |
-| `state` | `idle`, `loading`, `empty`, `error`, `success`, `processing` | `fetching` → `loading`; `failed` → `error` |
-
-### Rule 6: Ref Types Use Concept.ID Format
-
-When a property references another concept, use the format `{concept}.{id}`:
-
-```yaml
-# Format: {concept}.{id}
-input.email          # references Input with id "email"
-action.submit        # references Action with id "submit"
-state.loading        # references State with id "loading"
-constraint.required  # references Constraint with id "required"
-input.user-mail      # compound id uses hyphen
-```
-
-**Case-insensitive**: `input.email`, `Input.Email`, `INPUT.EMAIL` are all valid.
-**Hyphen for compound words in id**: `input.user-mail`, not `input.userMail` or `input.user_mail`.
-
-**Valid concepts**: `input`, `action`, `state`, `constraint`, `data`, `feedback`, `decision`, `navigation`, `section`, `capability`, `page`
-
-### Rule 7: Required Properties
-
-Required properties are defined in [`required-property-matrix.yaml`](required-property-matrix.yaml). This matrix is the source of truth for both Ontology and Normal Forms.
+NF canonical forms mark every non-required field with `?` in the type/comment notation. Do **not** add `?` to the emitted property name.
 
 | Concept | Required Properties |
 |---------|---------------------|
@@ -141,11 +34,149 @@ Required properties are defined in [`required-property-matrix.yaml`](required-pr
 | Decision | `id`, `intent`, `branches` |
 | Data | `id`, `source` |
 
-### Rule 8: Shared Enum Types
+### Rule 3: Property Names Are Canonical
 
-Some enum types are shared across concepts. Their canonical values are defined here and referenced by individual NF files.
+Aliases are documented for read-side normalization only. Agents must never emit aliases.
 
-#### Priority
+| Canonical Property | Aliases (never generate) |
+|-------------------|--------------------------|
+| `kind` | `type`, `role`, `category`, `input-type`, `field-type` |
+| `id` | `name`, `key`, `ref`, `identifier` |
+| `intent` | `purpose`, `goal`, `action-type`, `behavior`, `description`, `summary` |
+| `purpose` | `intent`, `role`, `function`, `page-purpose` — Page only |
+| `priority` | `importance`, `level`, `emphasis`, `weight` |
+| `label` | `title`, `display`, `text`, `caption` |
+| `requires` | `needs`, `inputs`, `dependencies`, `fields` |
+| `provides` | `offers`, `actions`, `operations` |
+| `produces` | `results-in`, `yields`, `creates`, `outcomes` |
+| `obeys` | `follows`, `constrained-by`, `rules`, `validations` |
+| `consumes` | `reads`, `uses`, `fetches`, `depends-on` |
+
+### Rule 4: Reference Shapes Are Layered
+
+UISL uses two reference shapes. Do not mix them in the same position.
+
+#### Local Spec References
+
+Local/spec references use lowercase `concept.id`:
+
+```yaml
+page.login
+section.credential-entry
+capability.authentication
+input.email
+action.submit
+state.loading
+constraint.email-format
+feedback.auth-failed
+navigation.go-to-home
+data.projects
+```
+
+Use these inside Normal Forms and canonical UISL specs.
+
+#### Taxonomy References
+
+Taxonomy references use full taxonomy paths:
+
+```yaml
+State: Lifecycle.Loading
+Action: CRUD.Delete
+Section: Overlay.FocusOverlay
+Page: EntryPoint
+```
+
+Use these inside taxonomy files or when explicitly referring to taxonomy nodes.
+
+### Rule 5: Definition vs Reference
+
+Define entities as complete objects where they are declared. Reference already-defined entities by `concept.id`.
+
+```yaml
+inputs:
+  - id: email
+    kind: credential
+    label: "Email"
+    validation:
+      - constraint.email-format
+
+capabilities:
+  - id: authentication
+    intent: "user verifies identity"
+    requires:
+      - input.email
+    provides:
+      - action.submit
+```
+
+Do not inline partial objects in reference positions.
+
+### Rule 6: Value Types Are Canonical
+
+For enumerations, there is exactly one canonical value. If an alias can map to more than one canonical value, it is ambiguous and must require context rather than auto-normalizing.
+
+### Rule 7: Alias Policy
+
+- Aliases are read-only normalization hints.
+- Agents must never emit aliases.
+- An alias must resolve to one canonical value within its local concept/property context.
+- If context is insufficient, the expression is ambiguous and must not auto-map.
+- Ambiguous aliases should be documented as false friends or context-required mappings.
+
+### Rule 8: Conditions Are Declarative
+
+Condition syntax is canonical — no JS expressions, React patterns, or implementation code.
+
+```text
+State: Category.Leaf is active
+data-id.field == value
+input-id is empty
+input-id is not empty
+value != expected
+value in [a, b, c]
+value not in [a, b, c]
+value matches pattern-id
+value does not match pattern-id
+expr1 AND expr2
+expr1 OR expr2
+value < N
+```
+
+Examples:
+
+- `State: Lifecycle.Processing is active`
+- `data.items is empty`
+- `input.email is empty`
+- `data.user-role != admin`
+- `data.dialog-mode in [edit, clone] AND data.user-role == admin`
+
+### Rule 9: Validation Uses Constraints
+
+Input validation is canonicalized through `Constraint` entities. Inputs reference constraints; they do not inline validation fragments.
+
+```yaml
+input:
+  id: email
+  kind: credential
+  label: "Email"
+  validation:
+    - constraint.email-format
+    - constraint.email-required
+```
+
+Non-canonical inputs like HTML `required`, `min`, `max`, `pattern`, or schema-library validators normalize to Constraint records first.
+
+### Rule 10: Layout Belongs Only to Page and Section
+
+- Page may use `layout`.
+- Section may use `layout-pattern`.
+- Capability must not carry layout. A Capability describes what the user can accomplish, not where or how it is spatially arranged.
+
+---
+
+## Shared Enum Types
+
+### Priority
 
 Used by: `action`, `section`, `decision`
 
@@ -156,7 +187,7 @@ Used by: `action`, `section`, `decision`
 | `tertiary` | `minor`, `subtle`, `peripheral`, `low-emphasis`, `footnote` |
 | `destructive` | `danger`, `critical`, `harmful`, `delete`, `remove` |
 
-#### Severity
+### Severity
 
 Used by: `constraint`, `feedback`
 
@@ -167,184 +198,106 @@ Used by: `constraint`, `feedback`
 | `info` | `neutral`, `blue`, `note`, `informational`, `notice`, `hint` |
 | `success` | `ok`, `done`, `positive`, `green`, `pass` |
 
-#### Condition
+---
 
-Used by: `constraint`, `input`, `section`, `decision`
+## Canonical Relationship Table
 
-Condition syntax is canonical — no JS expressions, no React patterns:
-
-```
-State: Category.Leaf == value     # State check
-data-id.field == value            # Data check
-input-id is empty                 # Input check
-expression != value               # Negation
-value in [a, b, c]               # Membership
-expr1 AND expr2                   # Compound AND
-expr1 OR expr2                    # Compound OR
-value < N                         # Comparison (<, >, <=, >=)
-```
-
-Examples:
-- `State: Lifecycle.Processing is active`
-- `items.length == 0`
-- `user-role != admin`
-- `dialog-mode in [edit, clone] AND user-role == admin`
+| Source | Relationship | Target |
+|--------|--------------|--------|
+| Page | contains / sections | Section |
+| Page | navigation-in | Navigation |
+| Page | navigation-out | Navigation |
+| Section | contains | Capability |
+| Section | sections | Section |
+| Capability | requires | Input |
+| Capability | provides | Action |
+| Capability | produces | State |
+| Capability | obeys | Constraint |
+| Capability | feedback | Feedback |
+| Capability | consumes | Data |
+| Capability | may-lead-to | Decision |
+| Action | triggers | State |
+| Action | produces | Feedback |
+| Action | may-lead-to | Decision / Navigation |
+| Decision | evaluates | State / Data / Constraint |
+| Decision | resolves-to | Navigation / State / Action / Feedback / Page |
+| Navigation | target | Page / Section / Capability / External URL |
+| Input | validation | Constraint |
+| Data | maps-to | Input |
+| Data | feeds | Section |
 
 ---
 
-## Equivalence Mapping Reference
+## Example: Canonical Auth Page
 
-### Input Equivalences
-
-| Non-Canonical Expression | Canonical Form | Resolution Rule |
-|--------------------------|----------------|-----------------|
-| `type: email` | `kind: credential` | `email` maps to credential Input by Taxonomy: Input → Credential → Email |
-| `field: email` | `input: { kind: credential }` | `field` is alias for `input`; `email` maps to credential |
-| `input-type: password` | `kind: credential`, `sensitive: true` | `password` maps to credential; inherently sensitive |
-| `component: Checkbox` | `kind: boolean` | Widget name → InputKind mapping |
-| `widget: dropdown` | `kind: single-select` | Widget name → InputKind mapping |
-| `role: form-control` | *(no equivalence)* | Too generic; requires additional context |
-
-### Action Equivalences
-
-| Non-Canonical Expression | Canonical Form | Resolution Rule |
-|--------------------------|----------------|-----------------|
-| `component: Button, variant: primary` | `priority: primary` | Button variant → Action priority |
-| `onClick: handleSubmit` | `intent: submit` | Event handler name → Action intent |
-| `type: submit` (in HTML context) | `intent: submit, priority: primary` | HTML button type → Action intent |
-| `role: destructive-action` | `priority: destructive` | Role description → Action priority |
-| `button: Save` | `intent: submit, label: "Save"` | Button label + context → Action intent |
-
-### Capability Equivalences
-
-| Non-Canonical Expression | Canonical Form | Resolution Rule |
-|--------------------------|----------------|-----------------|
-| `page-type: login` | `capability: { id: authentication }` | Page type → primary Capability |
-| `feature: sign-in` | `capability: { id: authentication }` | Feature name → Taxonomy alias match |
-| `screen: LoginScreen` | `page: { id: login, capability: authentication }` | Screen name → Page + Capability |
-| `section: auth-form` | `section: { id: credential-entry, contains: authentication }` | Section name → Section taxonomy + Capability |
-
-### State Equivalences
-
-| Non-Canonical Expression | Canonical Form | Resolution Rule |
-|--------------------------|----------------|-----------------|
-| `isLoading: true` | `state: loading` | Boolean flag → State name |
-| `hasError: true` | `state: error` | Error flag → State name |
-| `isEmpty: true` | `state: empty` | Empty flag → State name |
-| `showSpinner: true` | *(not a State — this is Feedback.Progress)* | Visual description → Feedback concept |
-
----
-
-## Agent Decision Tree
-
-When an Agent receives ambiguous input, it resolves to canonical form using this decision tree:
-
-```
-1. PARSE: Extract all key-value pairs
-   ↓
-2. CLASSIFY: For each value, check Taxonomy aliases
-   Example: "email" → Input.Credential.Email → kind: credential
-   ↓
-3. STRUCTURE: Map flattened keys to canonical nesting
-   Example: "requires-email" → capability.requires[input(id=email, kind=credential)]
-   ↓
-4. VALIDATE: Check against NF rules
-   Example: credential + sensitive:true → valid; text → must not have sensitive:true
-   ↓
-5. OUTPUT: Emit only canonical form
-```
-
-### Example: Agent resolves ambiguous auth page spec
-
-**Input** (ambiguous, from a human prompt):
-```yaml
-page: login
-fields:
-  - type: email
-  - name: password, input-type: password
-  - role: checkbox, label: Remember me
-actions:
-  - text: Sign In, variant: primary, type: submit
-  - text: Cancel, variant: secondary
-```
-
-**Resolution steps**:
-```
-Step 2 — CLASSIFY:
-  "email" → Taxonomy: Input.Credential.Email → kind: credential
-  "password" → Taxonomy: Input.Credential.Password → kind: credential, sensitive: true
-  "checkbox" → Taxonomy: Input.Selection.Boolean → kind: boolean
-
-Step 3 — STRUCTURE:
-  "fields" → canonical: capability.requires → Input[]
-  "actions" → canonical: capability.provides → Action[]
-  "page: login" → canonical: capability.id = authentication (Taxonomy alias match)
-
-Step 4 — VALIDATE:
-  credential + sensitive:true → ✓ (Password is sensitive)
-  Remember me → boolean → default: false → ✓
-  Sign In → intent: submit, priority: primary → ✓
-  Cancel → intent: dismiss, priority: secondary → ✓
-```
-
-**Output** (canonical):
 ```yaml
 page:
   id: login
   label: "Sign In"
+  purpose: "entry-point for identity verification"
+  layout: centered-column
   sections:
-    - id: credential-entry
-      capabilities:
-        - id: authentication
-          requires:
-            - input:
-                id: email
-                kind: credential
-                label: "Email"
-                validation:
-                  - format: email
-            - input:
-                id: password
-                kind: credential
-                label: "Password"
-                sensitive: true
-                validation:
-                  - min-length: 8
-            - input:
-                id: remember-me
-                kind: boolean
-                label: "Remember me"
-                default: false
-          provides:
-            - action:
-                id: submit
-                intent: submit
-                priority: primary
-                label: "Sign In"
-            - action:
-                id: cancel
-                intent: dismiss
-                priority: secondary
-                label: "Cancel"
-          produces:
-            - state: loading
-            - state: success
-            - state: error
+    - section.credential-entry
+
+sections:
+  - id: credential-entry
+    contains:
+      - capability.authentication
+
+capabilities:
+  - id: authentication
+    intent: "user provides credentials to verify identity"
+    requires:
+      - input.email
+      - input.password
+    provides:
+      - action.submit
+    produces:
+      - state.loading
+      - state.success
+      - state.error
+
+inputs:
+  - id: email
+    kind: credential
+    label: "Email"
+    validation:
+      - constraint.email-format
+  - id: password
+    kind: credential
+    label: "Password"
+    sensitive: true
+    validation:
+      - constraint.password-min-length
+
+actions:
+  - id: submit
+    intent: submit
+    priority: primary
+    label: "Sign In"
+
+constraints:
+  - id: email-format
+    condition: "input.email does not match email-pattern"
+    applies-to: validity
+    severity: error
+  - id: password-min-length
+    condition: "input.password.length < 8"
+    applies-to: validity
+    severity: error
 ```
 
 ---
 
-## Non-Equivalence: When NOT to map
-
-Some expressions look similar but are NOT semantically equivalent. These are **false friends** that the Agent must distinguish:
+## Non-Equivalence: When NOT to Map
 
 | Expression A | Expression B | Why NOT equivalent |
 |-------------|-------------|-------------------|
 | `input: { kind: text }` | `input: { kind: long-text }` | Short text vs multi-line — different interaction model |
-| `action: { intent: dismiss }` | `action: { intent: cancel }` | Dismiss = close overlay; Cancel = abandon input (may discard data) |
-| `state: loading` | `state: processing` | Loading = fetching data; Processing = executing action. Different blocking rules. |
-| `capability: { id: search }` | `action: { intent: search }` | Search-as-capability contains the full search UX; search-as-action is the trigger event. Not interchangeable. |
-| `section: { layout-pattern: overlay }` | `section: { layout-pattern: centered-column }` | Different spatial intents; cannot auto-convert. |
+| `action: { intent: dismiss }` | `action: { intent: cancel }` | Dismiss = close overlay; Cancel = abandon input |
+| `state: loading` | `feedback: { kind: progress }` | Loading is the condition; progress is communication about it |
+| `capability.search` | `action.search` | Search-as-capability is the complete UX; search-as-action is the trigger |
+| `section: { layout-pattern: overlay }` | `page: { layout: centered-column }` | Section and Page have distinct layout scopes |
 
 ---
 
@@ -354,25 +307,23 @@ Some expressions look similar but are NOT semantically equivalent. These are **f
 |------------|-------|
 | Directory | `normal-forms/` |
 | Naming | `<concept>.nf.yaml` |
-| Purpose | One file per ontology concept, defining its canonical form + equivalence mappings |
+| Purpose | One file per ontology concept, defining canonical form + read-side equivalence mappings |
 
 Each `.nf.yaml` follows this structure:
 
 ```yaml
 concept: <ConceptName>
 canonical-form:
-  # The ONE valid YAML shape for this concept
-  <property>: <canonical key name>
-  ...
+  <concept>:
+    <required-property>: <Type>
+    <optional-property>: <Type?>
 
 equivalences:
-  # Alternative expressions that map to this canonical form
   - non-canonical: <expression>
     maps-to: <canonical mapping>
     resolution: <how to resolve>
 
 false-friends:
-  # Expressions that look similar but are NOT equivalent
   - expression: <looks-like>
     not-equivalent-because: <reason>
 ```
@@ -388,4 +339,4 @@ false-friends:
 
 **Version**: 0.1.0-draft
 **Status**: Phase 2.5 — Normal Forms Defined
-**Last Updated**: 2026-06-26
+**Last Updated**: 2026-06-27

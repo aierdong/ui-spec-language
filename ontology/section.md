@@ -13,8 +13,8 @@ is that it groups Capabilities into a coherent unit.
 ```
 Page
   └─ contains → Section
-                  ├─ may-contain → Capability
-                  ├─ may-contain → Section       (nested sections)
+                  ├─ contains → Capability
+                  ├─ sections → Section       (nested sections)
                   └─ obeys → Constraint
 ```
 
@@ -30,6 +30,7 @@ Page
 |----------|------|-------------|
 | `label` | string | Human-readable name (e.g., "Navigation Hub", "Main Workspace") |
 | `contains` | Capability[] | Capabilities grouped within this section |
+| `sections` | Section[] | Nested Sections when spatial partitioning is hierarchical |
 | `layout-pattern` | LayoutPattern | Semantic layout intent (e.g., `centered-column`, `sidebar-shell`, `split-screen`, `vertical-stack`, `grid`) |
 | `zones` | Zone[] | Named sub-areas within the section (e.g., `top`, `middle`, `bottom`) |
 | `static` | boolean | Whether the section's content is non-interactive decoration (e.g., marketing copy) |
@@ -79,7 +80,7 @@ These are **NOT** Sections — they belong to other concepts:
 
 ## Nested Sections
 
-A Section may contain child Sections when the spatial partition is hierarchical:
+A Section may contain child Sections through the `sections` property when the spatial partition is hierarchical. The `contains` property is reserved for Capability references:
 
 ```
 Section: workspace

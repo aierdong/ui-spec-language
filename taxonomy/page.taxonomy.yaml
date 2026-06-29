@@ -1,0 +1,73 @@
+# Page Taxonomy
+# Defines generic page roles and inherited page-level defaults.
+# Concept reference: ontology/page.md
+#
+# Page taxonomy is intentionally generic: it classifies page roles, not concrete
+# application pages, routes, or URLs. Concrete pages remain application-defined.
+
+concept: Page
+ontology_ref: ontology/page.md
+purpose: "Generic page roles used to infer page-level defaults"
+
+taxonomy:
+  - id: EntryPoint
+    purpose: "A page that starts, resumes, or recovers a user journey"
+    inherits:
+      requires-auth: false
+      layout: centered-column
+    aliases:
+      - entry
+      - start
+      - landing
+      - login
+      - sign-in
+
+  - id: Workspace
+    purpose: "An authenticated page where users perform core product work"
+    inherits:
+      requires-auth: true
+      layout: sidebar-shell
+    aliases:
+      - dashboard
+      - home
+      - workspace
+      - console
+
+  - id: Detail
+    purpose: "A page focused on viewing or editing one selected entity"
+    inherits:
+      requires-auth: true
+      layout: master-detail
+    aliases:
+      - detail
+      - detail-page
+      - editor
+
+  - id: Settings
+    purpose: "A page for configuring user, application, or system preferences"
+    inherits:
+      requires-auth: true
+      layout: sidebar-shell
+    aliases:
+      - settings
+      - preferences
+      - configuration
+
+  - id: FlowStep
+    purpose: "A page representing one step in a multi-step user flow"
+    inherits:
+      layout: centered-column
+    aliases:
+      - wizard-step
+      - onboarding-step
+      - checkout-step
+
+  - id: ErrorRecovery
+    purpose: "A page that helps the user recover from an error or blocked path"
+    inherits:
+      layout: centered-column
+    aliases:
+      - not-found
+      - forbidden
+      - error-page
+      - recovery
