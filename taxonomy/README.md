@@ -163,6 +163,14 @@ Page taxonomy exists only for generic page roles and inherited page-level defaul
 
 Concrete pages remain application-defined in specs and registries. Page taxonomy helps Agents infer defaults such as `layout` and `requires-auth` from a generic role, not from a route name.
 
+## Rule: Required Properties on Category Nodes
+
+Category nodes (non-leaf nodes) are classification abstractions, not spec instances.
+They do not need to carry Required Properties (e.g., `target` for Navigation, `condition` for Constraint, `kind` for Feedback, `source` for Data).
+Required Properties are enforced at instantiation time when the taxonomy node is used in a spec.
+
+Category nodes exist to define inheritance and classification rules. Their children (leaf nodes or spec instances) carry the required properties needed for generation.
+
 ## Taxonomy-Specific Properties
 
 Some properties in taxonomy files are not defined in the corresponding ontology. These are **taxonomy-level extensions** — behavioral hints that help the Agent make rendering decisions during code generation. They do NOT change the ontology definition; they add implementation guidance within the inheritance chain.
@@ -176,6 +184,9 @@ Some properties in taxonomy files are not defined in the corresponding ontology.
 | `requires: [...]` | Action | Inputs this Action type typically needs |
 | `preserves-state: bool` | Navigation | Back-button returns to previous page state |
 | `blocks-background: bool` | Navigation | Overlay blocks interaction with background |
+| `discards-changes: bool` | Action, Navigation | Whether the action/navigation discards unsaved changes |
+| `clears-session: bool` | Action, Navigation | Whether the action/navigation terminates the user session |
+| `animated: bool` | Navigation | Whether the navigation transition is animated |
 
 ## Dual-Identity Concepts: Capability vs Action
 

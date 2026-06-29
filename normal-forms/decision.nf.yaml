@@ -31,7 +31,7 @@ canonical-form:
 
 property-canonical-names:
   id: { aliases: [name, key, decision-id, branch-point, flow] }
-  intent: { aliases: [description, summary, what, purpose, question, about] }
+  intent: { aliases: [description, summary, what, question, about, goal, objective, aim] }
   trigger: { aliases: [initiated-by, caused-by, source, type] }
   evaluates: { aliases: [checks, depends-on, considers, looks-at, inputs] }
   branches: { aliases: [paths, outcomes, options, cases, routes, results] }
@@ -97,13 +97,13 @@ equivalences:
           - data.user-profile
         branches:
           - condition: "data.user-role == admin"
-            resolves-to: page.admin-dashboard
+            resolves-to: navigation.go-to-admin-dashboard
             label: "Admin user"
           - condition: "data.user-role == editor"
-            resolves-to: page.editor-dashboard
+            resolves-to: navigation.go-to-editor-dashboard
             label: "Editor user"
         default-branch:
-          resolves-to: page.viewer-dashboard
+          resolves-to: navigation.go-to-viewer-dashboard
           label: "Default viewer"
     resolution:
       - "switch → decision with branches"

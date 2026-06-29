@@ -24,6 +24,7 @@ canonical-form:
     scope: Scope?           # page | section | application | session
     maps-to: InputRef[]?    # Inputs that bind to this data
     feeds: SectionRef[]?    # Sections that display this data
+    affects: Reference[]?   # State, Constraint, or Decision entities affected by this data
 
 # ============================================================================
 # CANONICAL PROPERTY NAMES
@@ -40,6 +41,7 @@ property-canonical-names:
   scope: { aliases: [visibility, lifetime, range, sharing] }
   maps-to: { aliases: [binds-to, feeds-input, input-binding, field-mapping] }
   feeds: { aliases: [displayed-in, shown-in, rendered-by, used-by] }
+  affects: { aliases: [impacts, influences, triggers, drives, determines] }
 
 # ============================================================================
 # CANONICAL SOURCE VALUES

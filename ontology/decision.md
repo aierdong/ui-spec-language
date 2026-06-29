@@ -14,11 +14,13 @@ flow* — what paths exist and what conditions trigger each path.
 ```
 Capability
   └─ explains → Decision
-                  ├─ evaluates → State         (what state(s) inform this decision)
+                  ├─ evaluates → State          (what state(s) inform this decision)
                   ├─ evaluates → Data           (what data informs this decision)
+                  ├─ evaluates → Constraint     (what rules apply)
                   ├─ resolves-to → Navigation   (where the user goes)
                   ├─ resolves-to → State        (what state results)
-                  └─ evaluates → Constraint     (what rules apply)
+                  ├─ resolves-to → Action       (what action results)
+                  └─ resolves-to → Feedback     (what feedback is shown)
 ```
 
 ## Required Properties

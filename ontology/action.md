@@ -37,8 +37,9 @@ Capability
 | `target` | Reference | Which Capability or UI element this action affects |
 | `sets-mode` | string | When this action changes the mode of a target (e.g., `create`, `edit`, `clone`) |
 | `navigates-to` | Page reference | Where the user goes after this action |
-| `disabled-when` | Condition | When this action cannot be triggered |
-| `visible-when` | Condition | When this action is hidden |
+| `obeys` | Constraint[] | Constraints that control action availability |
+| `disabled-when` | Condition | Syntactic sugar: inline condition for `obeys: [constraint.*]` |
+| `visible-when` | Condition | Syntactic sugar: inline condition for `obeys: [constraint.*]` |
 | `confirmation` | string | Message shown before executing a destructive action |
 | `keyboard-shortcut` | string | Platform-independent shortcut hint |
 

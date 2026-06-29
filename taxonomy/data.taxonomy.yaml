@@ -48,7 +48,6 @@ taxonomy:
           source: api
           type: collection
           mutable: true
-          scope: page
         aliases:
           - "project-table-configurations"
           - editable-table
@@ -210,7 +209,7 @@ taxonomy:
   # =========================================================================
   # Navigation — Data from URL parameters
   # =========================================================================
-  - id: Navigation
+  - id: NavigationData
     intent: "Data extracted from the current URL or navigation event"
     children:
 

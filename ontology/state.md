@@ -16,7 +16,8 @@ Capability
                   ├─ is-triggered-by → Action
                   ├─ may-lead-to → Decision
                   ├─ may-lead-to → Navigation
-                  └─ may-trigger → Feedback
+                  ├─ may-trigger → Feedback
+                  └─ obeys → Constraint
 ```
 
 ## Required Properties
@@ -33,7 +34,8 @@ Capability
 | `values` | string[] | Enumerated possible values (e.g., `[success, failed, partial-failed]`) |
 | `default` | string | The initial value when the page or component mounts |
 | `persistent` | boolean | Whether this state survives page navigation (default: `false`) |
-| `visible-when` | Condition | When this state is shown to the user |
+| `obeys` | Constraint[] | Constraints on this state |
+| `visible-when` | Condition | Syntactic sugar: inline condition for `obeys: [constraint.*]` |
 | `message` | string | Human-readable description of the state for the user |
 | `source` | string | What triggers this state (`internal`, `external`, `user-action`) |
 

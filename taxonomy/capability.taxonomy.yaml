@@ -30,7 +30,7 @@ taxonomy:
             - "State: Lifecycle.Loading"
             - "State: Outcome.Success"
             - "State: Outcome.Error"
-          feedback:
+          communicates:
             error:
               kind: error-message
               severity: error
@@ -57,7 +57,7 @@ taxonomy:
             - "State: Lifecycle.Loading"
             - "State: Outcome.Success"
             - "State: Outcome.Error"
-          feedback:
+          communicates:
             error:
               kind: error-message
               severity: error
@@ -95,10 +95,10 @@ taxonomy:
             - "Action: CRUD.Read"
             - "Action: CRUD.Update"
             - "Action: CRUD.Delete"
-          data:
+          consumes:
             source: collection
             mutable: true
-          states:
+          produces:
             - "State: Selection.Unselected"
             - "State: Lifecycle.Loading"
         aliases:
@@ -116,7 +116,7 @@ taxonomy:
           produces:
             - "State: Lifecycle.Loading"
             - "State: Outcome.Success"
-          feedback:
+          communicates:
             empty: "Feedback: Information.EmptyState"
         aliases:
           - search
@@ -161,7 +161,7 @@ taxonomy:
             - "State: Lifecycle.Processing"
             - "State: Outcome.Success"
             - "State: Outcome.Error"
-          feedback:
+          communicates:
             progress: "Feedback: Information.Progress"
         aliases:
           - upload
@@ -190,7 +190,7 @@ taxonomy:
         inherits:
           produces:
             - "State: Visibility.Visible"
-          feedback:
+          communicates:
             kind: "Feedback: Background.BackgroundNotification"
         aliases:
           - notification
@@ -232,7 +232,7 @@ taxonomy:
             - "Action: System.SwitchLanguage"
           scope: application
           instant: true
-          data:
+          consumes:
             source: local-storage
             mutable: true
         aliases:
@@ -267,7 +267,7 @@ taxonomy:
             - "State: Outcome.Success"
             - "State: Outcome.PartialSuccess"
             - "State: Outcome.Error"
-          feedback:
+          communicates:
             progress: "Feedback: Information.Progress"
         aliases:
           - run-project

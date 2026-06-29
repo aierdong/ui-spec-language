@@ -15,7 +15,8 @@ Page
   └─ contains → Section
                   ├─ contains → Capability
                   ├─ sections → Section       (nested sections)
-                  └─ obeys → Constraint
+                  ├─ obeys → Constraint
+                  └─ receives → Data
 ```
 
 ## Required Properties
@@ -31,6 +32,8 @@ Page
 | `label` | string | Human-readable name (e.g., "Navigation Hub", "Main Workspace") |
 | `contains` | Capability[] | Capabilities grouped within this section |
 | `sections` | Section[] | Nested Sections when spatial partitioning is hierarchical |
+| `obeys` | Constraint[] | Constraints that control section visibility or availability |
+| `receives` | Data[] | Read-only data this section displays (prefer Capability consumes Data for interactive data) |
 | `layout-pattern` | LayoutPattern | Semantic layout intent (e.g., `centered-column`, `sidebar-shell`, `split-screen`, `vertical-stack`, `grid`) |
 | `zones` | Zone[] | Named sub-areas within the section (e.g., `top`, `middle`, `bottom`) |
 | `static` | boolean | Whether the section's content is non-interactive decoration (e.g., marketing copy) |

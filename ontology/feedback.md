@@ -12,11 +12,11 @@ a modal, or a spoken alert — the *message* is the same.
 ## Relationship
 
 ```
-Action
-  └─ produces → Feedback
-                  ├─ triggered-by → State       (what state causes this feedback)
-                  ├─ obeys → Constraint         (when feedback is shown)
-                  └─ may-lead-to → Decision     (what the user does after seeing feedback)
+Feedback
+  ├─ triggered-by → State       (what state causes this feedback)
+  ├─ produced-by → Action       (what action causes this feedback)
+  ├─ obeys → Constraint         (when feedback is shown)
+  └─ may-lead-to → Decision     (what the user does after seeing feedback)
 ```
 
 ## Required Properties
@@ -35,7 +35,8 @@ Action
 | `duration` | Duration | How long feedback persists (`transient`, `sticky`, `persistent`) |
 | `placement` | Placement | Where feedback appears (`inline`, `page-top`, `overlay`, `target-proximity`) |
 | `action` | Action | An optional action the user can take in response |
-| `visible-when` | Condition | When this feedback is shown |
+| `obeys` | Constraint[] | Constraints controlling when feedback is shown |
+| `visible-when` | Condition | Syntactic sugar: inline condition for `obeys: [constraint.*]` |
 
 ## Feedback Kinds
 

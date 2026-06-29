@@ -267,7 +267,7 @@ taxonomy:
         intent: "End the current user session"
         inherits:
           priority: tertiary
-          requires: confirmation     # Explicitly modified from Delete's pattern
+          confirmation: "Are you sure you want to sign out?"  # Explicit confirmation before sign-out
           scope: application
           clears-session: true
         aliases:

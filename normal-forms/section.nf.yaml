@@ -23,6 +23,7 @@ canonical-form:
     static: boolean?         # Non-interactive decoration (marketing, branding)
     priority: Priority?      # Visual emphasis: primary | secondary | tertiary
     obeys: ConstraintRef[]?  # Constraints
+    receives: DataRef[]?     # Read-only data this section displays
 
 # ============================================================================
 # CANONICAL PROPERTY NAMES
@@ -38,6 +39,7 @@ property-canonical-names:
   static: { aliases: [decorative, non-interactive, display-only, read-only-section] }
   priority: { aliases: [emphasis, importance, visual-weight, prominence] }
   obeys: { aliases: [constraints, rules, conditions, guards] }
+  receives: { aliases: [data, incoming, displays, shows, presents] }
 
 # ============================================================================
 # CANONICAL LAYOUT PATTERNS

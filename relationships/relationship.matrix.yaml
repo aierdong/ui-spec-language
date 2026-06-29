@@ -34,7 +34,7 @@ relationship_categories:
     relationships: [requires, consumes, maps-to, sources-from]
   flow:
     description: User-triggered behavior, outcomes, branching, and movement.
-    relationships: [provides, triggers, produces, may-trigger, may-lead-to, explains, evaluates, resolves-to]
+    relationships: [provides, triggers, produces, communicates, may-trigger, may-lead-to, explains, evaluates, resolves-to]
   rule:
     description: Persistent visibility, availability, validity, or access rules.
     relationships: [obeys, guarded-by, applies-to]
@@ -122,7 +122,7 @@ relationships:
     aliases: [has-child-sections, nests, partitions-into]
     inverse: parent-section
     meaning: A section may contain nested sections when spatial partitioning is hierarchical.
-    canonical_property: contains
+    canonical_property: sections
 
   - id: section-obeys-constraint
     category: rule
@@ -196,17 +196,17 @@ relationships:
     meaning: UI conditions that can arise from this capability.
     canonical_property: produces
 
-  - id: capability-feedback-feedback
+  - id: capability-communicates-feedback
     category: flow
     source: capability
-    relationship: feedback
+    relationship: communicates
     targets: [feedback]
     cardinality: 0..*
     required: false
-    aliases: [messages, notifications, communicates]
-    inverse: belongs-to
+    aliases: [messages, notifications, feedback, outputs-feedback]
+    inverse: communicated-by
     meaning: User-facing communication available in this capability.
-    canonical_property: feedback
+    canonical_property: communicates
 
   - id: capability-consumes-data
     category: dependency
@@ -416,7 +416,7 @@ relationships:
     cardinality: 0..1
     required: false
     aliases: [auto-navigates, redirects]
-    inverse: triggered-by
+    inverse: driven-by
     meaning: State-driven movement.
     canonical_property: may-lead-to
     rules:
@@ -484,9 +484,9 @@ relationships:
     cardinality: 0..1
     required: false
     aliases: [offers-choice, prompts, branches-to]
-    inverse: triggered-by
+    inverse: prompted-by
     meaning: Feedback offers a choice or next step.
-    canonical_property: action
+    canonical_property: may-lead-to
 
   # ---------------------------------------------------------------------------
   # Decision relationships
@@ -645,6 +645,19 @@ relationships:
     meaning: Sections that present this data.
     canonical_property: feeds
 
+  - id: data-supplies-input
+    category: dependency
+    source: data
+    relationship: supplies
+    targets: [input]
+    cardinality: 0..*
+    required: false
+    aliases: [sources, provides-choices, provides-defaults]
+    inverse: sources-from
+    meaning: Input values sourced from this data.
+    canonical_property: supplies
+    generation: read-side-only
+
   - id: data-maps-to-input
     category: dependency
     source: data
@@ -732,14 +745,34 @@ forbidden_relationships:
     relationship: contains
     target: action
     reason: Capability provides Action; it does not contain it.
+  - source: capability
+    relationship: contains
+    target: feedback
+    reason: Capability communicates Feedback; it does not contain it.
   - source: constraint
     relationship: resolves-to
     target: navigation
     reason: Constraint is a persistent rule; Decision handles branching and movement.
+  - source: constraint
+    relationship: resolves-to
+    target: state
+    reason: Constraint is a persistent rule; Decision handles branching.
+  - source: constraint
+    relationship: resolves-to
+    target: action
+    reason: Constraint is a persistent rule; Decision handles branching.
+  - source: constraint
+    relationship: resolves-to
+    target: feedback
+    reason: Constraint is a persistent rule; Decision handles branching.
   - source: state
     relationship: renders
     target: feedback
     reason: Rendering is implementation. Use State may-trigger Feedback.
+  - source: state
+    relationship: communicates
+    target: feedback
+    reason: State may-trigger Feedback; communicates is reserved for Capability.
   - source: action
     relationship: calls
     target: api
@@ -748,6 +781,10 @@ forbidden_relationships:
     relationship: target
     target: route
     reason: Internal navigation targets semantic concepts; routes are implementation details.
+  - source: navigation
+    relationship: source
+    target: external
+    reason: Navigation always originates from internal concepts.
 
 agent_instruction: |
   When generating relationships:

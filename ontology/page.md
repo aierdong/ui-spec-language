@@ -53,8 +53,8 @@ Page: home
 | `navigation-in` | Navigation[] | How users arrive at this page |
 | `navigation-out` | Navigation[] | Where users can go from this page |
 | `layout` | PageLayout | The overall page-level layout pattern (semantic, not CSS) |
-| `requires-auth` | boolean | Whether the user must be authenticated to access this page |
-| `guarded-by` | Constraint[] | Constraints that gate access to this page |
+| `requires-auth` | boolean | Whether the user must be authenticated to access this page. Syntactic sugar: `requires-auth: true` ≡ `guarded-by: [constraint.auth-required]` |
+| `guarded-by` | Constraint[] | Constraints that gate access to this page. Preferred form for auth and permission rules |
 
 ## Page Layouts (semantic, not CSS)
 

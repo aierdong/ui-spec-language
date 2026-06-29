@@ -13,9 +13,9 @@ The same Data can feed multiple Capabilities and Sections across the application
 ```
 Capability
   └─ consumes → Data
-                  ├─ sourced-from → (API | Database | File | URL | LocalStorage | Parent)
-                  ├─ maps-to → Input  (what requirements bind to this data)
-                  └─ feeds → Section         (what sections display this data)
+                  ├─ maps-to → Input          (what inputs bind to this data)
+                  ├─ feeds → Section          (what sections display this data)
+                  └─ affects → State | Constraint | Decision
 ```
 
 ## Required Properties

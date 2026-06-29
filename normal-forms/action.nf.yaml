@@ -21,7 +21,11 @@ canonical-form:
     trigger: TriggerSource? # Where the action originates (row-body | row-action | inline | toolbar | context-menu | global)
     target: Reference?      # Which Capability or element this action affects
     sets-mode: string?      # Mode change (e.g., "create", "edit", "clone")
-    navigates-to: PageRef?  # Where the user goes after this action
+    navigates-to: NavigationRef?  # Where the user goes after this action
+    triggers: StateRef[]?        # States that can arise from this action
+    produces: FeedbackRef[]?     # Feedback this action produces
+    obeys: ConstraintRef[]?      # Constraints on this action's availability
+    may-lead-to: DecisionRef[]?  # Decisions this action may trigger
     disabled-when: Condition?  # When this action cannot be triggered
     visible-when: Condition?   # When this action is hidden
     confirmation: string?      # Message before destructive action
@@ -33,13 +37,17 @@ canonical-form:
 
 property-canonical-names:
   id: { aliases: [name, key, action-id, ref] }
-  intent: { aliases: [purpose, goal, action-type, behavior, verb, operation, role] }
+  intent: { aliases: [goal, objective, aim, action-type, behavior, verb, operation, role] }
   priority: { aliases: [importance, emphasis, level, weight, variant, style] }
   label: { aliases: [text, title, display, caption, button-text] }
   trigger: { aliases: [source, origin, location, placement, from] }
   target: { aliases: [affects, operates-on, applies-to, scope] }
   sets-mode: { aliases: [mode, context, opens-in, sets] }
   navigates-to: { aliases: [goes-to, redirects-to, links-to, href, route, path] }
+  triggers: { aliases: [starts, initiates, sets-state, causes, results-in-state] }
+  produces: { aliases: [shows, communicates, notifies, emits, feedback] }
+  obeys: { aliases: [constrained-by, follows, limited-by, rules] }
+  may-lead-to: { aliases: [branches-to, opens-decision, prompts, decisions] }
   disabled-when: { aliases: [disabled, inactive-when, unavailable-when, not-allowed-when] }
   visible-when: { aliases: [show-when, hidden-when, display-when] }
   confirmation: { aliases: [confirm-message, are-you-sure, warn-before, verify] }
@@ -50,7 +58,7 @@ property-canonical-names:
 # ============================================================================
 
 intent-values:
-  submit:     { aliases: [save, apply, send, post, create, update, confirm, execute, finish, done, ok, sign-in, login, authenticate] }
+  submit:     { aliases: [save, apply, send, post, create, update, confirm, execute, finish, done, ok] }
   cancel:     { aliases: [back, abort, stop, discard, revert, reset, clear] }
   dismiss:    { aliases: [close, hide, x, escape, minimize] }
   delete:     { aliases: [remove, destroy, erase, trash, archive] }
@@ -222,3 +230,4 @@ agent-instruction: |
   5. Icon-only buttons → priority: tertiary, trigger depends on location
   6. Resolve intent from handler names: handleSubmit→submit, handleDelete→delete, handleClose→dismiss
   7. Keyboard shortcuts must be platform-independent strings, not key codes
+  8. If `disabled-when` or `visible-when` is present, normalize to `obeys: [constraint.auto-generated-id]` with the condition moved into the Constraint's `condition` property

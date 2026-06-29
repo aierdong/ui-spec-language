@@ -316,8 +316,8 @@ Capability
 
 | # | 文件 | 内容 |
 |---|------|------|
-| 1 | `relationships/README.md` | Relationship 设计原则、关系图、关系分类、方向性、基数、示例与反例 |
-| 2 | `relationships/relationship.matrix.yaml` | 机器可读的关系矩阵：source、relationship、target、cardinality、aliases、forbidden relationships |
+| 1 | `relationships/README.md` | Relationship 设计原则、关系图、关系分类、方向性、基数、Generation 规则、示例与反例 |
+| 2 | `relationships/relationship.matrix.yaml` | 机器可读的关系矩阵：source、relationship、target、cardinality、aliases、generation、forbidden relationships |
 
 Relationship 的作用不是替代 Normal Forms，而是定义 Agent 推理时允许连接哪些概念：
 

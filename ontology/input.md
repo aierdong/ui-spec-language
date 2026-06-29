@@ -17,7 +17,8 @@ every interface begins with user input. The `kind` property distinguishes what *
 Capability
   └─ requires → Input
                   ├─ obeys → Constraint      (validation, conditional visibility)
-                  └─ belongs-to → Data        (what data source it maps to)
+                  ├─ maps-to → Data          (what data field it binds to)
+                  └─ sources-from → Data     (where selectable values come from)
 ```
 
 ## Required Properties

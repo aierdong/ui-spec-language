@@ -21,8 +21,8 @@ canonical-form:
     provides: ActionRef[]?  # Actions the user can trigger
     produces: StateRef[]?   # States that can arise
     obeys: ConstraintRef[]? # Constraints that limit this capability
-    feedback: FeedbackRef[]? # Feedback mechanisms
-    may-lead-to: DecisionRef[]? # Branch decisions
+    communicates: FeedbackRef[]? # Feedback mechanisms
+    may-lead-to: DecisionRef[]? # Branch decisions (canonical property for the "explains" relationship)
     consumes: DataRef[]?    # External data this capability reads
 
 # ============================================================================
@@ -32,12 +32,12 @@ canonical-form:
 property-canonical-names:
   id: { aliases: [name, key, capability-id, feature] }
   label: { aliases: [title, display-name, caption] }
-  intent: { aliases: [purpose, goal, description, what-it-does, about] }
+  intent: { aliases: [goal, objective, aim, description, what-it-does, about] }
   requires: { aliases: [needs, inputs, fields, params, dependencies] }
   provides: { aliases: [offers, actions, operations, verbs] }
   produces: { aliases: [results-in, yields, states, outcomes] }
   obeys: { aliases: [constraints, rules, validations, conditions] }
-  feedback: { aliases: [messages, notifications, alerts] }
+  communicates: { aliases: [feedback, messages, notifications, alerts] }
   may-lead-to: { aliases: [branches, decisions, next-steps, flows] }
   consumes: { aliases: [reads, uses, data-sources, fetches-from] }
 # ============================================================================
@@ -186,7 +186,9 @@ false-friends:
 
 agent-instruction: |
   When generating a Capability in UISL:
-  1. Use ONLY the canonical property names: id, intent, requires, provides, produces, etc.
+  1. Use ONLY the canonical property names: id, intent, requires, provides, produces, communicates, consumes, obeys, may-lead-to
+     Note: `may-lead-to` here is the canonical property for the "explains" relationship (Capability → Decision).
+     Do not confuse with Action/State's "may-lead-to" relationship name — same property name, different relationship.
   2. NEVER emit aliases: needs, fields, operations, results-in, description
   3. Resolve capability strings through Taxonomy aliases (e.g., "login" → "authentication")
   4. A capability MUST NOT be described by its visual representation or layout (e.g., "form", "table", "modal", "grid")

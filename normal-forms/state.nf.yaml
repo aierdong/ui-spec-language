@@ -22,6 +22,10 @@ canonical-form:
     visible-when: Condition?  # When this state is shown
     message: string?        # Human-readable description for the user
     source: StateSource?    # What triggers this state: internal | external | user-action
+    may-trigger: FeedbackRef[]?     # Feedback this state may trigger
+    may-lead-to: DecisionRef[]?     # Decisions this state may lead to
+    may-lead-to-nav: NavigationRef[]? # Navigation this state may trigger
+    obeys: ConstraintRef[]?         # Constraints on this state
 
 # ============================================================================
 # CANONICAL PROPERTY NAMES
@@ -36,6 +40,10 @@ property-canonical-names:
   visible-when: { aliases: [show-when, active-when, condition, trigger] }
   message: { aliases: [detail, explanation, text, info] }
   source: { aliases: [trigger, origin, caused-by, from] }
+  may-trigger: { aliases: [shows, communicates, causes-feedback, triggers-feedback] }
+  may-lead-to: { aliases: [branches-to, evaluated-by, decisions] }
+  may-lead-to-nav: { aliases: [auto-navigates, redirects, navigates-to] }
+  obeys: { aliases: [constrained-by, follows, rules, visible-when-state] }
 
 # ============================================================================
 # CANONICAL STATE ID VALUES (Top-level)
@@ -184,8 +192,9 @@ agent-instruction: |
   4. Boolean condition flags (isLoading, hasError, isEmpty) → state.id with the semantic name
   5. Visual progress indicators (showSpinner, skeleton) → Feedback.progress, not State
   6. State machine definitions → state with values[] and default
-  6. Taxonomy provides implicit behavior:
+  7. Taxonomy provides implicit behavior:
      - loading → blocks Action.Submit
      - processing → blocks Action.Submit + Action.Navigate.NavigateTo
      - error → triggers Feedback.Error
      - success → triggers Feedback.Confirmation
+  8. If `visible-when` is present, normalize to `obeys: [constraint.auto-generated-id]` with the condition moved into the Constraint's `condition` property

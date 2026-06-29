@@ -22,6 +22,7 @@ taxonomy:
       - id: Email
         intent: "User's email address for identification"
         inherits:
+          label: "Email"
           validation:
             - format: email
             - max-length: 254
@@ -32,6 +33,7 @@ taxonomy:
       - id: Password
         intent: "User's secret for authentication"
         inherits:
+          label: "Password"
           validation:
             - min-length: 8
             - complexity: medium    # at least one uppercase, one digit
@@ -42,6 +44,7 @@ taxonomy:
       - id: OTP
         intent: "One-time passcode, typically numeric and short-lived"
         inherits:
+          label: "Verification Code"
           validation:
             - format: numeric
             - length: 6
@@ -63,6 +66,7 @@ taxonomy:
       - id: ShortText
         intent: "Short single-line text (names, titles, labels)"
         inherits:
+          label: "Text"
           validation:
             - max-length: 255
         aliases:
@@ -76,6 +80,7 @@ taxonomy:
       - id: LongText
         intent: "Multi-line free-form text (descriptions, notes, comments)"
         inherits:
+          label: "Description"
           multiline: true
           validation:
             - max-length: 10000
@@ -88,6 +93,7 @@ taxonomy:
       - id: SearchQuery
         intent: "Text input for search functionality"
         inherits:
+          label: "Search"
           short-lived: true         # Typically cleared after search
           multiline: false
         aliases:
@@ -108,6 +114,7 @@ taxonomy:
       - id: Integer
         intent: "Whole number values"
         inherits:
+          label: "Number"
           validation:
             - integer: true
         aliases:
@@ -119,6 +126,7 @@ taxonomy:
       - id: Decimal
         intent: "Numbers with decimal precision"
         inherits:
+          label: "Amount"
           validation:
             - decimal: true
         aliases:
@@ -129,6 +137,7 @@ taxonomy:
       - id: Duration
         intent: "A span of time"
         inherits:
+          label: "Duration"
           display-format: humanized  # "2h 30m" rather than raw seconds
         aliases:
           - duration
@@ -146,6 +155,7 @@ taxonomy:
       - id: SingleSelect
         intent: "Choose exactly one option from a list"
         inherits:
+          label: "Select"
           multiple: false
         aliases:
           - select
@@ -158,6 +168,7 @@ taxonomy:
       - id: MultiSelect
         intent: "Choose zero or more options from a list"
         inherits:
+          label: "Select"
           multiple: true
           searchable: true           # Multi-selects benefit from search
         aliases:
@@ -168,6 +179,7 @@ taxonomy:
       - id: Boolean
         intent: "True/false binary choice"
         inherits:
+          label: "Yes/No"
           default: false
         aliases:
           - checkbox
@@ -188,6 +200,7 @@ taxonomy:
       - id: Date
         intent: "Calendar date without time"
         inherits:
+          label: "Date"
           format: date
         aliases:
           - date
@@ -197,6 +210,7 @@ taxonomy:
       - id: DateTime
         intent: "Calendar date with time component"
         inherits:
+          label: "Date & Time"
           format: datetime
         aliases:
           - datetime
@@ -216,6 +230,7 @@ taxonomy:
       - id: Image
         intent: "Image file upload"
         inherits:
+          label: "Image"
           accept: "image/*"
           validation:
             - max-size: 10mb
@@ -228,6 +243,7 @@ taxonomy:
       - id: Document
         intent: "Document file upload"
         inherits:
+          label: "File"
           accept: ".pdf,.doc,.docx,.xls,.xlsx,.csv"
           validation:
             - max-size: 50mb
@@ -246,6 +262,7 @@ taxonomy:
       - id: TagList
         intent: "A collection of labels or keywords"
         inherits:
+          label: "Tags"
           multiple: true
           display: inline            # Show as compact chips/badges
         aliases:
@@ -256,6 +273,7 @@ taxonomy:
       - id: KeyValue
         intent: "Key-value pair input"
         inherits:
+          label: "Key-Value"
           composite: true
         aliases:
           - key-value
@@ -267,6 +285,7 @@ taxonomy:
   - id: Display
     intent: "Read-only presentation of data. Not editable by the user."
     inherits:
+      label: ""
       editable: false
       validation: []                 # No validation needed for display
     aliases:

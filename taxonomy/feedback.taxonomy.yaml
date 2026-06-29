@@ -17,6 +17,7 @@ taxonomy:
   - id: Confirmation
     intent: "Notify the user that an operation completed successfully"
     inherits:
+      kind: confirmation
       severity: success
     children:
 
@@ -45,6 +46,7 @@ taxonomy:
   - id: Error
     intent: "Inform the user that an operation failed and why"
     inherits:
+      kind: error-message
       severity: error
       duration: sticky              # User must read and dismiss or correct
     children:
@@ -84,6 +86,7 @@ taxonomy:
   - id: Warning
     intent: "Caution the user about consequences or partial success"
     inherits:
+      kind: warning-notice
       severity: warning
     children:
 
@@ -116,6 +119,7 @@ taxonomy:
   - id: Information
     intent: "Communicate neutral information to the user"
     inherits:
+      kind: info-notice
       severity: info
     children:
 
@@ -166,6 +170,9 @@ taxonomy:
   # =========================================================================
   - id: Validation
     intent: "Feedback about requirement validation"
+    inherits:
+      kind: validation-error
+      severity: error
     children:
 
       - id: ValidationError
@@ -193,6 +200,9 @@ taxonomy:
   # =========================================================================
   - id: Background
     intent: "System-level events that don't require immediate user action"
+    inherits:
+      kind: info-notice
+      severity: info
     children:
 
       - id: BackgroundNotification

@@ -11,6 +11,10 @@ Navigation is about *destinations* and *transitions*.
 ## Relationship
 
 ```
+Page
+  ├─ navigation-in → Navigation
+  └─ navigation-out → Navigation
+
 Action
   └─ may-lead-to → Navigation
 
@@ -19,9 +23,6 @@ Decision
 
 State
   └─ may-lead-to → Navigation
-
-Page
-  └─ connected-to → Navigation
 ```
 
 ## Required Properties

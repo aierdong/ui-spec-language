@@ -45,7 +45,7 @@ taxonomy:
         inherits:
           method: external
           opens: new-tab               # Opens in new tab by default
-          carries-state: false         # Cannot carry app state to external
+          carry-state: false           # Cannot carry app state to external
         aliases:
           - external-link
           - oauth-redirect

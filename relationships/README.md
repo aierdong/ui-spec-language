@@ -47,14 +47,14 @@ Relationship names must be verbs or verb phrases. They must not be component nam
 
 ```text
 Page
-  ├─ contains ───────────────→ Section
-  ├─ guarded-by ─────────────→ Constraint
-  ├─ navigation-in ──────────→ Navigation
-  └─ navigation-out ─────────→ Navigation
+  ├─ contains ──────────────→ Section
+  ├─ guarded-by ────────────→ Constraint
+  ├─ navigation-in ─────────→ Navigation
+  └─ navigation-out ────────→ Navigation
 
 Section
-  ├─ contains ───────────────→ Capability
-  ├─ contains ───────────────→ Section
+  ├─ contains ──────────────→ Capability
+  ├─ contains ──────────────→ Section
   ├─ obeys ─────────────────→ Constraint
   └─ receives ──────────────→ Data
 
@@ -62,7 +62,7 @@ Capability
   ├─ requires ──────────────→ Input
   ├─ provides ──────────────→ Action
   ├─ produces ──────────────→ State
-  ├─ feedback ──────────────→ Feedback
+  ├─ communicates ──────────→ Feedback
   ├─ consumes ──────────────→ Data
   ├─ obeys ─────────────────→ Constraint
   └─ explains ──────────────→ Decision
@@ -81,15 +81,15 @@ Action
   └─ can-target ────────────→ Capability
 
 State
-  ├─ is-triggered-by ───────→ Action
+  ├─ is-triggered-by ───────→ Action          *(inverse, read-only)*
   ├─ may-trigger ───────────→ Feedback
   ├─ may-lead-to ───────────→ Decision
   ├─ may-lead-to ───────────→ Navigation
   └─ obeys ─────────────────→ Constraint
 
 Feedback
-  ├─ triggered-by ──────────→ State
-  ├─ produced-by ───────────→ Action
+  ├─ triggered-by ──────────→ State           *(inverse, read-only)*
+  ├─ produced-by ───────────→ Action          *(inverse, read-only)*
   ├─ obeys ─────────────────→ Constraint
   └─ may-lead-to ───────────→ Decision
 
@@ -117,6 +117,8 @@ Constraint
   └─ applies-to ────────────→ Input | Action | State | Capability | Section | Page | Feedback
 ```
 
+> **Legend**: Entries marked *(inverse, read-only)* are inverse relationships included for reading and round-tripping only. Agents must never emit them when generating specs — always use the canonical direction instead. See [Generation Rules](#generation-rules) for details.
+
 ---
 
 ## Canonical Relationship Matrix
@@ -132,10 +134,11 @@ The full machine-readable matrix is in [`relationship.matrix.yaml`](relationship
 | Section | `contains` | Capability | `0..*` | no | A section groups capabilities. |
 | Section | `contains` | Section | `0..*` | no | Sections may be nested when spatial partitioning is hierarchical. |
 | Section | `obeys` | Constraint | `0..*` | no | Section visibility or availability follows a rule. |
+| Section | `receives` | Data | `0..*` | no | Section receives data for read-only presentation. *(avoid-unless-needed)* |
 | Capability | `requires` | Input | `0..*` | no | Information the user must provide. |
 | Capability | `provides` | Action | `0..*` | no | Actions available within the capability. |
 | Capability | `produces` | State | `0..*` | no | Conditions that can arise from this capability. |
-| Capability | `feedback` | Feedback | `0..*` | no | Communication available within this capability. |
+| Capability | `communicates` | Feedback | `0..*` | no | Communication available within this capability. |
 | Capability | `consumes` | Data | `0..*` | no | Data read by this capability. |
 | Capability | `obeys` | Constraint | `0..*` | no | Rules limiting the whole capability. |
 | Capability | `explains` | Decision | `0..*` | no | Branching logic inside the capability. |
@@ -280,7 +283,10 @@ Relationships are directional. The source owns the semantic statement.
 | `Capability requires Input` | Input is required by Capability | Emit `requires` from Capability. |
 | `Capability provides Action` | Action is provided by Capability | Emit `provides` from Capability. |
 | `Capability produces State` | State arises from Capability | Emit `produces` from Capability. |
+| `Capability communicates Feedback` | Feedback belongs to Capability | Emit `communicates` from Capability. |
 | `Action triggers State` | State is triggered by Action | Emit `triggers` from Action. |
+| `Action produces Feedback` | Feedback is produced by Action | Emit `produces` from Action. |
+| `Action can-target Capability` | Capability is targeted by Action | Emit `can-target` from Action when the action affects a different capability. |
 | `State may-trigger Feedback` | Feedback is triggered by State | Prefer `may-trigger` from State when modeling condition-driven feedback. |
 | `Decision evaluates State/Data/Constraint` | State/Data/Constraint informs Decision | Emit `evaluates` from Decision. |
 | `Decision resolves-to Navigation/State/Action/Feedback` | Navigation/State/Action/Feedback is outcome of Decision | Emit `resolves-to` inside branches. |
@@ -310,6 +316,29 @@ Important distinctions:
 
 ---
 
+## Generation Rules
+
+Some relationships in the matrix carry a `generation` field that constrains how Agents may emit them.
+
+| Generation Value | Meaning | Agent Rule |
+|---|---|---|
+| *(absent)* | Normal forward relationship. | Emit freely from the canonical source. |
+| `read-side-only` | Inverse relationship included for reading/round-tripping. | **Never emit when generating specs.** Use the canonical direction instead. |
+| `avoid-unless-needed` | Forward relationship that exists for completeness but has a preferred alternative. | Prefer the alternative noted in the relationship's `rules`. Emit only when the alternative cannot express the intent. |
+
+### Relationships with `generation` constraints
+
+| Relationship ID | Generation | Preferred Alternative |
+|---|---|---|
+| `state-is-triggered-by-action` | `read-side-only` | `Action triggers State` |
+| `feedback-produced-by-action` | `read-side-only` | `Action produces Feedback` |
+| `data-maps-to-input` | `read-side-only` | `Input maps-to Data` |
+| `data-affects-decision` | `read-side-only` | `Decision evaluates Data` |
+| `constraint-applies-to-target` | `read-side-only` | `Target obeys Constraint` |
+| `section-receives-data` | `avoid-unless-needed` | `Capability consumes Data` (for user work) or `Data feeds Section` (for read-only presentation) |
+
+---
+
 ## Shorthand vs Explicit Relationship
 
 Normal Forms use properties such as `requires`, `provides`, `produces`, `visible-when`, and `navigates-to`.
@@ -320,8 +349,10 @@ These are canonical shorthand for relationships.
 | `capability.requires: [input.email]` | `Capability(authentication) requires Input(email)` |
 | `capability.provides: [action.submit]` | `Capability(authentication) provides Action(submit)` |
 | `capability.produces: [state.loading]` | `Capability(authentication) produces State(loading)` |
+| `capability.communicates: [feedback.auth-failed-message]` | `Capability(authentication) communicates Feedback(auth-failed-message)` |
 | `capability.consumes: [data.projects]` | `Capability(crud) consumes Data(projects)` |
 | `action.disabled-when: "items.length == 0"` | `Action(delete) obeys Constraint(no-items-selected)` |
+| `action.target: capability.project-management` | `Action(delete-project) can-target Capability(project-management)` |
 | `action.navigates-to: page.home` | `Action(submit) may-lead-to Navigation(go-to-home)` |
 | `navigation.target: page.home` | `Navigation(go-to-home) target Page(home)` |
 | `decision.branches[].resolves-to: feedback.auth-failed` | `Decision(auth-outcome) resolves-to Feedback(auth-failed)` |
@@ -341,16 +372,18 @@ Agent rule: use shorthand when writing Canonical Schema later; use explicit trip
 
 Why: Section is the semantic partition that explains where a capability lives.
 
-### Rule 2: Capability does not contain Input or Action
+### Rule 2: Capability does not contain Input, Action, or Feedback
 
 ```text
 ❌ Capability contains Input
 ❌ Capability contains Action
+❌ Capability contains Feedback
 ✅ Capability requires Input
 ✅ Capability provides Action
+✅ Capability communicates Feedback
 ```
 
-Why: Inputs and Actions are not spatial children; they are requirements and affordances.
+Why: Inputs, Actions, and Feedback are not spatial children; they are requirements, affordances, and communications.
 
 ### Rule 3: Constraint is not Decision
 
@@ -392,6 +425,15 @@ Why: UISL describes the user's journey, not web routing implementation.
 
 Why: Action is user intent; handlers are implementation.
 
+### Rule 7: Action can-target Capability (for cross-capability operations)
+
+```text
+✅ Action(delete-project) can-target Capability(project-management)
+✅ Action(select-all) can-target Capability(item-list)
+```
+
+Why: Some actions affect a capability different from the one they belong to (e.g., a toolbar action that targets a data grid). Use `can-target` to express this cross-capability reference.
+
 ---
 
 ## Examples
@@ -412,7 +454,7 @@ Capability(authentication)
   produces State(processing)
   produces State(authenticated)
   produces State(auth-failed)
-  feedback Feedback(auth-failed-message)
+  communicates Feedback(auth-failed-message)
   explains Decision(auth-outcome)
 
 Input(email)
@@ -434,6 +476,27 @@ Decision(auth-outcome)
 Navigation(go-to-home)
   target Page(home)
 ```
+
+### Cross-Capability Action (can-target)
+
+```text
+Section(project-toolbar)
+  contains Capability(bulk-operations)
+
+Section(project-list)
+  contains Capability(project-management)
+
+Capability(bulk-operations)
+  provides Action(delete-selected)
+  provides Action(export-selected)
+
+Action(delete-selected)
+  can-target Capability(project-management)
+  obeys Constraint(at-least-one-selected)
+  may-lead-to Decision(delete-confirmation)
+```
+
+Why `can-target`: The `delete-selected` action lives in a toolbar capability but affects the project-management capability (the data grid). `can-target` expresses this cross-capability reference.
 
 ### Empty Collection Flow
 

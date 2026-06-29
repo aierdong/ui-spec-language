@@ -15,7 +15,7 @@ Section
                   ├─ provides → Action         (what the user can trigger)
                   ├─ produces → State          (what conditions arise)
                   ├─ obeys → Constraint        (what limits apply)
-                  ├─ feedback → Feedback       (what the system communicates)
+                  ├─ communicates → Feedback   (what the system communicates)
                   ├─ may-lead-to → Decision    (what branch happens next)
                   └─ consumes → Data           (what data it reads)
 ```
@@ -36,7 +36,7 @@ Section
 | `provides` | Action[] | Actions the user can trigger |
 | `produces` | State[] | States that can arise from this capability |
 | `obeys` | Constraint[] | Constraints that limit this capability |
-| `feedback` | Feedback[] | Feedback mechanisms available |
+| `communicates` | Feedback[] | Feedback mechanisms available |
 | `may-lead-to` | Decision[] | Branch decisions this capability can trigger |
 | `consumes` | Data[] | External data this capability reads |
 

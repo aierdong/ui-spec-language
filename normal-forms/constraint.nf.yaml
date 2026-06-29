@@ -16,7 +16,7 @@ canonical-form:
   constraint:
     id: string # Unique name (e.g., "email-format", "auth-required")
     condition: Condition # The expression that triggers or applies this constraint
-    applies-to: TargetType? # visibility | availability | validity (default: availability)
+    effect: TargetType? # visibility | availability | validity (default: availability)
     message: string? # Human-readable explanation when violated
     severity: Severity? # error | warning | info | success
 
@@ -27,15 +27,15 @@ canonical-form:
 property-canonical-names:
   id: { aliases: [name, key, rule, constraint-id, check] }
   condition: { aliases: [when, if, expression, test, predicate, rule] }
-  applies-to: { aliases: [target, effect, scope, type, constraint-type, mode] }
+  effect: { aliases: [applies-to, target, scope, type, constraint-type, mode] }
   message: { aliases: [error-message, text, hint, validation-message] }
   severity: { aliases: [level, importance, strictness, blocking] }
 
 # ============================================================================
-# CANONICAL APPLIES-TO VALUES
+# CANONICAL EFFECT VALUES
 # ============================================================================
 
-applies-to-values:
+effect-values:
   visibility: { aliases: [show, hide, display, render, visible] }
   availability: { aliases: [enable, disable, interactive, editable, active] }
   validity: { aliases: [validate, check, rule, requirement, format, pattern] }
@@ -56,6 +56,8 @@ severity-values:
 # All conditions use this syntax. No DSL variation.
 
 condition-syntax:
+  always-true: "always"  # Permanently active constraint
+  never-true: "never"    # Permanently inactive (placeholder)
   state-check: "State: Category.Leaf is active"
   data-check: "data-id.field == value"
   input-check: "input-id is empty"
@@ -86,7 +88,7 @@ equivalences:
       constraint:
         id: required
         condition: "value is empty"
-        applies-to: validity
+        effect: validity
         severity: error
         message: "This field is required"
     resolution:
@@ -98,7 +100,7 @@ equivalences:
     maps-to:
       constraint:
         id: always-disabled
-        applies-to: availability
+        effect: availability
         condition: always
     resolution:
       - "HTML disabled attribute → availability constraint"
@@ -111,11 +113,11 @@ equivalences:
       constraints:
         - id: min-length
           condition: "value.length < 8"
-          applies-to: validity
+          effect: validity
           severity: error
         - id: max-length
           condition: "value.length > 100"
-          applies-to: validity
+          effect: validity
           severity: error
     resolution:
       - "HTML minlength/maxlength → validity constraints"
@@ -127,7 +129,7 @@ equivalences:
       constraint:
         id: format-match
         condition: "value does not match pattern"
-        applies-to: validity
+        effect: validity
         severity: error
     resolution:
       - "HTML pattern attribute → validity constraint"
@@ -140,7 +142,7 @@ equivalences:
       constraint:
         id: admin-only-access
         condition: "data.user-role != admin"
-        applies-to: visibility
+        effect: visibility
         severity: error
     resolution:
       - "conditional render → visibility constraint"
@@ -152,7 +154,7 @@ equivalences:
       constraint:
         id: no-ops-on-empty
         condition: "data.items is empty"
-        applies-to: availability
+        effect: availability
     resolution:
       - "disabled prop with condition → availability constraint"
       - "items.length === 0 → semantic condition data.items is empty"
@@ -164,7 +166,7 @@ equivalences:
       constraint:
         id: email-format
         condition: "value does not match email-pattern"
-        applies-to: validity
+        effect: validity
         severity: error
         message: "Invalid email"
     resolution:
@@ -178,11 +180,11 @@ equivalences:
       constraints:
         - id: email-format
           condition: "value does not match email-pattern"
-          applies-to: validity
+          effect: validity
           severity: error
         - id: email-required
           condition: "value is empty"
-          applies-to: validity
+          effect: validity
           severity: error
     resolution:
       - "Yup schema → multiple validity constraints"
@@ -195,7 +197,7 @@ equivalences:
       constraint:
         id: role-required
         condition: "data.user-role not in [admin, editor]"
-        applies-to: visibility
+        effect: visibility
         message: "You do not have permission to access this"
     resolution:
       - "can array → visibility constraint with role check"
@@ -207,7 +209,7 @@ equivalences:
       constraint:
         id: business-only
         condition: "input.account-type == business"
-        applies-to: visibility
+        effect: visibility
     resolution:
       - "visible-if → visibility constraint"
       - "JS condition → canonical condition syntax"
@@ -217,8 +219,8 @@ equivalences:
 # ============================================================================
 
 false-friends:
-  - expression: "applies-to: visibility, severity: error"
-    looks-like: "applies-to: validity, severity: error"
+  - expression: "effect: visibility, severity: error"
+    looks-like: "effect: validity, severity: error"
     not-equivalent-because: "Visibility constrains whether an element EXISTS — errors here mean the element is hidden, not invalid. Validity constrains whether the VALUE is acceptable. Different semantics."
 
   - expression: "condition: 'items.length == 0'"
@@ -241,7 +243,7 @@ agent-instruction: |
   When generating a Constraint in UISL:
   1. Use canonical condition syntax ONLY — no JS expressions, no React patterns
   2. References to States use full path: "State: Category.Leaf"
-  3. applies-to MUST be one of: visibility, availability, validity
+  3. effect MUST be one of: visibility, availability, validity
   4. Constraint is a PERSISTENT rule, not a one-time event (that's Decision)
   5. HTML attributes → Constraint mapping:
      - required → validity: "value is empty"

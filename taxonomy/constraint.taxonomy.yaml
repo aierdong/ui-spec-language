@@ -14,7 +14,7 @@ taxonomy:
   - id: Visibility
     intent: "Conditions that control whether an element is rendered"
     inherits:
-      applies-to: visibility
+      effect: visibility
     children:
 
       - id: ShowWhen
@@ -50,7 +50,7 @@ taxonomy:
   - id: Availability
     intent: "Conditions that control whether an element can be interacted with"
     inherits:
-      applies-to: availability
+      effect: availability
     children:
 
       - id: EnableWhen
@@ -100,7 +100,7 @@ taxonomy:
   - id: Validity
     intent: "Conditions that validate whether a value is acceptable"
     inherits:
-      applies-to: validity
+      effect: validity
       severity: error
     children:
 
@@ -170,7 +170,7 @@ taxonomy:
   - id: Confirmation
     intent: "User must explicitly confirm an action, typically for irreversible operations"
     inherits:
-      applies-to: availability
+      effect: availability
       severity: warning
     children:
 
@@ -204,7 +204,7 @@ taxonomy:
       - id: SessionExpiry
         intent: "Session expires after a period of inactivity"
         inherits:
-          applies-to: availability
+          effect: availability
           condition: "session has expired"
           resolves-to:
             - "Navigation: AuthNavigation.GoToLogin"
@@ -215,7 +215,7 @@ taxonomy:
       - id: RateLimit
         intent: "Action is rate-limited to prevent abuse"
         inherits:
-          applies-to: availability
+          effect: availability
           message: "Too many attempts. Please try again later."
         aliases:
           - rate-limit

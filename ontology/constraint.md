@@ -1,7 +1,7 @@
 # Constraint（约束）
 
 ## Definition
-A condition that restricts when a Input, Action, State, or Capability is available, visible, or valid.
+A condition that restricts when an Input, Action, State, Capability, Section, Page, or Feedback is available, visible, or valid.
 A Constraint answers the question: **"Under what conditions does this rule apply?"**
 
 Constraints are the "rules engine" of the UI. They express business logic in a declarative,
@@ -11,11 +11,13 @@ is only relevant when the user selects Business account type."
 ## Relationship
 
 ```
-Input ──── obeys ──→ Constraint
-Action    ──── obeys ──→ Constraint
-State     ──── obeys ──→ Constraint
+Input      ── obeys ──→ Constraint
+Action     ── obeys ──→ Constraint
+State      ── obeys ──→ Constraint
 Capability ── obeys ──→ Constraint
-Section   ──── obeys ──→ Constraint
+Section    ── obeys ──→ Constraint
+Page       ── guarded-by ──→ Constraint
+Feedback   ── obeys ──→ Constraint
 ```
 
 ## Required Properties

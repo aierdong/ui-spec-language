@@ -27,13 +27,22 @@ taxonomy:
           - idle
           - ready
 
+      - id: Ready
+        intent: "Capability is prepared and awaiting user interaction"
+        inherits:
+          default: false             # Triggered after loading completes
+        aliases:
+          - ready
+          - prepared
+          - initialized
+
       - id: Loading
         intent: "Data or content is being fetched or processed"
         inherits:
           blocks:                    # While loading, these are disabled
             - "Action: Submit"       # Prevent double-submission
             - "Action: CRUD.Delete"       # Prevent delete during load
-          triggers:
+          may-trigger:
             - "Feedback: Information.Progress"   # Show loading indicator
         aliases:
           - loading
@@ -47,7 +56,7 @@ taxonomy:
             - "Action: Submit"
             - "Action: CRUD.Delete"
             - "Action: Navigate.NavigateTo"  # Prevent navigation during processing
-          triggers:
+          may-trigger:
             - "Feedback: Information.Progress"
         aliases:
           - processing
@@ -64,7 +73,7 @@ taxonomy:
       - id: Success
         intent: "The Action completed successfully"
         inherits:
-          triggers:
+          may-trigger:
             - "Feedback: Confirmation"
           duration: transient        # Auto-clear after feedback shown
         aliases:
@@ -76,7 +85,7 @@ taxonomy:
         intent: "The Action failed"
         inherits:
           blocking: true             # User must acknowledge before continuing
-          triggers:
+          may-trigger:
             - "Feedback: Error"
           duration: sticky           # Persists until user dismisses or retries
         aliases:
@@ -88,13 +97,24 @@ taxonomy:
       - id: PartialSuccess
         intent: "Some items succeeded, some failed"
         inherits:
-          triggers:
+          may-trigger:
             - "Feedback: Warning"
           duration: sticky
         aliases:
           - partial-success
           - partial-failed
           - partial
+
+      - id: Timeout
+        intent: "The operation did not complete within the expected time"
+        inherits:
+          may-trigger:
+            - "Feedback: Error"
+          duration: sticky
+        aliases:
+          - timeout
+          - timed-out
+          - expired
 
   # =========================================================================
   # Selection — What items are currently selected
@@ -131,6 +151,18 @@ taxonomy:
         aliases:
           - multi-selected
 
+      - id: AllSelected
+        intent: "All items in the collection are selected"
+        inherits:
+          enables:
+            - "Action: CRUD.Delete"
+            - "Action: Export"
+            - "Action: CRUD.Update"
+          default: false
+        aliases:
+          - all-selected
+          - select-all
+
   # =========================================================================
   # Availability — Whether an element can be interacted with
   # =========================================================================
@@ -158,12 +190,23 @@ taxonomy:
       - id: Locked
         intent: "Element is locked due to external condition (e.g., subscription required)"
         inherits:
-          triggers:
+          may-trigger:
             - "Feedback: Information"
         aliases:
           - locked
           - premium
           - requires-upgrade
+
+      - id: Expired
+        intent: "Element is no longer valid due to time-based constraint"
+        inherits:
+          may-trigger:
+            - "Feedback: Warning"
+          duration: sticky
+        aliases:
+          - expired
+          - time-expired
+          - stale
 
   # =========================================================================
   # Visibility — Whether content is shown

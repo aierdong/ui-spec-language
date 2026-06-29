@@ -97,15 +97,19 @@ taxonomy:
           - dirty-form-navigate
 
       - id: AfterSubmit
-        intent: "What happens after a successful form submission"
+        intent: "What happens after a form submission"
         inherits:
           trigger: automatic
           evaluates:
             - "State: Outcome.Success"
+            - "State: Outcome.Error"
           branches:
-            - condition: "created or updated"
+            - condition: "State: Outcome.Success"
               resolves-to: "Navigation: ResultNavigation.GoToList"
-              label: "Return to list view"
+              label: "Submission succeeded — return to list"
+            - condition: "State: Outcome.Error"
+              resolves-to: "Feedback: Error.BannerError"
+              label: "Submission failed — show error"
         aliases:
           - post-submit
           - after-save
@@ -190,11 +194,10 @@ taxonomy:
         intent: "What to do when uploaded file exceeds size limit"
         inherits:
           trigger: automatic
+          evaluates:
+            - "Data: File.Image"    # File size metadata
           branches:
-            - condition: "file can be compressed"
-              resolves-to: "Feedback: Warning.InlineWarning"
-              label: "Offer compression"
-            - condition: "file cannot be compressed"
+            - condition: "data.file-size > config.max-file-size"
               resolves-to: "Feedback: Error.InlineError"
               label: "Show size limit error"
         aliases:

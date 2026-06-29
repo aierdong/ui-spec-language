@@ -20,6 +20,7 @@ canonical-form:
     carry-state: StateRef[]?   # States to preserve across navigation
     carry-data: DataRef[]?     # Data to pass to the target
     label: string?           # Human-readable name (e.g., "Back to Projects")
+    icon: string?            # Semantic icon reference (not a specific icon library name)
     back-target: Reference?  # Where the user returns to (for push navigation)
     is-external: boolean?    # Target is outside the application
 
@@ -34,6 +35,7 @@ property-canonical-names:
   carry-state: { aliases: [preserve-state, keep-state, pass-state, state-transfer] }
   carry-data: { aliases: [pass-data, transfer-data, send-data, payload, params] }
   label: { aliases: [text, title, display, link-text, aria-label] }
+  icon: { aliases: [icon-name, glyph, symbol, nav-icon] }
   back-target: { aliases: [return-to, go-back-to, previous, parent] }
   is-external: { aliases: [external, outbound, third-party, offsite] }
 

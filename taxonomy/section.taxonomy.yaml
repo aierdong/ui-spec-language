@@ -214,12 +214,12 @@ taxonomy:
           - logo
           - brand
 
-      - id: EmptyState
+      - id: EmptyStateArea
         intent: "Placeholder section shown when a view has no data"
         inherits:
           layout-pattern: centered-column
           contains:
-            - "Feedback: Information.EmptyState"
+            - "Capability: DataManagement.CRUD"   # Create action to guide from empty to populated
         aliases:
           - empty-state-area
           - no-data

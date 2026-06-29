@@ -16,7 +16,7 @@ canonical-form:
   input:
     id: string              # Unique name within the Capability (e.g., "email", "password")
     label: string           # Human-readable name (e.g., "Email Address")
-    kind: InputKind         # Semantic type: credential | text | long-text | number | boolean | single-select | multi-select | date | datetime | duration | file | tag-list
+    kind: InputKind         # Semantic type: credential | text | long-text | number | boolean | single-select | multi-select | date | datetime | duration | file | tag-list | display
     validation: ConstraintRef[]? # Rules the value must satisfy
     default: any?            # Default value
     placeholder: string?     # Example or hint text
@@ -66,6 +66,7 @@ kind-values:
   duration:    { aliases: [time-span, elapsed, interval, period] }
   file:        { aliases: [upload, attachment, document, image, photo, avatar, file-input] }
   tag-list:    { aliases: [tags, labels, chips, keywords, badges] }
+  display:     { aliases: [read-only, readonly, output, presentation, label-value, static-text] }
 
 # ============================================================================
 # EQUIVALENCE MAPPINGS

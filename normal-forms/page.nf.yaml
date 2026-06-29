@@ -21,7 +21,7 @@ canonical-form:
     label: string           # Human-readable name (e.g., "Sign In")
     purpose: string?        # High-level purpose (e.g., "entry-point", "workspace")
     layout: PageLayout?     # Semantic page layout (sidebar-shell | split-screen | centered-column | full-canvas | master-detail | stacked)
-    requires-auth: boolean?  # Whether authentication is required
+    requires-auth: boolean?  # Syntactic sugar: equivalent to guarded-by: [constraint.auth-required]
     guarded-by: ConstraintRef[]?      # Constraints that gate access
     sections: SectionRef[]?           # Sections that partition this page
     navigation-in: NavigationRef[]?   # How users arrive at this page
@@ -36,7 +36,7 @@ canonical-form:
 property-canonical-names:
   id: { aliases: [name, key, page-id, route-name] }
   label: { aliases: [title, heading, display-name, page-title] }
-  purpose: { aliases: [intent, role, function, page-purpose] }
+  purpose: { aliases: [role, function, page-purpose, goal, objective] }
   layout: { aliases: [layout-type, page-layout, template] }
   requires-auth: { aliases: [auth-required, protected, authenticated-only, private] }
   guarded-by: { aliases: [access-control, permissions, guards, restricted-by] }
@@ -139,3 +139,6 @@ agent-instruction: |
   3. Map all incoming route/path/component references to canonical page.id and Page taxonomy roles
   4. A page with `layout: centered-column` and `requires-auth: false` containing an authentication capability → this is a login page
   5. Pages are targets of Navigation events; define `navigation-out` for where users go from here
+  6. If `requires-auth` is present, normalize to `guarded-by` on write:
+     - `requires-auth: true` → `guarded-by: [constraint.auth-required]`
+     - `requires-auth: false` → omit both properties (public page)

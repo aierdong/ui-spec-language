@@ -22,6 +22,7 @@ canonical-form:
     placement: Placement?   # inline | page-top | overlay | target-proximity
     action: ActionRef?      # Optional action the user can take in response
     visible-when: Condition?  # When this feedback is shown
+    may-lead-to: DecisionRef[]? # Decisions this feedback may trigger
 
 # ============================================================================
 # CANONICAL PROPERTY NAMES
@@ -36,6 +37,7 @@ property-canonical-names:
   placement: { aliases: [position, location, where, anchor, attach-to] }
   action: { aliases: [response, follow-up, cta, button, link] }
   visible-when: { aliases: [show-when, display-when, condition, trigger] }
+  may-lead-to: { aliases: [offers-choice, prompts, branches-to, decisions] }
 
 # ============================================================================
 # CANONICAL KIND VALUES
@@ -242,3 +244,4 @@ agent-instruction: |
   6. kind: validation-error always has placement: target-proximity
   7. If Feedback includes an action (like "Undo"), reference an ActionRef
   8. Spinner/Skeleton/Progress are Feedback; create State.loading only when the underlying condition is explicit
+  9. If `visible-when` is present, normalize to `obeys: [constraint.auto-generated-id]` with the condition moved into the Constraint's `condition` property

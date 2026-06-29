@@ -24,26 +24,77 @@ These concepts are platform-independent, semantic, and designed for Agentic Codi
 ```
 Page
   ├─ contains → Section
+  ├─ guarded-by → Constraint
   ├─ navigation-in → Navigation
   └─ navigation-out → Navigation
-                  ├─ contains → Capability
-                  ├─ sections → Section
-                  └─ obeys → Constraint
-                                  ├─ requires → Input
-                                  │              └─ validation → Constraint
-                                  ├─ provides → Action
-                                  │              ├─ triggers → State
-                                  │              └─ obeys → Constraint
-                                  ├─ produces → State
-                                  ├─ feedback → Feedback
-                                  ├─ consumes → Data
-                                  ├─ may-lead-to → Decision
-                                  │              ├─ evaluates → State/Data/Constraint
-                                  │              └─ resolves-to → Navigation/State/Action/Feedback/Page
-                                  └─ obeys → Constraint
+
+Section
+  ├─ contains → Capability
+  ├─ contains → Section
+  ├─ obeys → Constraint
+  └─ receives → Data
+
+Capability
+  ├─ requires → Input
+  ├─ provides → Action
+  ├─ produces → State
+  ├─ communicates → Feedback
+  ├─ consumes → Data
+  ├─ obeys → Constraint
+  └─ explains → Decision
+
+Input
+  ├─ obeys → Constraint
+  ├─ maps-to → Data
+  └─ sources-from → Data
+
+Action
+  ├─ triggers → State
+  ├─ produces → Feedback
+  ├─ obeys → Constraint
+  ├─ may-lead-to → Decision
+  ├─ may-lead-to → Navigation
+  └─ can-target → Capability
+
+State
+  ├─ is-triggered-by → Action    *(inverse, read-only)*
+  ├─ may-trigger → Feedback
+  ├─ may-lead-to → Decision
+  ├─ may-lead-to → Navigation
+  └─ obeys → Constraint
+
+Feedback
+  ├─ triggered-by → State       *(inverse, read-only)*
+  ├─ produced-by → Action       *(inverse, read-only)*
+  ├─ obeys → Constraint
+  └─ may-lead-to → Decision
+
+Decision
+  ├─ evaluates → State
+  ├─ evaluates → Data
+  ├─ evaluates → Constraint
+  ├─ resolves-to → Navigation
+  ├─ resolves-to → State
+  ├─ resolves-to → Action
+  └─ resolves-to → Feedback
+
+Navigation
+  ├─ source → Page | Section | Capability
+  ├─ target → Page | Section | Capability | External
+  ├─ carry-state → State
+  └─ carry-data → Data
+
+Data
+  ├─ maps-to → Input
+  ├─ feeds → Section
+  └─ affects → State | Constraint | Decision
+
+Constraint
+  └─ applies-to → Input | Action | State | Capability | Section | Page | Feedback
+```
 
 Navigation connects Pages into an application map through source/target relationships.
-```
+See [`relationships/`](../relationships/) for the full machine-readable matrix.
 
 ## Design Principles (from Phase 0)
 
@@ -74,4 +125,4 @@ Each `.md` file follows this structure:
 
 **Version**: 0.1.0-draft
 **Status**: Phase 1 — Vocabulary Definition + Phase 2 — Taxonomy + Phase 3 — Relationships Complete
-**Last Updated**: 2026-06-27
+**Last Updated**: 2026-06-29

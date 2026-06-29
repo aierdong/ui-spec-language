@@ -42,8 +42,8 @@ Aliases are documented for read-side normalization only. Agents must never emit 
 |-------------------|--------------------------|
 | `kind` | `type`, `role`, `category`, `input-type`, `field-type` |
 | `id` | `name`, `key`, `ref`, `identifier` |
-| `intent` | `purpose`, `goal`, `action-type`, `behavior`, `description`, `summary` |
-| `purpose` | `intent`, `role`, `function`, `page-purpose` — Page only |
+| `intent` | `goal`, `objective`, `aim`, `action-type`, `behavior`, `description`, `summary` |
+| `purpose` | `role`, `function`, `page-purpose`, `goal` — Page only |
 | `priority` | `importance`, `level`, `emphasis`, `weight` |
 | `label` | `title`, `display`, `text`, `caption` |
 | `requires` | `needs`, `inputs`, `dependencies`, `fields` |
@@ -202,29 +202,48 @@ Used by: `constraint`, `feedback`
 
 ## Canonical Relationship Table
 
-| Source | Relationship | Target |
-|--------|--------------|--------|
-| Page | contains / sections | Section |
-| Page | navigation-in | Navigation |
-| Page | navigation-out | Navigation |
-| Section | contains | Capability |
-| Section | sections | Section |
-| Capability | requires | Input |
-| Capability | provides | Action |
-| Capability | produces | State |
-| Capability | obeys | Constraint |
-| Capability | feedback | Feedback |
-| Capability | consumes | Data |
-| Capability | may-lead-to | Decision |
-| Action | triggers | State |
-| Action | produces | Feedback |
-| Action | may-lead-to | Decision / Navigation |
-| Decision | evaluates | State / Data / Constraint |
-| Decision | resolves-to | Navigation / State / Action / Feedback / Page |
-| Navigation | target | Page / Section / Capability / External URL |
-| Input | validation | Constraint |
-| Data | maps-to | Input |
-| Data | feeds | Section |
+| Source | Relationship | Target | Canonical Property |
+|--------|--------------|--------|--------------------|
+| Page | contains | Section | `sections` |
+| Page | guarded-by | Constraint | `guarded-by` |
+| Page | navigation-in | Navigation | `navigation-in` |
+| Page | navigation-out | Navigation | `navigation-out` |
+| Section | contains | Capability | `contains` |
+| Section | contains | Section | `sections` |
+| Section | obeys | Constraint | `obeys` |
+| Section | receives | Data | `receives` |
+| Capability | requires | Input | `requires` |
+| Capability | provides | Action | `provides` |
+| Capability | produces | State | `produces` |
+| Capability | communicates | Feedback | `communicates` |
+| Capability | consumes | Data | `consumes` |
+| Capability | obeys | Constraint | `obeys` |
+| Capability | explains | Decision | `may-lead-to` |
+| Input | obeys | Constraint | `validation` |
+| Input | maps-to | Data | `maps-to` |
+| Input | sources-from | Data | `source` |
+| Action | triggers | State | `triggers` |
+| Action | produces | Feedback | `produces` |
+| Action | obeys | Constraint | `obeys` |
+| Action | may-lead-to | Decision | `may-lead-to` |
+| Action | may-lead-to | Navigation | `navigates-to` |
+| Action | can-target | Capability | `target` |
+| State | may-trigger | Feedback | `may-trigger` |
+| State | may-lead-to | Decision | `may-lead-to` |
+| State | may-lead-to | Navigation | `may-lead-to` |
+| State | obeys | Constraint | `obeys` |
+| Feedback | obeys | Constraint | `visible-when` |
+| Feedback | may-lead-to | Decision | `may-lead-to` |
+| Decision | evaluates | State / Data / Constraint | `evaluates` |
+| Decision | resolves-to | Navigation / State / Action / Feedback | `branches[].resolves-to` |
+| Navigation | source | Page / Section / Capability | `source` |
+| Navigation | target | Page / Section / Capability / External | `target` |
+| Navigation | carry-state | State | `carry-state` |
+| Navigation | carry-data | Data | `carry-data` |
+| Data | maps-to | Input | `maps-to` |
+| Data | feeds | Section | `feeds` |
+| Data | affects | State / Constraint / Decision | `affects` |
+| Constraint | applies-to | Input / Action / State / Capability / Section / Page / Feedback | `applies-to` |
 
 ---
 
