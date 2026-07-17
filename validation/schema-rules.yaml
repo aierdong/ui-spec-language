@@ -1,0 +1,306 @@
+# UISL Validation Rules v0.1.0
+# ============================================================================
+# Derived from:
+#   - relationships/relationship.matrix.yaml (forbidden_relationships, cardinality)
+#   - schema/canonical-schema.yaml (concept shapes, reference system)
+#   - normal-forms/required-property-matrix.yaml (required fields)
+# ============================================================================
+
+meta:
+  version: "0.1.0-draft"
+  phase: 4
+  description: "Schema validation rules for UISL specs"
+  derived-from:
+    - relationships/relationship.matrix.yaml
+    - schema/canonical-schema.yaml
+
+# ============================================================================
+# RULE GROUPS
+# ============================================================================
+
+rules:
+
+  # --------------------------------------------------------------------------
+  # R1 — Forbidden Relationships (from relationship.matrix.yaml)
+  # --------------------------------------------------------------------------
+  forbidden-relationships:
+    - id: FR-001
+      description: "Page must not directly contain Capability"
+      check: "No capability entry directly inside a page"
+      severity: error
+
+    - id: FR-002
+      description: "Capability must not contain Input"
+      check: "Capability.requires uses 'requires', not 'contains' alias"
+      severity: error
+
+    - id: FR-003
+      description: "Capability must not contain Action"
+      check: "Capability.provides uses 'provides', not 'contains' alias"
+      severity: error
+
+    - id: FR-004
+      description: "Capability must not contain Feedback"
+      check: "Capability.communicates uses 'communicates', not 'contains' alias"
+      severity: error
+
+    - id: FR-005
+      description: "Constraint must not resolve to Navigation"
+      check: "Constraint has no field named 'resolves-to'"
+      severity: error
+
+    - id: FR-006
+      description: "Constraint must not resolve to State, Action, or Feedback"
+      check: "Constraint has no field named 'resolves-to' targeting these types"
+      severity: error
+
+    - id: FR-007
+      description: "State must not use 'communicates' to reference Feedback"
+      check: "State uses 'may-trigger' for Feedback references"
+      severity: error
+
+    - id: FR-008
+      description: "Navigation source must not be 'external'"
+      check: "Navigation.source target type is not 'external'"
+      severity: error
+
+    - id: FR-009
+      description: "Action must not reference implementation concepts (API, handler, component)"
+      check: "No 'calls', 'handler', 'component' fields on Action"
+      severity: error
+
+    - id: FR-010
+      description: "Navigation target must not be a route string for internal targets"
+      check: "Internal targets use page.*, section.*, or capability.* format"
+      severity: error
+
+  # --------------------------------------------------------------------------
+  # R2 — Required Properties (from required-property-matrix.yaml)
+  # --------------------------------------------------------------------------
+  required-properties:
+    - id: RP-001
+      description: "Page must have id and label"
+      check: "page.id and page.label are present"
+      severity: error
+
+    - id: RP-002
+      description: "Capability must have id and intent"
+      check: "capability.id and capability.intent are present"
+      severity: error
+
+    - id: RP-003
+      description: "Section must have id"
+      check: "section.id is present"
+      severity: error
+
+    - id: RP-004
+      description: "Input must have id, kind, and label"
+      check: "input.id, input.kind, and input.label are present"
+      severity: error
+
+    - id: RP-005
+      description: "Action must have id and intent"
+      check: "action.id and action.intent are present"
+      severity: error
+
+    - id: RP-006
+      description: "State must have id"
+      check: "state.id is present"
+      severity: error
+
+    - id: RP-007
+      description: "Feedback must have id and kind"
+      check: "feedback.id and feedback.kind are present"
+      severity: error
+
+    - id: RP-008
+      description: "Decision must have id, intent, and branches"
+      check: "decision.id, decision.intent, and decision.branches are present"
+      severity: error
+
+    - id: RP-009
+      description: "Navigation must have id and target"
+      check: "navigation.id and navigation.target are present"
+      severity: error
+
+    - id: RP-010
+      description: "Data must have id and source"
+      check: "data.id and data.source are present"
+      severity: error
+
+    - id: RP-011
+      description: "Constraint must have id and condition"
+      check: "constraint.id and constraint.condition are present"
+      severity: error
+
+  # --------------------------------------------------------------------------
+  # R3 — Relationship Cardinality (from relationship.matrix.yaml)
+  # --------------------------------------------------------------------------
+  cardinality:
+    - id: CA-001
+      description: "Page should have at least one Section"
+      check: "page.sections is non-empty"
+      severity: warning
+
+    - id: CA-002
+      description: "Navigation.target must have exactly one value"
+      check: "navigation.target is a single string"
+      severity: error
+
+    - id: CA-003
+      description: "Constraint should have at least one target via inverse relationship"
+      check: "At least one concept references this constraint via obeys/validation/guarded-by"
+      severity: warning
+
+    - id: CA-004
+      description: "Input.maps-to must have at most one target"
+      check: "input.maps-to is a single string or absent"
+      severity: error
+
+    - id: CA-005
+      description: "Decision must have at least one branch"
+      check: "decision.branches is non-empty"
+      severity: error
+
+  # --------------------------------------------------------------------------
+  # R4 — Reference Integrity
+  # --------------------------------------------------------------------------
+  reference-integrity:
+    - id: RI-001
+      description: "All referenced ids must resolve to a defined concept"
+      check: "Every ref string matches a defined concept id"
+      severity: error
+
+    - id: RI-002
+      description: "No duplicate ids within the same scope"
+      check: "All ids in pages[], inputs[], constraints[], etc. are unique"
+      severity: error
+
+    - id: RI-003
+      description: "No circular references"
+      check: "Reference graph has no cycles"
+      severity: error
+
+    - id: RI-004
+      description: "Cross-concept refs must match expected target type"
+      check: "navigation.* refs point to Navigation concepts, data.* to Data concepts, etc."
+      severity: error
+
+    - id: RI-005
+      description: "Inline concepts must not be referenced outside their parent's sub-tree"
+      check: "No external ref to an id defined inside a Capability's requires/provides/produces/etc."
+      severity: warning
+
+  # --------------------------------------------------------------------------
+  # R5 — Decision-Specific Rules
+  # --------------------------------------------------------------------------
+  decision-rules:
+    - id: DE-001
+      description: "Decision.branches[].resolves-to must target valid types"
+      check: "Target is navigation.*, state.*, action.*, or feedback.*"
+      severity: error
+
+    - id: DE-002
+      description: "default-branch must not have a 'condition' property"
+      check: "decision.default-branch.condition is absent"
+      severity: error
+
+    - id: DE-003
+      description: "Branch conditions must use canonical condition syntax"
+      check: "No JS expressions, no React patterns"
+      severity: warning
+
+    - id: DE-004
+      description: "Decision.evaluates should reference entities that are actually evaluated"
+      check: "All evaluates refs are used in at least one branch condition"
+      severity: warning
+
+  # --------------------------------------------------------------------------
+  # R6 — Semantic Integrity
+  # --------------------------------------------------------------------------
+  semantic:
+    - id: SI-001
+      description: "No component names in ids or labels"
+      check: "Ids and labels don't contain Button, Modal, Card, Form, Table, Grid, Flex, etc."
+      severity: error
+
+    - id: SI-002
+      description: "No CSS or layout properties on Capability"
+      check: "Capability has no width, height, margin, padding, flex, grid, position, etc."
+      severity: error
+
+    - id: SI-003
+      description: "No framework-specific concepts"
+      check: "No React/Flutter/HTML/Vue concepts in ids, intents, or labels"
+      severity: error
+
+    - id: SI-004
+      description: "No URL routes as Navigation targets (except external)"
+      check: "Internal navigation.target does not contain '/', ':', or start with 'http'"
+      severity: error
+
+    - id: SI-005
+      description: "Intent values use canonical vocabulary"
+      check: "Action.intent is one of: submit, cancel, delete, create, edit, dismiss, navigate, download, search, sort, filter, sign-out, clone, expand, copy, run, toggle-theme"
+      severity: warning
+
+  # --------------------------------------------------------------------------
+  # R7 — Constraint-Specific Rules
+  # --------------------------------------------------------------------------
+  constraint-rules:
+    - id: CT-001
+      description: "Constraint.effect must be a valid target type"
+      check: "effect is one of: visibility, availability, validity"
+      severity: error
+
+    - id: CT-002
+      description: "Constraint.severity must be a valid severity level"
+      check: "severity is one of: error, warning, info, success"
+      severity: error
+
+    - id: CT-003
+      description: "Constraint.condition must use canonical syntax"
+      check: "No imperative code, no function bodies, no JS expressions"
+      severity: warning
+
+# ============================================================================
+# VALIDATION PIPELINE
+# ============================================================================
+
+pipeline:
+  description: "Order in which rules should be applied"
+  stages:
+    - stage: 1
+      name: "Structural"
+      rules: [FR-001..FR-010]
+      description: "Check forbidden relationships first — structural errors make other checks unreliable."
+
+    - stage: 2
+      name: "Required Properties"
+      rules: [RP-001..RP-011]
+      description: "Verify all required fields are present."
+
+    - stage: 3
+      name: "Cardinality"
+      rules: [CA-001..CA-005]
+      description: "Check relationship cardinality constraints."
+
+    - stage: 4
+      name: "Reference Integrity"
+      rules: [RI-001..RI-005]
+      description: "Verify all references resolve and are type-correct."
+
+    - stage: 5
+      name: "Decision Rules"
+      rules: [DE-001..DE-004]
+      description: "Validate decision branching logic."
+
+    - stage: 6
+      name: "Semantic Integrity"
+      rules: [SI-001..SI-005]
+      description: "Enforce semantic naming — no implementation concepts."
+
+    - stage: 7
+      name: "Constraint Rules"
+      rules: [CT-001..CT-003]
+      description: "Validate constraint-specific properties."

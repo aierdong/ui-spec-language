@@ -1,0 +1,637 @@
+# UISL Canonical Schema v0.1.0
+# ============================================================================
+# Phase 4 — Every field is derived from Phase 1-3 artifacts.
+# Nothing is invented here.
+#
+# Sources:
+#   required fields    → normal-forms/required-property-matrix.yaml
+#   relationship fields → relationships/relationship.matrix.yaml (canonical_property)
+#   optional fields    → ontology/*.md + normal-forms/*.nf.yaml
+# ============================================================================
+
+meta:
+  version: "0.1.0-draft"
+  phase: 4
+  description: >
+    Canonical Schema for UI Specification Language (UISL).
+    Defines the valid YAML shapes for all 11 ontology concepts.
+    Derived from the relationship matrix — not invented.
+
+# ============================================================================
+# SECTION 1 — REFERENCE SYSTEM
+# ============================================================================
+
+references:
+  description: >
+    How concepts reference each other in a UISL spec.
+    Two patterns coexist: nesting (structural containment) and id-references (cross-cutting).
+
+  # ID format for all concepts
+  id-format:
+    rule: "lowercase, hyphen-separated, unique within the spec"
+    examples: ["email", "auth-failed", "go-to-home", "password-min-length"]
+    counter: ["Email", "authFailed", "auth_failed"]
+
+  # Nesting pattern: structural containment
+  nesting:
+    description: >
+      Page contains Section. Section contains Capability.
+      These are expressed through YAML nesting — the parent defines its children inline.
+      This reflects the user's spatial journey through the interface.
+    rules:
+      - "Page.sections[] contains Section definitions (not just refs)"
+      - "Section.capabilities[] contains Capability definitions (not just refs)"
+      - "Section.sections[] may contain nested Section definitions"
+
+  # Reference pattern: cross-cutting concepts
+  referencing:
+    description: >
+      Input, Action, State, Feedback, and Decision may be defined inline within their
+      owning Capability, or at the spec root for shared reuse.
+      Constraint, Data, and Navigation are always defined at the spec root and
+      referenced by id.
+    format:
+      inline: "Defined directly inside the parent concept"
+      local-ref: "concept-id"                    # e.g., email, submit
+      qualified-ref: "ConceptType.concept-id"     # e.g., navigation.go-to-home
+
+  # Cross-concept reference targets
+  ref-types:
+    InputRef: "string — matches inputs[].id or capabilities[].requires[].id"
+    ActionRef: "string — matches actions[].id or capabilities[].provides[].id"
+    StateRef: "string — matches states[].id or capabilities[].produces[].id"
+    FeedbackRef: "string — matches feedbacks[].id or capabilities[].communicates[].id"
+    DecisionRef: "string — matches decisions[].id or capabilities[].explains[].id"
+    NavigationRef: "string — matches navigations[].id"
+    DataRef: "string — matches data[].id"
+    ConstraintRef: "string — matches constraints[].id"
+    SectionRef: "string — matches sections[].id or pages[].sections[].id"
+    PageRef: "string — matches pages[].id"
+    Reference: "string — any valid concept id, used when target type is polymorphic"
+
+# ============================================================================
+# SECTION 2 — CONCEPT SCHEMAS
+# ============================================================================
+# For each concept:
+#   required:     from required-property-matrix.yaml
+#   relationships: from relationship.matrix.yaml (key = canonical_property)
+#   optional:     from ontology + NF canonical-form
+# ============================================================================
+
+concepts:
+
+  # --------------------------------------------------------------------------
+  # PAGE
+  # --------------------------------------------------------------------------
+  page:
+    source:
+      ontology: ontology/page.md
+      taxonomy: taxonomy/page.taxonomy.yaml
+      normal-form: normal-forms/page.nf.yaml
+      matrix: required-property-matrix.yaml + relationship.matrix.yaml
+
+    required:
+      - id: string
+          description: "Unique machine-readable identifier (e.g., login, dashboard)"
+      - label: string
+          description: "Human-readable display name (e.g., 'Sign In')"
+
+    relationships:
+      - sections: Section[]
+          description: "Sections that partition this page. Contains full Section definitions, not refs."
+          from: "page-contains-section → canonical_property: sections"
+          cardinality: "1..* (recommended)"
+      - guarded-by: ConstraintRef[]
+          description: "Persistent access rules (e.g., auth-required)"
+          from: "page-guarded-by-constraint → canonical_property: guarded-by"
+          cardinality: "0..*"
+      - navigation-in: NavigationRef[]
+          description: "How users can arrive at this page"
+          from: "page-navigation-in → canonical_property: navigation-in"
+          cardinality: "0..*"
+      - navigation-out: NavigationRef[]
+          description: "How users can leave this page"
+          from: "page-navigation-out → canonical_property: navigation-out"
+          cardinality: "0..*"
+
+  # --------------------------------------------------------------------------
+  # SECTION
+  # --------------------------------------------------------------------------
+  section:
+    source:
+      ontology: ontology/section.md
+      taxonomy: taxonomy/section.taxonomy.yaml
+      normal-form: normal-forms/section.nf.yaml
+      matrix: required-property-matrix.yaml + relationship.matrix.yaml
+
+    required:
+      - id: string
+          description: "Unique identifier within the page (e.g., credential-form, sidebar)"
+
+    relationships:
+      - capabilities: Capability[]
+          description: "Capabilities grouped within this section. Contains full Capability definitions."
+          from: "section-contains-capability → canonical_property: contains"
+          cardinality: "0..*"
+      - sections: Section[]
+          description: "Nested sub-sections for hierarchical partitioning"
+          from: "section-contains-section → canonical_property: sections"
+          cardinality: "0..*"
+      - obeys: ConstraintRef[]
+          description: "Rules governing section visibility or availability"
+          from: "section-obeys-constraint → canonical_property: obeys"
+          cardinality: "0..*"
+      - receives: DataRef[]
+          description: "Read-only data this section displays (prefer Capability.consumes for interactive data)"
+          from: "section-receives-data → canonical_property: receives"
+          cardinality: "0..*"
+          note: "Avoid unless the section is purely presentational"
+
+    optional:
+      - label: string?
+          description: "Human-readable name (e.g., 'Navigation Hub')"
+      - layout-pattern: string?
+          description: "Semantic partition: centered-column | sidebar-shell | vertical-stack | horizontal-strip | grid | overlay | master-detail | split-screen"
+      - zones: string[]?
+          description: "Named sub-areas (e.g., header, body, footer)"
+      - static: boolean?
+          description: "Non-interactive decoration (marketing, branding)"
+
+  # --------------------------------------------------------------------------
+  # CAPABILITY
+  # --------------------------------------------------------------------------
+  capability:
+    source:
+      ontology: ontology/capability.md
+      taxonomy: taxonomy/capability.taxonomy.yaml
+      normal-form: normal-forms/capability.nf.yaml
+      matrix: required-property-matrix.yaml + relationship.matrix.yaml
+
+    required:
+      - id: string
+          description: "Unique identifier (e.g., authentication, crud, search)"
+      - intent: string
+          description: "What the user can accomplish, in plain language (e.g., 'user provides credentials to verify identity')"
+
+    relationships:
+      - requires: Input[]
+          description: "Information the user must provide. Contains full Input definitions or refs."
+          from: "capability-requires-input → canonical_property: requires"
+          cardinality: "0..*"
+      - provides: Action[]
+          description: "Actions the user can trigger. Contains full Action definitions or refs."
+          from: "capability-provides-action → canonical_property: provides"
+          cardinality: "0..*"
+      - produces: State[]
+          description: "UI conditions that can arise. Contains full State definitions or refs."
+          from: "capability-produces-state → canonical_property: produces"
+          cardinality: "0..*"
+      - communicates: Feedback[]
+          description: "User-facing communication. Contains full Feedback definitions or refs."
+          from: "capability-communicates-feedback → canonical_property: communicates"
+          cardinality: "0..*"
+      - consumes: DataRef[]
+          description: "Data read by this capability"
+          from: "capability-consumes-data → canonical_property: consumes"
+          cardinality: "0..*"
+      - obeys: ConstraintRef[]
+          description: "Persistent rules limiting the whole capability"
+          from: "capability-obeys-constraint → canonical_property: obeys"
+          cardinality: "0..*"
+      - explains: Decision[]
+          description: "Branching logic inside this capability. Contains full Decision definitions or refs."
+          from: "capability-explains-decision → canonical_property: explains"
+          cardinality: "0..*"
+          note: "Not to be confused with Action.may-lead-to or State.may-lead-to. Explains means the Capability OWNS the decision's branching logic."
+
+    optional:
+      - label: string?
+          description: "Human-readable display name (e.g., 'Sign In')"
+
+  # --------------------------------------------------------------------------
+  # INPUT
+  # --------------------------------------------------------------------------
+  input:
+    source:
+      ontology: ontology/input.md
+      taxonomy: taxonomy/input.taxonomy.yaml
+      normal-form: normal-forms/input.nf.yaml
+      matrix: required-property-matrix.yaml + relationship.matrix.yaml
+
+    required:
+      - id: string
+          description: "Unique identifier within the capability (e.g., email, password)"
+      - kind: string
+          description: "Semantic type: credential | text | long-text | number | boolean | single-select | multi-select | date | datetime | duration | file | tag-list | display"
+      - label: string
+          description: "Human-readable label (e.g., 'Email Address')"
+
+    relationships:
+      - validation: ConstraintRef[]
+          description: "Validation rules the value must satisfy"
+          from: "input-obeys-constraint → canonical_property: validation"
+          cardinality: "0..*"
+      - maps-to: DataRef?
+          description: "Data field this input binds to"
+          from: "input-maps-to-data → canonical_property: maps-to"
+          cardinality: "0..1"
+      - source: DataRef?
+          description: "Data source for selectable or default values"
+          from: "input-sources-from-data → canonical_property: source"
+          cardinality: "0..1"
+
+    optional:
+      - default: any?
+          description: "Default value"
+      - placeholder: string?
+          description: "Example or hint text"
+      - help-text: string?
+          description: "Explanatory guidance"
+      - sensitive: boolean?
+          description: "Mask the value (passwords, tokens)"
+      - multiple: boolean?
+          description: "Allow multiple values"
+      - searchable: boolean?
+          description: "Values from a searchable remote source"
+
+  # --------------------------------------------------------------------------
+  # ACTION
+  # --------------------------------------------------------------------------
+  action:
+    source:
+      ontology: ontology/action.md
+      taxonomy: taxonomy/action.taxonomy.yaml
+      normal-form: normal-forms/action.nf.yaml
+      matrix: required-property-matrix.yaml + relationship.matrix.yaml
+
+    required:
+      - id: string
+          description: "Unique identifier within the capability (e.g., submit, cancel, delete)"
+      - intent: string
+          description: "What the user intends to accomplish: submit | cancel | delete | create | edit | dismiss | navigate | download | search | sort | filter | sign-out | clone | expand | copy | run | toggle-theme"
+
+    relationships:
+      - triggers: StateRef[]
+          description: "States that can arise from this action"
+          from: "action-triggers-state → canonical_property: triggers"
+          cardinality: "0..*"
+      - produces: FeedbackRef[]
+          description: "Feedback this action produces"
+          from: "action-produces-feedback → canonical_property: produces"
+          cardinality: "0..*"
+      - obeys: ConstraintRef[]
+          description: "Availability or visibility constraints"
+          from: "action-obeys-constraint → canonical_property: obeys"
+          cardinality: "0..*"
+      - may-lead-to: DecisionRef[]
+          description: "Decision(s) this action may trigger"
+          from: "action-may-lead-to-decision → canonical_property: may-lead-to"
+          cardinality: "0..*"
+      - navigates-to: NavigationRef?
+          description: "Where the user goes after this action (only when no Decision branch is needed)"
+          from: "action-may-lead-to-navigation → canonical_property: navigates-to"
+          cardinality: "0..1"
+      - target: CapabilityRef?
+          description: "A different Capability this action affects (cross-capability reference)"
+          from: "action-can-target-capability → canonical_property: target"
+          cardinality: "0..1"
+
+    optional:
+      - label: string?
+          description: "Human-readable text (e.g., 'Sign In', 'Delete Project')"
+      - priority: string?
+          description: "Visual emphasis: primary | secondary | tertiary | destructive"
+      - confirmation: string?
+          description: "Confirmation message before destructive action"
+      - keyboard-shortcut: string?
+          description: "Platform-independent shortcut hint (e.g., 'Ctrl+D')"
+
+  # --------------------------------------------------------------------------
+  # STATE
+  # --------------------------------------------------------------------------
+  state:
+    source:
+      ontology: ontology/state.md
+      taxonomy: taxonomy/state.taxonomy.yaml
+      normal-form: normal-forms/state.nf.yaml
+      matrix: required-property-matrix.yaml + relationship.matrix.yaml
+
+    required:
+      - id: string
+          description: "Unique identifier (e.g., loading, empty, error, authenticated)"
+
+    relationships:
+      - may-trigger: FeedbackRef[]
+          description: "Feedback shown when this state occurs"
+          from: "state-may-trigger-feedback → canonical_property: may-trigger"
+          cardinality: "0..*"
+      - may-lead-to: DecisionRef[]
+          description: "Decisions this state may lead to"
+          from: "state-may-lead-to-decision → canonical_property: may-lead-to"
+          cardinality: "0..*"
+      - may-lead-to-nav: NavigationRef[]
+          description: "Navigation this state may trigger"
+          from: "state-may-lead-to-navigation → canonical_property: may-lead-to (Navigation)"
+          cardinality: "0..*"
+      - obeys: ConstraintRef[]
+          description: "Constraints on this state"
+          from: "state-obeys-constraint → canonical_property: obeys"
+          cardinality: "0..*"
+
+    optional:
+      - label: string?
+          description: "Human-readable name (e.g., 'Processing')"
+      - values: string[]?
+          description: "Enumerated possible values (e.g., ['success', 'failed'])"
+      - default: string?
+          description: "Initial state value"
+      - persistent: boolean?
+          description: "Survives page navigation (default: false)"
+      - message: string?
+          description: "Human-readable description"
+
+  # --------------------------------------------------------------------------
+  # FEEDBACK
+  # --------------------------------------------------------------------------
+  feedback:
+    source:
+      ontology: ontology/feedback.md
+      taxonomy: taxonomy/feedback.taxonomy.yaml
+      normal-form: normal-forms/feedback.nf.yaml
+      matrix: required-property-matrix.yaml + relationship.matrix.yaml
+
+    required:
+      - id: string
+          description: "Unique identifier (e.g., auth-failed-message, save-success-toast)"
+      - kind: string
+          description: "Semantic type: confirmation | error-message | warning-notice | info-notice | validation-error | empty-state | progress | inline-help"
+
+    relationships:
+      - may-lead-to: DecisionRef[]
+          description: "Decisions this feedback may trigger (e.g., error message offers retry)"
+          from: "feedback-may-lead-to-decision → canonical_property: may-lead-to"
+          cardinality: "0..*"
+      - obeys: ConstraintRef[]
+          description: "Rules controlling when feedback is shown"
+          from: "feedback-obeys-constraint → canonical_property: visible-when"
+          note: "Canonical property is visible-when; the relationship verb is obeys"
+          cardinality: "0..*"
+
+    optional:
+      - message: string?
+          description: "Content communicated to the user"
+      - severity: string?
+          description: "success | error | warning | info"
+      - duration: string?
+          description: "transient | sticky | persistent"
+      - placement: string?
+          description: "inline | page-top | overlay | target-proximity"
+      - action: ActionRef?
+          description: "Optional action the user can take in response"
+
+  # --------------------------------------------------------------------------
+  # DECISION
+  # --------------------------------------------------------------------------
+  decision:
+    source:
+      ontology: ontology/decision.md
+      taxonomy: taxonomy/decision.taxonomy.yaml
+      normal-form: normal-forms/decision.nf.yaml
+      matrix: required-property-matrix.yaml + relationship.matrix.yaml
+
+    required:
+      - id: string
+          description: "Unique identifier (e.g., auth-outcome, empty-collection)"
+      - intent: string
+          description: "What the decision determines (e.g., 'determine authentication result')"
+      - branches: Branch[]
+          description: "At least one conditional branch"
+
+    relationships:
+      - evaluates: Reference[]
+          description: "State, Data, or Constraint entities informing branch selection"
+          from: "decision-evaluates-(state|data|constraint) → canonical_property: evaluates"
+          cardinality: "0..*"
+
+    optional:
+      - default-branch: Branch?
+          description: "Fallback branch taken when no condition matches"
+
+    # Branch sub-schema
+    branch:
+      required:
+        - resolves-to: Reference
+            description: "Target: navigation.*, state.*, action.*, or feedback.*"
+      optional:
+        - condition: string?
+            description: "Condition expression (not present on default-branch)"
+        - label: string?
+            description: "Human-readable branch label"
+        - priority: number?
+            description: "Evaluation order (lower = evaluated first)"
+
+  # --------------------------------------------------------------------------
+  # NAVIGATION
+  # --------------------------------------------------------------------------
+  navigation:
+    source:
+      ontology: ontology/navigation.md
+      taxonomy: taxonomy/navigation.taxonomy.yaml
+      normal-form: normal-forms/navigation.nf.yaml
+      matrix: required-property-matrix.yaml + relationship.matrix.yaml
+
+    required:
+      - id: string
+          description: "Unique identifier (e.g., go-to-home, open-project-detail)"
+      - target: string
+          description: "Destination: page.*, section.*, capability.*, or an external URL"
+
+    relationships:
+      - source: Reference?
+          description: "Where movement starts (page, section, or capability)"
+          from: "navigation-source → canonical_property: source"
+          cardinality: "0..1"
+      - carry-state: StateRef[]
+          description: "UI state preserved across movement"
+          from: "navigation-carry-state → canonical_property: carry-state"
+          cardinality: "0..*"
+      - carry-data: DataRef[]
+          description: "Data context passed with movement"
+          from: "navigation-carry-data → canonical_property: carry-data"
+          cardinality: "0..*"
+
+    optional:
+      - method: string?
+          description: "push | replace | external | back"
+      - label: string?
+          description: "Human-readable destination label"
+      - icon: string?
+          description: "Semantic icon reference (not a specific icon library name)"
+
+  # --------------------------------------------------------------------------
+  # DATA
+  # --------------------------------------------------------------------------
+  data:
+    source:
+      ontology: ontology/data.md
+      taxonomy: taxonomy/data.taxonomy.yaml
+      normal-form: normal-forms/data.nf.yaml
+      matrix: required-property-matrix.yaml + relationship.matrix.yaml
+
+    required:
+      - id: string
+          description: "Unique identifier (e.g., projects, user-profile)"
+      - source: string
+          description: "api | database | file | url-parameter | local-storage | session-storage | parent | context | computed"
+
+    relationships:
+      - feeds: SectionRef[]
+          description: "Sections that present this data"
+          from: "data-feeds-section → canonical_property: feeds"
+          cardinality: "0..*"
+      - affects: Reference[]
+          description: "State, Constraint, or Decision entities affected by this data"
+          from: "data-affects-(state|constraint|decision) → canonical_property: affects"
+          cardinality: "0..*"
+
+    optional:
+      - type: string?
+          description: "singleton | collection | tree | stream | dictionary"
+      - mutable: boolean?
+          description: "User can modify (default: false)"
+      - keyed-by: string?
+          description: "Field used as unique identifier for collection items"
+      - lazy: boolean?
+          description: "Loaded on demand (default: false)"
+      - freshness: string?
+          description: "realtime | near-realtime | on-demand | cache-tolerant"
+      - scope: string?
+          description: "page | section | application | session"
+
+  # --------------------------------------------------------------------------
+  # CONSTRAINT
+  # --------------------------------------------------------------------------
+  constraint:
+    source:
+      ontology: ontology/constraint.md
+      taxonomy: taxonomy/constraint.taxonomy.yaml
+      normal-form: normal-forms/constraint.nf.yaml
+      matrix: required-property-matrix.yaml + relationship.matrix.yaml
+
+    required:
+      - id: string
+          description: "Unique identifier (e.g., email-format, auth-required, min-length)"
+      - condition: string
+          description: "The expression that triggers or describes this constraint"
+
+    optional:
+      - effect: string?
+          description: "visibility | availability | validity (default: availability)"
+      - message: string?
+          description: "Human-readable explanation when violated"
+      - severity: string?
+          description: "error | warning | info | success"
+
+# ============================================================================
+# SECTION 3 — TOP-LEVEL SPEC STRUCTURE
+# ============================================================================
+
+spec-structure:
+  description: >
+    A complete UISL spec is a YAML document with a root `spec` key.
+    Cross-cutting concepts (constraints, data, navigations) are defined at the root
+    and referenced by id. The structural hierarchy (pages → sections → capabilities)
+    is expressed through nesting.
+
+  shape: |
+    spec:
+      version: "0.1.0"               # Required — UISL spec version
+      title: string?                  # Optional — human-readable spec title
+      description: string?            # Optional — what this spec describes
+
+      # Cross-cutting concepts (referenced by id)
+      constraints: Constraint[]?      # Optional — all constraints in the spec
+      data: Data[]?                   # Optional — all data entities in the spec
+      navigations: Navigation[]?      # Optional — all navigations in the spec
+
+      # Shared concepts (may be referenced inline or defined here)
+      inputs: Input[]?                # Optional — shared/reusable inputs
+      actions: Action[]?              # Optional — shared/reusable actions
+      states: State[]?                # Optional — shared/reusable states
+      feedbacks: Feedback[]?          # Optional — shared/reusable feedbacks
+      decisions: Decision[]?          # Optional — shared/reusable decisions
+
+      # Structural hierarchy (nesting pattern)
+      pages: Page[]                   # Required — at least one page
+
+  # How inline vs. root definitions resolve
+  resolution:
+    description: >
+      A reference (e.g., "email") is resolved by searching:
+      1. The current Capability's inline definitions (e.g., capabilities[].requires[].id)
+      2. The current Page's shared definitions
+      3. The spec root's shared definitions (e.g., inputs[].id)
+      The first match wins. Duplicate ids across scopes are an error.
+
+# ============================================================================
+# SECTION 4 — VALIDATION RULES
+# ============================================================================
+
+validation:
+  description: >
+    Structural and reference integrity rules derived from Phase 3's
+    relationship.matrix.yaml (valid relationships, cardinality, and
+    forbidden_relationships).
+
+  structural:
+    - rule: "Page must not directly contain a Capability"
+      check: "Page can only contain Section; Section contains Capability"
+    - rule: "Capability must not use 'contains' for Input, Action, or Feedback"
+      check: "Use 'requires' for Input, 'provides' for Action, 'communicates' for Feedback"
+    - rule: "Constraint must not have 'resolves-to'"
+      check: "Constraint is a persistent rule; Decision handles branching"
+    - rule: "Constraint must not target Navigation"
+      check: "Use Decision.resolves-to for movement"
+    - rule: "Navigation.target is required"
+      check: "Every Navigation must have a target"
+    - rule: "Navigation.source cannot be 'external'"
+      check: "Navigation always originates from internal concepts"
+    - rule: "State must not use 'communicates' to reference Feedback"
+      check: "State uses 'may-trigger' for Feedback; 'communicates' is reserved for Capability"
+
+  reference-integrity:
+    - rule: "All ids must be unique within their scope"
+    - rule: "All referenced ids must resolve to a defined concept"
+    - rule: "Circular references are invalid (A references B references A)"
+    - rule: "Cross-concept references must match the expected target type"
+
+  decision-constraints:
+    - rule: "Decision must have at least one branch"
+    - rule: "Decision.branches[].resolves-to must target: navigation.*, state.*, action.*, or feedback.*"
+    - rule: "default-branch must not have a 'condition' property"
+
+# ============================================================================
+# AGENT INSTRUCTION
+# ============================================================================
+
+agent-instruction: |
+  When generating a UISL spec:
+  1. Start from the user's journey: Page → Section → Capability.
+  2. For each Capability, ask:
+     - What information does it require? → defines Input under 'requires'
+     - What can the user do? → defines Action under 'provides'
+     - What conditions can arise? → defines State under 'produces'
+     - What must be communicated? → defines Feedback under 'communicates'
+     - What data does it read? → references Data via 'consumes'
+     - What rules limit it? → references Constraint via 'obeys'
+     - What branch logic exists? → defines Decision under 'explains'
+  3. Cross-cutting concepts (Constraint, Data, Navigation) go at the spec root.
+  4. Concept-specific concepts (Input, Action, State, Feedback, Decision)
+     are defined inline within their Capability by default.
+     Move them to the spec root only when genuinely shared across capabilities.
+  5. Use ONLY canonical property names from this schema.
+  6. Never introduce component names, CSS concepts, framework APIs, or URLs (except Navigation external targets).
+  7. Use Decision whenever there are multiple possible next paths.
+  8. Use Constraint only for persistent rules about visibility, availability, or validity.
+  9. Use Navigation only for movement to a Page, Section, Capability, or external destination.
+  10. Concepts defined inline within a parent MUST NOT be referenced by concepts outside that parent's sub-tree.

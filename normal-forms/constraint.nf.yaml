@@ -19,6 +19,9 @@ canonical-form:
     effect: TargetType? # visibility | availability | validity (default: availability)
     message: string? # Human-readable explanation when violated
     severity: Severity? # error | warning | info | success
+    # NOTE: "applies-to" (target entity list) is an inverse relationship.
+    # Canonical direction is: Target obeys Constraint, not Constraint applies-to Target.
+    # Do not emit "applies-to" when generating specs.
 
 # ============================================================================
 # CANONICAL PROPERTY NAMES

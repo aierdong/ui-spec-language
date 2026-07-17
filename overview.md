@@ -335,29 +335,57 @@ Phase 4 的 Canonical Schema 应该从这张关系矩阵推导字段，而不是
 
 ---
 
-# Phase 4：设计 Canonical Schema
+# Phase 4：设计 Canonical Schema ✅ 已完成
+
+> **详见 [`schema/`](schema/) 目录**
 
 直到这里。才开始写 YAML。
+
+核心原则：**从关系矩阵推导字段，不凭空设计**。Schema 中的每一个字段都追溯到 Phase 1-3 的三个来源之一：
+- 必填属性 → `required-property-matrix.yaml`
+- 关系属性 → `relationship.matrix.yaml`（使用 `canonical_property` 作为 YAML key）
+- 可选属性 → `ontology/*.md` + `normal-forms/*.nf.yaml`
+
+### 关键设计决策
+
+1. **混合嵌套+引用**：Page → Section → Capability 通过 YAML 嵌套表达结构关系；Constraint、Data、Navigation 在 spec root 定义并通过 id 引用。
+2. **纯语义**：第一版无 layout、无 style、无 component。Section 的 `layout-pattern` 是语义分区描述，不是 CSS 布局指令。
+3. **无 Component 概念**：第一版完全没有 `components`。
+
 例如：
 
 ```yaml
-page:
-sections:
-capabilities:
-actions:
-states:
-constraints:
-decisions:
+spec:
+  version: "0.1.0"
+  pages:
+    - id: login
+      label: "Sign In"
+      sections:
+        - id: credential-form
+          capabilities:
+            - id: authentication
+              intent: "authenticate user identity"
+              requires:
+                - id: email
+                  kind: credential
+                  label: "Email"
+              provides:
+                - id: submit
+                  intent: submit
 ```
 
-不要一开始就出现：
+### Phase 4 产出
 
-```
-components
-```
+| # | 文件 | 内容 |
+|---|------|------|
+| 1 | `schema/README.md` | Schema 设计理念、结构说明、与其他 Phase 的关系 |
+| 2 | `schema/canonical-schema.yaml` | 机器可读的 Canonical Schema：引用系统、11 个概念形状、顶层 Spec 结构、验证规则、Agent Instruction |
+| 3 | `examples/login.spec.yaml` | 完整 Login 示例，演示 Authentication 流程中的所有概念 |
+| 4 | `validation/schema-rules.yaml` | 7 组验证规则（35 条）：Forbidden Relationships、Required Properties、Cardinality、Reference Integrity、Decision Rules、Semantic Integrity、Constraint Rules |
 
-我甚至建议：
-第一版没有 component。
+### Phase 4 前置修复
+
+在 Schema 设计前，修复了 `relationships/relationship.matrix.yaml` 和 `normal-forms/capability.nf.yaml` 中 `capability-explains-decision` 的 `canonical_property` 不一致（`may-lead-to` → `explains`），与 ontology 和关系语义对齐。
 
 ---
 

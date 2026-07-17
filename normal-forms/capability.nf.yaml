@@ -22,7 +22,7 @@ canonical-form:
     produces: StateRef[]?   # States that can arise
     obeys: ConstraintRef[]? # Constraints that limit this capability
     communicates: FeedbackRef[]? # Feedback mechanisms
-    may-lead-to: DecisionRef[]? # Branch decisions (canonical property for the "explains" relationship)
+    explains: DecisionRef[]?  # Branch decisions this capability owns
     consumes: DataRef[]?    # External data this capability reads
 
 # ============================================================================
@@ -38,7 +38,7 @@ property-canonical-names:
   produces: { aliases: [results-in, yields, states, outcomes] }
   obeys: { aliases: [constraints, rules, validations, conditions] }
   communicates: { aliases: [feedback, messages, notifications, alerts] }
-  may-lead-to: { aliases: [branches, decisions, next-steps, flows] }
+  explains: { aliases: [may-lead-to, branches, decisions, next-steps, flows] }
   consumes: { aliases: [reads, uses, data-sources, fetches-from] }
 # ============================================================================
 # EQUIVALENCE MAPPINGS — Ambiguous forms → Canonical
@@ -186,9 +186,9 @@ false-friends:
 
 agent-instruction: |
   When generating a Capability in UISL:
-  1. Use ONLY the canonical property names: id, intent, requires, provides, produces, communicates, consumes, obeys, may-lead-to
-     Note: `may-lead-to` here is the canonical property for the "explains" relationship (Capability → Decision).
-     Do not confuse with Action/State's "may-lead-to" relationship name — same property name, different relationship.
+  1. Use ONLY the canonical property names: id, intent, requires, provides, produces, communicates, consumes, obeys, explains
+     Note: `explains` is the canonical property for the Capability → Decision relationship.
+     Do not confuse with Action/State's "may-lead-to" — different relationship, different property name.
   2. NEVER emit aliases: needs, fields, operations, results-in, description
   3. Resolve capability strings through Taxonomy aliases (e.g., "login" → "authentication")
   4. A capability MUST NOT be described by its visual representation or layout (e.g., "form", "table", "modal", "grid")

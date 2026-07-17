@@ -242,10 +242,11 @@ relationships:
     aliases: [branches-through, has-flow, decisions]
     inverse: explained-by
     meaning: Branching logic inside the capability.
-    canonical_property: may-lead-to
+    canonical_property: explains
     rules:
       - Use explains for decisions owned by the capability.
       - Do not flatten branches into unrelated navigation entries.
+      - Do not confuse with Action/State may-lead-to — different relationship, different canonical property.
 
   # ---------------------------------------------------------------------------
   # Input relationships
