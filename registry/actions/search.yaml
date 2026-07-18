@@ -1,0 +1,19 @@
+# Action Registry — search
+# Query the system for matching records.
+# Taxonomy: action.taxonomy.yaml → Search
+
+id: search
+intent: search
+label: "Search"
+concept: Action
+taxonomy_ref: "Action: Search"
+aliases:
+  - search
+  - find
+  - query
+priority: primary
+notes: |
+  Search-as-Action is the trigger; Search-as-Capability is the complete UX
+  (NF non-equivalence table). This shell is what a Capability.Search lists
+  under provides. Typically produces State: Lifecycle.Loading and may lead
+  to an empty-state Decision when results are absent.

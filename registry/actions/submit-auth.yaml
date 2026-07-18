@@ -1,0 +1,19 @@
+# Action Registry — submit-auth
+# Authenticate with provided credentials.
+# Taxonomy: action.taxonomy.yaml → Submit.SubmitAuth
+
+id: submit-auth
+intent: submit
+label: "Sign In"
+concept: Action
+taxonomy_ref: "Action: Submit.SubmitAuth"
+aliases:
+  - submit-auth
+  - login
+  - sign-in
+priority: primary
+notes: |
+  intent is `submit` (NF intent-values canonical); the auth specialization is
+  carried by taxonomy_ref, not a new intent value. Error feedback placement
+  is target-proximity (near the form), not page-top banner — that routing is
+  decided by the owning Capability, this shell only records the intent.

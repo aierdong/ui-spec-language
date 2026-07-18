@@ -1,0 +1,18 @@
+# Action Registry — dismiss
+# Close the current overlay or return to previous view.
+# Taxonomy: action.taxonomy.yaml → Navigate.Dismiss
+
+id: dismiss
+intent: dismiss
+label: "Close"
+concept: Action
+taxonomy_ref: "Action: Navigate.Dismiss"
+aliases:
+  - dismiss
+  - close
+priority: tertiary
+notes: |
+  Overlay-only. Discards changes by default (taxonomy discards-changes: true).
+  If the overlay holds unsaved form data, the Capability should route the
+  close through a Decision (DiscardChangesWarning) rather than a bare
+  dismiss — do not bake confirmation into this shell.

@@ -1,0 +1,29 @@
+# Capability Registry — authenticate
+# Verify the user's identity to grant system access.
+# Taxonomy: capability.taxonomy.yaml → Identity.Authentication
+
+id: authenticate
+label: "Sign In"
+intent: "verify user identity to grant system access"
+concept: Capability
+taxonomy_ref: "Capability: Identity.Authentication"
+aliases:
+  - login
+  - sign-in
+  - auth
+recommended:
+  requires:
+    - email
+    - password
+  provides:
+    - submit-auth
+  produces:
+    - loading
+    - success
+    - error
+  communicates:
+    - error-message
+notes: |
+  Persist no layout — Section owns layout-pattern (NF Rule 10).
+  On error, prefer feedback placement near the form (target-proximity),
+  not a page-top banner, unless multiple errors aggregate.

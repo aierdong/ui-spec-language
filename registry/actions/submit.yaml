@@ -1,0 +1,19 @@
+# Action Registry — submit
+# Finalize and send user input to the system for processing.
+# Taxonomy: action.taxonomy.yaml → Submit.SubmitForm
+
+id: submit
+intent: submit
+label: "Submit"
+concept: Action
+taxonomy_ref: "Action: Submit.SubmitForm"
+aliases:
+  - submit
+  - save
+  - apply
+priority: primary
+notes: |
+  Generic form submit. For authentication use submit-auth (auth-specific
+  error placement). For payment use Action: Submit.SubmitPayment.
+  Produces loading + success/error + may lead to a Decision on outcome;
+  the Capability wires the Decision, not the Action registry shell.

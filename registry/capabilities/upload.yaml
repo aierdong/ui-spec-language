@@ -1,0 +1,27 @@
+# Capability Registry — upload
+# Transfer files from the user's device to the system.
+# Taxonomy: capability.taxonomy.yaml → Transfer.Upload
+
+id: upload
+label: "Upload"
+intent: "user uploads a file to the system"
+concept: Capability
+taxonomy_ref: "Capability: Transfer.Upload"
+aliases:
+  - upload
+  - import
+recommended:
+  requires:
+    - file-upload
+  provides:
+    - submit
+  produces:
+    - processing
+    - success
+    - error
+  communicates:
+    - progress
+notes: |
+  File accept/max-size rules belong on the Input as Constraints (NF Rule 9),
+  not as capability-level metadata. Progress feedback is persistent and
+  blocks stacking with other progresses (taxonomy: Feedback.Information.Progress).

@@ -1,0 +1,19 @@
+# Action Registry — delete
+# Permanently remove a record.
+# Taxonomy: action.taxonomy.yaml → CRUD.Delete
+
+id: delete
+intent: delete
+label: "Delete"
+concept: Action
+taxonomy_ref: "Action: CRUD.Delete"
+aliases:
+  - delete
+  - remove
+priority: destructive
+confirmation: "Are you sure you want to delete this? This action cannot be undone."
+notes: |
+  Destructive: priority destructive + mandatory confirmation (taxonomy
+  requires: confirmation). Not reversible (taxonomy reversible: false).
+  The confirmation message here is a default; concrete specs may override
+  the wording but must keep confirmation present.

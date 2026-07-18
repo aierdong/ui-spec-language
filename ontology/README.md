@@ -119,7 +119,7 @@ Each `.md` file follows this structure:
 ## Next Steps
 
 - Phase 4: Design Canonical Schema (YAML structure)
-- Phase 5: Build Vocabulary Registry
+- Phase 5: Build Vocabulary Registry ✅ — see [`../registry/`](../registry/)
 
 ---
 

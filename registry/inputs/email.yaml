@@ -1,0 +1,22 @@
+# Input Registry — email
+# User's email address for identification (credential context).
+# Taxonomy: input.taxonomy.yaml → Credential.Email
+
+id: email
+label: "Email Address"
+intent: "user's email address for identification"
+concept: Input
+taxonomy_ref: "Input: Credential.Email"
+aliases:
+  - email-address
+  - email
+kind: credential
+sensitive: false
+validation:
+  - required
+  - email-format
+notes: |
+  kind: credential is identity-verification context. In a *profile* context
+  the same field is kind: text with a format:email constraint (NF
+  agent-instruction #4). sensitive is false for email (the value is shown),
+  unlike password.

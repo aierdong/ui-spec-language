@@ -1,0 +1,27 @@
+# Capability Registry — search
+# Find records matching user-specified criteria.
+# Taxonomy: capability.taxonomy.yaml → DataManagement.Search
+
+id: search
+label: "Search"
+intent: "user searches for items matching a query"
+concept: Capability
+taxonomy_ref: "Capability: DataManagement.Search"
+aliases:
+  - search
+  - find
+recommended:
+  requires:
+    - search-query
+  provides:
+    - search
+  produces:
+    - loading
+    - success
+  communicates:
+    - empty-state
+notes: |
+  Search is BOTH a Capability (the complete search UX) and an Action
+  (the trigger) — do not collapse them (NF non-equivalence table).
+  The Capability owns the query input + result state + empty feedback;
+  the Action only submits the query.

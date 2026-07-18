@@ -61,8 +61,8 @@ Phase 1 (Ontology)     → defines what each concept IS
 Phase 2 (Taxonomy)     → defines where each concept SITS in the classification tree
 Phase 2.5 (Normal Forms) → defines the ONE canonical YAML shape + equivalence mappings
 Phase 3 (Relationships)  → defines which concepts may CONNECT and how
-Phase 4 (Schema) ← YOU ARE HERE → crystallises 1–3 into a formal YAML specification
-Phase 5 (Registry)    → populates the schema with registered vocabulary instances
+Phase 4 (Schema)        → crystallises 1–3 into a formal YAML specification ✅
+Phase 5 (Registry)   ✅ → populates the schema with registered vocabulary instances
 Phase 6 (Tests)       → validates Agent output against the schema
 ```
 
@@ -77,5 +77,5 @@ Phase 6 (Tests)       → validates Agent output against the schema
 ---
 
 **Version**: 0.1.0-draft
-**Status**: Phase 4 — Canonical Schema Design
-**Last Updated**: 2026-07-06
+**Status**: Phase 4 — Canonical Schema Design (Phase 5 Registry complete)
+**Last Updated**: 2026-07-18

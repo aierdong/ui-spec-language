@@ -1,0 +1,20 @@
+# Action Registry — navigate-to
+# Go to another page or section of the application.
+# Taxonomy: action.taxonomy.yaml → Navigate.NavigateTo
+
+id: navigate-to
+intent: navigate
+label: "Go"
+concept: Action
+taxonomy_ref: "Action: Navigate.NavigateTo"
+aliases:
+  - go-to
+  - navigate
+  - open-page
+priority: secondary
+notes: |
+  navigation target is set on the concrete Action via navigates-to
+  (concept.id, e.g., navigation.go-to-home) — the registry shell carries no
+  specific target. Use this for unconditional movement; if the destination
+  depends on an outcome, route through a Decision instead (NF false-friend:
+  a link may navigate, a button may trigger state then navigate).

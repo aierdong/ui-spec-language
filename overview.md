@@ -389,7 +389,9 @@ spec:
 
 ---
 
-# Phase 5：建立 Vocabulary Registry
+# Phase 5：建立 Vocabulary Registry ✅ 已完成
+
+> **详见 [`registry/`](registry/) 目录**
 
 这是很多 DSL 没做，所以后来越来越乱。
 例如：
@@ -438,6 +440,35 @@ aliases:
 
 以后：
 Agent 根本不用猜。
+
+### Registry 与其他 Phase 的分工
+
+Registry **不重复** Ontology / Taxonomy / Normal Forms 已有的内容，而是把三者交汇成
+一份份可在 spec 里直接采纳的高频构件：
+
+| 产物 | 回答 | Registry 是否重复 |
+|---|---|---|
+| `ontology/*.md` | 概念**是什么** | 否 |
+| `taxonomy/*.yaml` | 概念在**分类树哪个位置**、继承什么默认 | 否 — 用 `taxonomy_ref` 回指 |
+| `normal-forms/*.nf.yaml` | 每个语义的 **ONE canonical shape** | 否 — 条目本身符合 NF |
+| `schema/canonical-schema.yaml` | YAML 的**合法形状** | 否 — 条目是形状的填值 |
+| `registry/*` | **高频概念的拿来即用构件** + 别名登记 + 推荐接线 | — |
+
+一句话：Taxonomy 说"Authentication 在分类树哪个位置、默认继承什么"；Registry 给"一个可复用的
+authenticate 构件、它有哪些已知别名、推荐接哪些 input/action"。
+
+### Phase 5 产出
+
+| # | 文件 | 内容 |
+|---|------|------|
+| 0 | `registry/README.md` | Registry 定位、与其他 Phase 分工、条目模板、一致性约束、Agent 使用方式 |
+| 1 | `registry/capabilities/*.yaml` | 7 个 Capability 构件：authenticate、register、account-recovery、crud-records、search、upload、notification |
+| 2 | `registry/inputs/*.yaml` | 7 个 Input 构件：email、password、otp、search-query、agree-to-terms、file-upload、display-field |
+| 3 | `registry/actions/*.yaml` | 8 个 Action 构件：submit、submit-auth、cancel、dismiss、delete、navigate-to、sign-out、search |
+
+v1 共 22 个条目，覆盖 `examples/login.spec.yaml` 用到的全部概念，外加 CRUD/Search/Upload 几条最高频。
+后续可按需补齐 State、Feedback、Decision、Navigation、Constraint、Data 子目录。每个条目含
+`id / label / intent / concept / taxonomy_ref / aliases / recommended`（薄接线，推荐不强制）/ `notes`。
 
 ---
 
@@ -525,7 +556,7 @@ ui-spec/
 ├── ontology/      # 定义世界：有哪些概念，它们是什么
 ├── taxonomy/      # 定义层级：每个概念的分类树 + 继承规则
 ├── normal-forms/  # 定义规范形式：每个语义的 ONE canonical YAML shape
-├── registry/      # 定义词汇：Authentication、Credential、Search...
+├── registry/      # 定义词汇：Authentication、Credential、Search... # ✅ Phase 5
 ├── schema/        # 定义 YAML 结构
 ├── validation/    # 校验规则和约束
 ├── examples/      # Login、Dashboard、Checkout...

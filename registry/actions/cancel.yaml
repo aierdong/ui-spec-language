@@ -1,0 +1,19 @@
+# Action Registry — cancel
+# Abandon current input without saving.
+# Taxonomy: action.taxonomy.yaml → Navigate.Dismiss (cancel alias)
+
+id: cancel
+intent: cancel
+label: "Cancel"
+concept: Action
+taxonomy_ref: "Action: Navigate.Dismiss"
+aliases:
+  - cancel
+  - close
+  - back
+priority: secondary
+notes: |
+  Cancel ≠ Dismiss (NF false-friends): Cancel abandons input with possible
+  unsaved-changes warning; Dismiss closes an overlay with no data concern.
+  Use this shell for "discard my form"; use the dismiss shell for "close
+  this dialog".

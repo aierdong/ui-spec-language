@@ -1,0 +1,20 @@
+# Input Registry — file-upload
+# A file provided by the user for upload.
+# Taxonomy: input.taxonomy.yaml → File (Document/Image)
+
+id: file-upload
+label: "File"
+intent: "user-provided file for upload"
+concept: Input
+taxonomy_ref: "Input: File.Document"
+aliases:
+  - file
+  - attachment
+kind: file
+validation:
+  - required
+  - max-size
+notes: |
+  Accept types and size limits live on the Constraint (NF Rule 9), not
+  inline. For image uploads point taxonomy_ref to Input: File.Image and
+  add a FormatMatch constraint for image MIME types.

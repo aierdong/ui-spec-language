@@ -1,0 +1,31 @@
+# Capability Registry — register
+# Create a new user identity in the system.
+# Taxonomy: capability.taxonomy.yaml → Identity.Registration
+
+id: register
+label: "Create Account"
+intent: "create a new user identity in the system"
+concept: Capability
+taxonomy_ref: "Capability: Identity.Registration"
+aliases:
+  - register
+  - sign-up
+  - create-account
+recommended:
+  requires:
+    - email
+    - password
+    - agree-to-terms
+  provides:
+    - submit
+  produces:
+    - loading
+    - success
+    - error
+  communicates:
+    - error-message
+notes: |
+  Distinct from authenticate: register creates an identity, authenticate
+  verifies an existing one. Do not reuse authenticate's recommended wiring
+  verbatim — registration typically adds consent (agree-to-terms) and a
+  name/short-text input.

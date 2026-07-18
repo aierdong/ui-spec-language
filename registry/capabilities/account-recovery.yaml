@@ -1,0 +1,29 @@
+# Capability Registry — account-recovery
+# Recover access to a locked or forgotten account.
+# Taxonomy: capability.taxonomy.yaml → Identity.AccountRecovery
+
+id: account-recovery
+label: "Account Recovery"
+intent: "recover access to a locked or forgotten account"
+concept: Capability
+taxonomy_ref: "Capability: Identity.AccountRecovery"
+aliases:
+  - forgot-password
+  - reset-password
+  - account-recovery
+recommended:
+  requires:
+    - email
+  provides:
+    - submit
+  produces:
+    - loading
+    - success
+    - error
+  communicates:
+    - info-notice
+notes: |
+  Typically a multi-step flow: request reset → receive OTP → set new password.
+  Each step is its own Capability instance sharing the account-recovery shell.
+  Communicates success as info-notice (not confirmation) — the action is
+  "we sent you a link", not "you're done".

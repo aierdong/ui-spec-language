@@ -1,0 +1,21 @@
+# Capability Registry — notification
+# Alert the user to time-sensitive or relevant events.
+# Taxonomy: capability.taxonomy.yaml → Communication.Notification
+
+id: notification
+label: "Notifications"
+intent: "alert the user to time-sensitive or relevant events"
+concept: Capability
+taxonomy_ref: "Capability: Communication.Notification"
+aliases:
+  - notification
+  - alert
+recommended:
+  produces:
+    - visible
+  communicates:
+    - background-notification
+notes: |
+  Background notifications are non-blocking (taxonomy:
+  Feedback.Background.BackgroundNotification) — do not model them as
+  a blocking DialogError. Prefer overlay placement, transient duration.

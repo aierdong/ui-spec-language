@@ -1,0 +1,19 @@
+# Action Registry — sign-out
+# End the current user session.
+# Taxonomy: action.taxonomy.yaml → System.SignOut
+
+id: sign-out
+intent: sign-out
+label: "Sign Out"
+concept: Action
+taxonomy_ref: "Action: System.SignOut"
+aliases:
+  - logout
+  - sign-out
+  - log-out
+priority: tertiary
+confirmation: "Are you sure you want to sign out?"
+notes: |
+  Scope: application (taxonomy clears-session: true). Confirmation is
+  recommended because leaving the session loses unsaved work; keep it
+  unless the flow is already guarded by a discard-changes Decision.

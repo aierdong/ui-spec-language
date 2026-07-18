@@ -1,0 +1,33 @@
+# Capability Registry — crud-records
+# Full Create-Read-Update-Delete lifecycle for a record collection.
+# Taxonomy: capability.taxonomy.yaml → DataManagement.CRUD
+
+id: crud-records
+label: "Manage Records"
+intent: "user manages data records (create, read, update, delete)"
+concept: Capability
+taxonomy_ref: "Capability: DataManagement.CRUD"
+aliases:
+  - project-management
+  - entity-list
+  - data-grid
+recommended:
+  provides:
+    - submit
+    - delete
+    - "Action: CRUD.Create"
+    - "Action: CRUD.Update"
+  produces:
+    - loading
+    - selected
+    - unselected
+  communicates:
+    - confirmation
+    - error-message
+notes: |
+  Not a single record editor — this is the collection-level capability.
+  A DataTable is only one rendering of CRUD (NF false friend).
+  create/edit specialize Submit/Create(Read flow — list them as taxonomy
+  references unless a dedicated registry action entry exists. Delete MUST
+  route through confirmation feedback before executing (Action.Delete
+  confirmation in taxonomy).

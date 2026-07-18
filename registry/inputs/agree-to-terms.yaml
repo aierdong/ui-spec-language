@@ -1,0 +1,21 @@
+# Input Registry — agree-to-terms
+# Binary consent to terms/conditions.
+# Taxonomy: input.taxonomy.yaml → Selection.Boolean
+
+id: agree-to-terms
+label: "I agree to the terms"
+intent: "user consents to terms or conditions"
+concept: Input
+taxonomy_ref: "Input: Selection.Boolean"
+aliases:
+  - agree-to-terms
+  - remember-me
+  - remember-session
+kind: boolean
+default: false
+validation:
+  - required
+notes: |
+  kind: boolean renders as checkbox/toggle/yes-no (NF kind mapping) —
+  never encode the widget. For registration, this typically carries a
+  required constraint gating the submit action.

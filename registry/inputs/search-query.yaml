@@ -1,0 +1,19 @@
+# Input Registry — search-query
+# Text input for search functionality.
+# Taxonomy: input.taxonomy.yaml → Text.SearchQuery
+
+id: search-query
+label: "Search"
+intent: "text input for search functionality"
+concept: Input
+taxonomy_ref: "Input: Text.SearchQuery"
+aliases:
+  - search
+  - query
+  - search-input
+kind: text
+notes: |
+  kind: text, NOT a separate "search" kind (NF false-friends: "field: search"
+  maps to Text.SearchQuery). Typically short-lived and cleared after a
+  search is executed — that behavior is owned by the consuming Capability,
+  not the Input shell.

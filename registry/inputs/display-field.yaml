@@ -1,0 +1,18 @@
+# Input Registry — display-field
+# Read-only presentation of data. Not editable by the user.
+# Taxonomy: input.taxonomy.yaml → Display
+
+id: display-field
+label: "Value"
+intent: "read-only presentation of a data value"
+concept: Input
+taxonomy_ref: "Input: Display"
+aliases:
+  - readonly
+  - badge
+kind: display
+notes: |
+  kind: display is NOT a user input — it is read-only presentation that
+  rides along the Input shape for binding convenience. No validation,
+  no disabled-when; use it to surface data the user should see but not
+  edit (taxonomy: Input.Display).

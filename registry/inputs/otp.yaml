@@ -1,0 +1,22 @@
+# Input Registry — otp
+# One-time passcode, typically numeric and short-lived.
+# Taxonomy: input.taxonomy.yaml → Credential.OTP
+
+id: otp
+label: "Verification Code"
+intent: "one-time passcode, typically numeric and short-lived"
+concept: Input
+taxonomy_ref: "Input: Credential.OTP"
+aliases:
+  - otp
+  - verification-code
+  - token
+  - pin
+kind: credential
+sensitive: true
+validation:
+  - required
+  - format
+notes: |
+  OTP values expire — the expiry rule belongs on the Constraint as a
+  Timing constraint (taxonomy: Constraint.Timing), not as input metadata.
