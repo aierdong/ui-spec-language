@@ -218,7 +218,7 @@ Used by: `constraint`, `feedback`
 | Capability | communicates | Feedback | `communicates` |
 | Capability | consumes | Data | `consumes` |
 | Capability | obeys | Constraint | `obeys` |
-| Capability | explains | Decision | `may-lead-to` |
+| Capability | explains | Decision | `explains` |
 | Input | obeys | Constraint | `validation` |
 | Input | maps-to | Data | `maps-to` |
 | Input | sources-from | Data | `source` |

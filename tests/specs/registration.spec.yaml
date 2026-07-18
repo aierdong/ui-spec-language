@@ -53,7 +53,7 @@ spec:
           label: "Account Details"
           layout-pattern: centered-column
 
-          capabilities:
+          contains:
             - id: register
               intent: "create a new user identity in the system"
               consumes: [data.new-account]
@@ -63,19 +63,19 @@ spec:
                   kind: credential
                   label: "Email Address"
                   placeholder: "you@example.com"
-                  validation: [email-format]
+                  validation: [constraint.email-format]
                   maps-to: data.new-account
 
                 - id: password
                   kind: credential
                   label: "Password"
                   sensitive: true
-                  validation: [password-min-length]
+                  validation: [constraint.password-min-length]
 
                 - id: agree-to-terms
                   kind: boolean
                   label: "Agree to terms"
-                  validation: [terms-required]
+                  validation: [constraint.terms-required]
 
               provides:
                 - id: create-account
@@ -89,7 +89,7 @@ spec:
                   intent: navigate
                   priority: tertiary
                   label: "Sign in instead"
-                  navigates-to: go-to-sign-in
+                  navigates-to: navigation.go-to-sign-in
 
               produces:
                 - id: creating

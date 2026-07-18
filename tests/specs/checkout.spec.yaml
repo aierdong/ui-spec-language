@@ -50,7 +50,7 @@ spec:
           layout-pattern: stacked-list
           receives: [data.order-summary]
 
-          capabilities:
+          contains:
             - id: review-order
               intent: "let the user review the order before paying"
               consumes: [data.order-summary]
@@ -62,7 +62,7 @@ spec:
           label: "Payment"
           layout-pattern: centered-column
 
-          capabilities:
+          contains:
             - id: place-order
               intent: "let the user submit the order with a chosen payment"
               requires:
@@ -80,7 +80,7 @@ spec:
                   intent: submit
                   priority: primary
                   label: "Place order"
-                  obeys: [payment-required, terms-required]
+                  obeys: [constraint.payment-required, constraint.terms-required]
                   triggers: [processing]
                   may-lead-to: [order-outcome]
 
@@ -88,7 +88,7 @@ spec:
                   intent: cancel
                   priority: tertiary
                   label: "Back"
-                  navigates-to: go-to-cart
+                  navigates-to: navigation.go-to-cart
 
               produces:
                 - id: payment-chosen

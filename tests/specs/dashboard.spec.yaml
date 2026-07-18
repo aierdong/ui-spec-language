@@ -46,7 +46,7 @@ spec:
   pages:
     - id: dashboard
       label: "Home"
-      guarded-by: [require-auth]
+      guarded-by: [constraint.require-auth]
 
       sections:
         - id: identity
@@ -54,7 +54,7 @@ spec:
           layout-pattern: header-strip
           receives: [data.profile-summary]
 
-          capabilities:
+          contains:
             - id: show-profile
               intent: "show the signed-in user's profile summary"
               consumes: [data.profile-summary]
@@ -66,7 +66,7 @@ spec:
           label: "Account Summary"
           layout-pattern: stat-row
 
-          capabilities:
+          contains:
             - id: show-balance
               intent: "show account balance to the user"
               consumes: [data.account-balance]
@@ -98,7 +98,7 @@ spec:
           label: "Quick Actions"
           layout-pattern: action-row
 
-          capabilities:
+          contains:
             - id: search-records
               intent: "let the user search across records"
               requires:
@@ -111,12 +111,12 @@ spec:
                   intent: search
                   priority: primary
                   label: "Search"
-                  navigates-to: go-to-search
+                  navigates-to: navigation.go-to-search
                 - id: open-records
                   intent: navigate
                   priority: secondary
                   label: "Manage records"
-                  navigates-to: go-to-records
+                  navigates-to: navigation.go-to-records
 
             - id: session-control
               intent: "let the user end the current session"

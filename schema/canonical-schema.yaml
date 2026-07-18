@@ -40,7 +40,7 @@ references:
       This reflects the user's spatial journey through the interface.
     rules:
       - "Page.sections[] contains Section definitions (not just refs)"
-      - "Section.capabilities[] contains Capability definitions (not just refs)"
+      - "Section.contains[] contains Capability definitions (not just refs)"
       - "Section.sections[] may contain nested Section definitions"
 
   # Reference pattern: cross-cutting concepts
@@ -49,22 +49,22 @@ references:
       Input, Action, State, Feedback, and Decision may be defined inline within their
       owning Capability, or at the spec root for shared reuse.
       Constraint, Data, and Navigation are always defined at the spec root and
-      referenced by id.
+      referenced with typed refs such as constraint.*, data.*, and navigation.*.
     format:
       inline: "Defined directly inside the parent concept"
       local-ref: "concept-id"                    # e.g., email, submit
-      qualified-ref: "ConceptType.concept-id"     # e.g., navigation.go-to-home
+      qualified-ref: "concept-type.concept-id"     # e.g., navigation.go-to-home
 
   # Cross-concept reference targets
   ref-types:
-    InputRef: "string — matches inputs[].id or capabilities[].requires[].id"
-    ActionRef: "string — matches actions[].id or capabilities[].provides[].id"
-    StateRef: "string — matches states[].id or capabilities[].produces[].id"
-    FeedbackRef: "string — matches feedbacks[].id or capabilities[].communicates[].id"
-    DecisionRef: "string — matches decisions[].id or capabilities[].explains[].id"
-    NavigationRef: "string — matches navigations[].id"
-    DataRef: "string — matches data[].id"
-    ConstraintRef: "string — matches constraints[].id"
+    InputRef: "string — matches inputs[].id or contains[].requires[].id"
+    ActionRef: "string — matches actions[].id or contains[].provides[].id"
+    StateRef: "string — matches states[].id or contains[].produces[].id"
+    FeedbackRef: "string — matches feedbacks[].id or contains[].communicates[].id"
+    DecisionRef: "string — matches decisions[].id or contains[].explains[].id"
+    NavigationRef: "string — emitted as navigation.<id>; resolves to navigations[].id"
+    DataRef: "string — emitted as data.<id>; resolves to data[].id"
+    ConstraintRef: "string — emitted as constraint.<id>; resolves to constraints[].id"
     SectionRef: "string — matches sections[].id or pages[].sections[].id"
     PageRef: "string — matches pages[].id"
     Reference: "string — any valid concept id, used when target type is polymorphic"
@@ -129,7 +129,7 @@ concepts:
           description: "Unique identifier within the page (e.g., credential-form, sidebar)"
 
     relationships:
-      - capabilities: Capability[]
+      - contains: Capability[]
           description: "Capabilities grouped within this section. Contains full Capability definitions."
           from: "section-contains-capability → canonical_property: contains"
           cardinality: "0..*"
@@ -540,7 +540,7 @@ spec-structure:
   description: >
     A complete UISL spec is a YAML document with a root `spec` key.
     Cross-cutting concepts (constraints, data, navigations) are defined at the root
-    and referenced by id. The structural hierarchy (pages → sections → capabilities)
+    and referenced with typed refs such as constraint.*, data.*, and navigation.*. The structural hierarchy (pages → sections → capabilities)
     is expressed through nesting.
 
   shape: |
@@ -549,7 +549,7 @@ spec-structure:
       title: string?                  # Optional — human-readable spec title
       description: string?            # Optional — what this spec describes
 
-      # Cross-cutting concepts (referenced by id)
+      # Cross-cutting concepts (referenced with typed refs)
       constraints: Constraint[]?      # Optional — all constraints in the spec
       data: Data[]?                   # Optional — all data entities in the spec
       navigations: Navigation[]?      # Optional — all navigations in the spec
@@ -568,7 +568,7 @@ spec-structure:
   resolution:
     description: >
       A reference (e.g., "email") is resolved by searching:
-      1. The current Capability's inline definitions (e.g., capabilities[].requires[].id)
+      1. The current Capability's inline definitions (e.g., contains[].requires[].id)
       2. The current Page's shared definitions
       3. The spec root's shared definitions (e.g., inputs[].id)
       The first match wins. Duplicate ids across scopes are an error.

@@ -362,7 +362,7 @@ spec:
       label: "Sign In"
       sections:
         - id: credential-form
-          capabilities:
+          contains:
             - id: authentication
               intent: "authenticate user identity"
               requires:
@@ -381,7 +381,7 @@ spec:
 | 1 | `schema/README.md` | Schema 设计理念、结构说明、与其他 Phase 的关系 |
 | 2 | `schema/canonical-schema.yaml` | 机器可读的 Canonical Schema：引用系统、11 个概念形状、顶层 Spec 结构、验证规则、Agent Instruction |
 | 3 | `examples/login.spec.yaml` | 完整 Login 示例，演示 Authentication 流程中的所有概念 |
-| 4 | `validation/schema-rules.yaml` | 7 组验证规则（35 条）：Forbidden Relationships、Required Properties、Cardinality、Reference Integrity、Decision Rules、Semantic Integrity、Constraint Rules |
+| 4 | `validation/schema-rules.yaml` | 7 组验证规则（36 条）：Forbidden Relationships、Required Properties、Cardinality、Reference Integrity、Decision Rules、Semantic Integrity、Constraint Rules |
 
 ### Phase 4 前置修复
 
@@ -521,7 +521,9 @@ Agent 每升级一次。跑全部测试。
 
 ---
 
-# Phase 7：最后才是 Skill
+# Phase 7：最后才是 Skill ✅ 已完成
+
+> **详见 [`.claude/skills/uisl-authoring/SKILL.md`](.claude/skills/uisl-authoring/SKILL.md)**
 
 Skill 根本不用教：怎么写 YAML。
 
@@ -544,6 +546,19 @@ Never use HTML concepts.
 Prefer semantic concepts.
 If unknown, reference registry.
 ```
+
+### Phase 7 产出
+
+| # | 文件 | 内容 |
+|---|------|------|
+| 1 | `.claude/skills/uisl-authoring/SKILL.md` | Claude Code 项目级 Skill：指导 Agent 使用 UISL 的 Vocabulary、Relationship、Constraint、Decision 进行语义建模 |
+
+### Skill 的职责边界
+
+- Skill **不复制** Ontology / Registry / Relationship Matrix / Normal Forms / Schema 的完整内容，只规定读取顺序和决策流程。
+- Skill **不教组件实现**，也不生成 React / Flutter / HTML / CSS 概念。
+- Skill **先建语义图，后序列化 YAML**：需求 → Page / Section / Capability → Registry → Relationship → Constraint / Decision → Canonical Schema。
+- Skill 的输出应通过 Phase 6 Conformance Test 验收。
 
 ---
 

@@ -74,6 +74,11 @@ rules:
       check: "Internal targets use page.*, section.*, or capability.* format"
       severity: error
 
+    - id: FR-011
+      description: "Section must not use capabilities as an alias for contains"
+      check: "Section contains Capability via canonical property 'contains'"
+      severity: error
+
   # --------------------------------------------------------------------------
   # R2 — Required Properties (from required-property-matrix.yaml)
   # --------------------------------------------------------------------------
@@ -272,7 +277,7 @@ pipeline:
   stages:
     - stage: 1
       name: "Structural"
-      rules: [FR-001..FR-010]
+      rules: [FR-001..FR-011]
       description: "Check forbidden relationships first — structural errors make other checks unreliable."
 
     - stage: 2

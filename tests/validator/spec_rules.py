@@ -68,6 +68,7 @@ def run_structural(spec: dict) -> ScenarioReport:
 
     _required_properties(idx, rep)
     _forbidden_page_contains_capability(idx, rep)
+    _forbidden_section_capabilities_alias(idx, rep)
     _forbidden_capability_contains(idx, rep)
     _forbidden_constraint_resolves(idx, rep)
     _forbidden_state_communicates(idx, rep)
@@ -108,9 +109,20 @@ def _forbidden_page_contains_capability(idx: SpecIndex, rep: ScenarioReport) -> 
         direct = c.node.get("capabilities")
         rep.add(RuleResult(
             rule_id="FR-001", group="forbidden-relationships", severity="error",
-            description="Page must not directly contain Capability (use sections[].capabilities[])",
+            description="Page must not directly contain Capability (use sections[].contains[])",
             passed=direct is None,
             detail=f"id={c.node.get('id')!r}" if direct is not None else "",
+        ))
+
+
+def _forbidden_section_capabilities_alias(idx: SpecIndex, rep: ScenarioReport) -> None:
+    for c in idx.of_type("section"):
+        alias = c.node.get("capabilities")
+        rep.add(RuleResult(
+            rule_id="FR-011", group="forbidden-relationships", severity="error",
+            description="Section must use 'contains' for Capability definitions, not 'capabilities'",
+            passed=alias is None,
+            detail=f"id={c.node.get('id')!r}" if alias is not None else "",
         ))
 
 
@@ -303,11 +315,7 @@ def _find_target(idx: SpecIndex, ref_id: str, expected_type: str | None = None):
 def _resolve(ref: str, known: set[str], idx: SpecIndex,
              id_to_scope: dict, src_scope: str | None,
              expected_type: str | None = None) -> tuple[bool, str, str, str]:
-    """Return (ok, detail, severity, rule_id).
-
-    severity is 'error' for unresolved refs, 'warning' for cross-scope
-    bare-id refs that should use a typed prefix (RI-004-like).
-    """
+    """Return (ok, detail, severity, rule_id)."""
     # typed refs ("state.processing"):
     for prefix, prefix_expected in _PREFIX_RULED.items():
         if ref.startswith(prefix):
@@ -328,14 +336,13 @@ def _resolve(ref: str, known: set[str], idx: SpecIndex,
             first = idx.by_id[ref]
             return False, f"ref {ref!r} must target {expected_type} but target is {first.type}", "error", "RI-004"
         target_scope = id_to_scope.get(ref)
-        # cross-scope bare references to global concepts (navigation/data/constraint)
-        # SHOULD use typed prefix — warning, not error (canonical spec mixes both).
+        # Bare references to global or cross-scope concepts must use typed prefix.
         if tgt.type in ("navigation", "data", "constraint"):
-            return (False, f"ref {ref!r} to {tgt.type} should use typed prefix "
-                    f"({tgt.type}.{ref}) for RI-004", "warning", "RI-004")
+            return (False, f"ref {ref!r} to {tgt.type} must use typed prefix "
+                    f"({tgt.type}.{ref}) for RI-004", "error", "RI-004")
         if target_scope is not None and src_scope is not None and target_scope != src_scope:
             return (False, f"cross-scope ref {ref!r} to {tgt.type}"
-                    f" should use typed prefix for RI-004", "warning", "RI-004")
+                    f" must use typed prefix for RI-004", "error", "RI-004")
         return True, "", "error", "RI-001"
     return False, f"unresolved id {ref!r}", "error", "RI-001"
 

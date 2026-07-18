@@ -43,7 +43,7 @@ spec:
           label: "Recovery Steps"
           layout-pattern: vertical-stack
 
-          capabilities:
+          contains:
             - id: account-recovery
               intent: "recover access to a locked or forgotten account"
               consumes: [data.recovery-request]
@@ -52,13 +52,13 @@ spec:
                 - id: email
                   kind: credential
                   label: "Email Address"
-                  validation: [email-format]
+                  validation: [constraint.email-format]
                   maps-to: data.recovery-request
 
                 - id: otp
                   kind: credential
                   label: "Recovery Code"
-                  validation: [otp-required]
+                  validation: [constraint.otp-required]
 
               provides:
                 - id: request-recovery
@@ -72,7 +72,7 @@ spec:
                   intent: navigate
                   priority: tertiary
                   label: "Back to sign in"
-                  navigates-to: go-to-sign-in
+                  navigates-to: navigation.go-to-sign-in
 
               produces:
                 - id: sending

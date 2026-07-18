@@ -18,7 +18,7 @@ SPEC = {
                 "sections": [
                     {
                         "id": "credential-form",
-                        "capabilities": [
+                        "contains": [
                             {
                                 "id": "authentication",
                                 "intent": "verify identity",
@@ -27,7 +27,7 @@ SPEC = {
                                         "id": "email",
                                         "kind": "credential",
                                         "label": "Email",
-                                        "validation": ["email-format"],
+                                        "validation": ["constraint.email-format"],
                                     }
                                 ],
                                 "provides": [

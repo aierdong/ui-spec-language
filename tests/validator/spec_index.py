@@ -60,7 +60,7 @@ def index_spec(spec: dict) -> SpecIndex:
     """Flatten the canonical spec tree into Concept records.
 
     Recognizes the canonical schema layout:
-      spec.pages[].sections[].capabilities[]
+      spec.pages[].sections[].contains[]
         .requires[] (input)
         .provides[] (action)
         .produces[] (state)
@@ -100,7 +100,7 @@ def _index_section(idx: SpecIndex, section: dict, page_id: str | None) -> None:
     for section2 in section.get("sections", []) or []:
         _add(idx, "section", section2, parent=sid, parent_type="section", scope_id=page_id)
         _index_section(idx, section2, page_id)
-    for cap in section.get("capabilities", []) or []:
+    for cap in section.get("contains", []) or []:
         cid = _id(cap)
         _add(idx, "capability", cap, parent=sid, parent_type="section", scope_id=cid)
         _walk_capability_children(idx, cap, cid)

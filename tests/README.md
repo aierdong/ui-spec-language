@@ -106,6 +106,27 @@ python3 tests/validator/run.py login --candidate agent-output/login.spec.yaml
 3. 在 `expectations/` 写断言 —— 至少一条 `must-contain`、一条 `must-not-contain`。
 4. `python3 tests/validator/run.py <name>` 应输出 PASS。
 
+## Phase 7 Skill 验收
+
+`.claude/skills/uisl-authoring/SKILL.md` 使用这套 Conformance Test 验收 Agent 的语义建模能力。
+
+推荐流程：
+
+1. 选择一个 `requirements/<name>.md` 作为 Agent 输入。
+2. 使用 `uisl-authoring` Skill 生成候选 spec。
+3. 将候选文件保存为 `<candidate-dir>/<name>.spec.yaml`，或保存为任意路径后用 `--candidate` 指定。
+4. 运行：
+
+```bash
+# 单个候选文件
+python3 tests/validator/run.py <name> --candidate <candidate-spec-path>
+
+# 多个候选场景，文件名必须是 <scenario>.spec.yaml
+python3 tests/validator/run.py --candidate-dir <candidate-dir>
+```
+
+Skill 生成的候选 spec 不需要与 `tests/specs/*.spec.yaml` 文本完全一致，但必须满足结构规则和语义断言。失败时优先检查：是否发明了未登记 vocabulary、是否用了 alias、是否混入组件/CSS/框架词、是否把 Constraint 和 Decision 混淆、是否违反 `relationships/relationship.matrix.yaml` 的 canonical property。
+
 ## 与其他 Phase 的分工
 
 | 产物 | 回答 | Phase 6 是否重复 |

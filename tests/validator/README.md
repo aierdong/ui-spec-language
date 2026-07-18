@@ -31,7 +31,7 @@ python3 tests/validator/run.py login --candidate agent-output/login.spec.yaml
 
 已覆盖：
 
-- Forbidden Relationships：`FR-001` 到 `FR-010` 中的直接字段与 Navigation target/source 检查。
+- Forbidden Relationships：`FR-001` 到 `FR-011` 中的直接字段、旧 alias 与 Navigation target/source 检查。
 - Required Properties：`RP-001` 到 `RP-011`。
 - Cardinality：`CA-001`、`CA-002`、`CA-004`、`CA-005`。
 - Reference Integrity：`RI-001`、`RI-004` 的解析与类型前缀检查。

@@ -14,7 +14,7 @@ spec:
     On success, navigate to the home page. On failure, show an error message.
 
   # ---------------------------------------------------------------------------
-  # Cross-cutting concepts (defined once, referenced by id)
+  # Cross-cutting concepts (defined once, referenced with typed refs)
   # ---------------------------------------------------------------------------
 
   constraints:
@@ -66,7 +66,7 @@ spec:
           label: "Credentials"
           layout-pattern: centered-column
 
-          capabilities:
+          contains:
             # ================================================================
             # CAPABILITY — Authentication
             # ================================================================
@@ -80,7 +80,7 @@ spec:
                   kind: credential
                   label: "Email Address"
                   placeholder: "you@example.com"
-                  validation: [email-format]    # → Constraint reference
+                  validation: [constraint.email-format]    # → Constraint reference
                   maps-to: data.user-session
 
                 - id: password
@@ -88,7 +88,7 @@ spec:
                   label: "Password"
                   sensitive: true
                   placeholder: "Enter your password"
-                  validation: [password-min-length]
+                  validation: [constraint.password-min-length]
 
               # ---- Actions (what the user can do) ----
               provides:

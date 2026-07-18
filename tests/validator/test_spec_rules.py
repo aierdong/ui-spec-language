@@ -33,7 +33,7 @@ BASE_SPEC = {
                 "sections": [
                     {
                         "id": "credential-form",
-                        "capabilities": [
+                        "contains": [
                             {
                                 "id": "authentication",
                                 "intent": "verify identity",
@@ -42,7 +42,7 @@ BASE_SPEC = {
                                         "id": "email",
                                         "kind": "credential",
                                         "label": "Email",
-                                        "validation": ["email-format"],
+                                        "validation": ["constraint.email-format"],
                                         "maps-to": "data.user-session",
                                     }
                                 ],
@@ -99,19 +99,19 @@ class SpecRuleTests(unittest.TestCase):
         self.assertTrue(run_structural(BASE_SPEC).passed)
 
     def test_required_properties_fail(self) -> None:
-        report = broken(lambda spec: spec["spec"]["pages"][0]["sections"][0]["capabilities"][0].pop("intent"))
+        report = broken(lambda spec: spec["spec"]["pages"][0]["sections"][0]["contains"][0].pop("intent"))
 
         self.assert_rule_failed(report, "RP-002")
 
     def test_capability_contains_is_forbidden(self) -> None:
         def mutate(spec):
-            spec["spec"]["pages"][0]["sections"][0]["capabilities"][0]["contains"] = []
+            spec["spec"]["pages"][0]["sections"][0]["contains"][0]["contains"] = []
 
         self.assert_rule_failed(broken(mutate), "FR-002")
 
     def test_action_handler_is_forbidden(self) -> None:
         def mutate(spec):
-            spec["spec"]["pages"][0]["sections"][0]["capabilities"][0]["provides"][0]["handler"] = "submitLogin"
+            spec["spec"]["pages"][0]["sections"][0]["contains"][0]["provides"][0]["handler"] = "submitLogin"
 
         self.assert_rule_failed(broken(mutate), "FR-009")
 
@@ -120,6 +120,13 @@ class SpecRuleTests(unittest.TestCase):
             spec["spec"]["pages"][0]["capabilities"] = [{"id": "bad", "intent": "bad"}]
 
         self.assert_rule_failed(broken(mutate), "FR-001")
+
+    def test_section_capabilities_alias_is_forbidden(self) -> None:
+        def mutate(spec):
+            section = spec["spec"]["pages"][0]["sections"][0]
+            section["capabilities"] = section.pop("contains")
+
+        self.assert_rule_failed(broken(mutate), "FR-011")
 
     def test_constraint_cannot_resolve(self) -> None:
         def mutate(spec):
@@ -131,7 +138,7 @@ class SpecRuleTests(unittest.TestCase):
 
     def test_state_cannot_communicate_feedback(self) -> None:
         def mutate(spec):
-            spec["spec"]["pages"][0]["sections"][0]["capabilities"][0]["produces"][0]["communicates"] = ["auth-error"]
+            spec["spec"]["pages"][0]["sections"][0]["contains"][0]["produces"][0]["communicates"] = ["auth-error"]
 
         self.assert_rule_failed(broken(mutate), "FR-007")
 
@@ -153,32 +160,43 @@ class SpecRuleTests(unittest.TestCase):
 
     def test_input_maps_to_must_be_single_string(self) -> None:
         def mutate(spec):
-            spec["spec"]["pages"][0]["sections"][0]["capabilities"][0]["requires"][0]["maps-to"] = ["data.user-session"]
+            spec["spec"]["pages"][0]["sections"][0]["contains"][0]["requires"][0]["maps-to"] = ["data.user-session"]
 
         self.assert_rule_failed(broken(mutate), "CA-004")
 
     def test_unresolved_reference_fails(self) -> None:
         def mutate(spec):
-            spec["spec"]["pages"][0]["sections"][0]["capabilities"][0]["provides"][0]["triggers"] = ["missing"]
+            spec["spec"]["pages"][0]["sections"][0]["contains"][0]["provides"][0]["triggers"] = ["missing"]
 
         self.assert_rule_failed(broken(mutate), "RI-001")
 
+    def test_root_reference_requires_typed_prefix(self) -> None:
+        def mutate(spec):
+            cap = spec["spec"]["pages"][0]["sections"][0]["contains"][0]
+            cap["requires"][0]["validation"] = ["email-format"]
+            cap["provides"][0]["navigates-to"] = "go-home"
+
+        report = broken(mutate)
+        failures = [r for r in report.failures if r.rule_id == "RI-004"]
+        self.assertEqual(len(failures), 2)
+        self.assertTrue(all(r.severity == "error" for r in failures))
+
     def test_typed_reference_must_match_target_type(self) -> None:
         def mutate(spec):
-            spec["spec"]["pages"][0]["sections"][0]["capabilities"][0]["explains"][0]["branches"][0]["resolves-to"] = "feedback.authenticated"
+            spec["spec"]["pages"][0]["sections"][0]["contains"][0]["explains"][0]["branches"][0]["resolves-to"] = "feedback.authenticated"
 
         self.assert_rule_failed(broken(mutate), "RI-004")
 
     def test_typed_reference_can_disambiguate_duplicate_ids(self) -> None:
         def mutate(spec):
             spec["spec"]["navigations"].append({"id": "submit", "target": "page.submit", "method": "push"})
-            spec["spec"]["pages"][0]["sections"][0]["capabilities"][0]["provides"][0]["navigates-to"] = "navigation.submit"
+            spec["spec"]["pages"][0]["sections"][0]["contains"][0]["provides"][0]["navigates-to"] = "navigation.submit"
 
         self.assertTrue(broken(mutate).passed)
 
     def test_capability_string_references_resolve(self) -> None:
         def mutate(spec):
-            cap = spec["spec"]["pages"][0]["sections"][0]["capabilities"][0]
+            cap = spec["spec"]["pages"][0]["sections"][0]["contains"][0]
             spec["spec"]["inputs"] = [{"id": "shared-email", "kind": "credential", "label": "Email"}]
             spec["spec"]["actions"] = [{"id": "shared-submit", "intent": "submit"}]
             spec["spec"]["states"] = [{"id": "shared-processing"}]
@@ -203,13 +221,13 @@ class SpecRuleTests(unittest.TestCase):
 
     def test_capability_string_reference_must_resolve(self) -> None:
         def mutate(spec):
-            spec["spec"]["pages"][0]["sections"][0]["capabilities"][0]["requires"] = ["input.missing"]
+            spec["spec"]["pages"][0]["sections"][0]["contains"][0]["requires"] = ["input.missing"]
 
         self.assert_rule_failed(broken(mutate), "RI-001")
 
     def test_capability_string_reference_must_match_expected_type(self) -> None:
         def mutate(spec):
-            spec["spec"]["pages"][0]["sections"][0]["capabilities"][0]["requires"] = ["action.submit"]
+            spec["spec"]["pages"][0]["sections"][0]["contains"][0]["requires"] = ["action.submit"]
 
         self.assert_rule_failed(broken(mutate), "RI-004")
 
@@ -217,7 +235,7 @@ class SpecRuleTests(unittest.TestCase):
         def mutate(spec):
             spec["spec"]["constraints"][0]["effect"] = "navigation"
             spec["spec"]["constraints"][0]["severity"] = "fatal"
-            decision = spec["spec"]["pages"][0]["sections"][0]["capabilities"][0]["explains"][0]
+            decision = spec["spec"]["pages"][0]["sections"][0]["contains"][0]["explains"][0]
             decision["branches"] = []
             decision["default-branch"] = {"condition": "always", "resolves-to": "state.processing"}
 

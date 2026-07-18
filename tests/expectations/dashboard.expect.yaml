@@ -3,7 +3,7 @@
 scenario: dashboard
 
 must-contain:
-  - "page.guarded-by == require-auth"
+  - "page.guarded-by == constraint.require-auth"
   - "capability.id == show-profile"
   - "capability.id == show-balance"
   - "capability.id == search-records"

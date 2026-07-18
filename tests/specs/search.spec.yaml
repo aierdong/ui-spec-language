@@ -35,7 +35,7 @@ spec:
           label: "Search Controls"
           layout-pattern: centered-column
 
-          capabilities:
+          contains:
             - id: search-records
               intent: "let the user find records by query and filter"
               requires:
@@ -43,7 +43,7 @@ spec:
                   kind: text
                   label: "Search"
                   placeholder: "Find a record"
-                  validation: [query-min-length]
+                  validation: [constraint.query-min-length]
 
                 - id: status-filter
                   kind: single-select

@@ -39,7 +39,7 @@ spec:
           label: "Records"
           layout-pattern: stacked-list
 
-          capabilities:
+          contains:
             - id: crud-records
               intent: "let the user create, read, update, and delete records"
               consumes: [data.records-list]
@@ -49,20 +49,20 @@ spec:
                   intent: create
                   priority: primary
                   label: "New record"
-                  navigates-to: go-to-create
+                  navigates-to: navigation.go-to-create
 
                 - id: edit-record
                   intent: edit
                   priority: secondary
                   label: "Edit"
-                  obeys: [has-selection]
-                  navigates-to: go-to-edit
+                  obeys: [constraint.has-selection]
+                  navigates-to: navigation.go-to-edit
 
                 - id: delete-record
                   intent: delete
                   priority: secondary
                   label: "Delete"
-                  obeys: [has-selection]
+                  obeys: [constraint.has-selection]
                   may-lead-to: [delete-outcome]
 
                 - id: cancel-delete
