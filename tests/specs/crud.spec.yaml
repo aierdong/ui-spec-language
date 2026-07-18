@@ -1,0 +1,110 @@
+# UISL Spec — CRUD Records Page
+# Concepts: Page, Section, Capability (crud-records), Action (create/edit/delete/cancel),
+#           State, Feedback (confirmation, error-message), Decision.
+
+spec:
+  version: "0.1.0"
+  title: "Manage Records"
+  description: >
+    A record-collection manager. The user can create, edit, and delete records;
+    deletion is gated by a confirmation prompt.
+
+  constraints:
+    - id: has-selection
+      condition: "state.selected is not active"
+      effect: availability
+      severity: warning
+      message: "Select a record first"
+
+  navigations:
+    - id: go-to-create
+      target: page.record-edit
+      method: push
+    - id: go-to-edit
+      target: page.record-edit
+      method: push
+
+  data:
+    - id: records-list
+      source: api
+      type: collection
+      scope: application
+
+  pages:
+    - id: records
+      label: "Manage Records"
+
+      sections:
+        - id: record-collection
+          label: "Records"
+          layout-pattern: stacked-list
+
+          capabilities:
+            - id: crud-records
+              intent: "let the user create, read, update, and delete records"
+              consumes: [data.records-list]
+
+              provides:
+                - id: create-record
+                  intent: create
+                  priority: primary
+                  label: "New record"
+                  navigates-to: go-to-create
+
+                - id: edit-record
+                  intent: edit
+                  priority: secondary
+                  label: "Edit"
+                  obeys: [has-selection]
+                  navigates-to: go-to-edit
+
+                - id: delete-record
+                  intent: delete
+                  priority: secondary
+                  label: "Delete"
+                  obeys: [has-selection]
+                  may-lead-to: [delete-outcome]
+
+                - id: cancel-delete
+                  intent: cancel
+                  priority: tertiary
+                  label: "Keep it"
+                  triggers: [idle]
+
+              produces:
+                - id: loading
+                  label: "Loading records"
+                - id: selected
+                  label: "A record is selected"
+                - id: idle
+                  label: "Ready"
+                - id: deleted
+                  label: "Record removed"
+
+              communicates:
+                - id: delete-confirm
+                  kind: confirmation
+                  message: "Remove this record?"
+                  severity: warning
+                  placement: overlay
+                  duration: sticky
+                - id: delete-error
+                  kind: error-message
+                  message: "Could not delete the record"
+                  severity: error
+                  placement: inline
+                  duration: transient
+
+              explains:
+                - id: delete-outcome
+                  intent: "decide whether to remove the record after confirmation"
+                  evaluates: [deleted]
+                  branches:
+                    - condition: "user confirms deletion"
+                      resolves-to: state.deleted
+                      label: "Proceed to delete"
+                    - condition: "user cancels confirmation"
+                      resolves-to: action.cancel-delete
+                      label: "Cancel and return to list"
+                  default-branch:
+                    resolves-to: feedback.delete-confirm

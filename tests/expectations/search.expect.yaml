@@ -1,0 +1,24 @@
+# Conformance Expectations — search
+
+scenario: search
+
+must-contain:
+  - "capability.id == search-records"
+  - "input.id == query"
+  - "input.kind == single-select"
+  - "input.kind == text"
+  - "action.intent == search"
+  - "action.intent == dismiss"
+  - "state.id == no-results"
+  - "state.id == searching"
+  - "feedback.kind == empty-state"
+  - "feedback.kind == error-message"
+  - "decision.id == results-outcome"
+
+must-not-contain:
+  - "any.id contains datatable (case-insensitive)"
+  - "any.id contains grid"
+  - "any.label contains Shopping Cart (case-insensitive)"
+  - "any.id contains button"
+  - "any.id contains login (case-insensitive)"
+  - "capability.id contains auth (case-insensitive)"

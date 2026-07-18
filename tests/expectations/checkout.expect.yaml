@@ -1,0 +1,22 @@
+# Conformance Expectations — checkout
+
+scenario: checkout
+
+must-contain:
+  - "capability.id == place-order"
+  - "input.kind == single-select"
+  - "input.kind == boolean"
+  - "action.intent == submit"
+  - "action.intent == cancel"
+  - "state.id == placed"
+  - "state.id == failed"
+  - "feedback.kind == error-message"
+  - "decision.id == order-outcome"
+  - "constraint.effect == availability"
+
+must-not-contain:
+  - "any.label contains Shopping Cart (case-insensitive)"
+  - "any.id contains btn (case-insensitive)"
+  - "any.id contains button"
+  - "capability.id contains cart (case-insensitive)"
+  - "any.id contains login (case-insensitive)"

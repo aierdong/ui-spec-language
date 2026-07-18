@@ -1,0 +1,26 @@
+# Conformance Expectations — dashboard
+
+scenario: dashboard
+
+must-contain:
+  - "page.guarded-by == require-auth"
+  - "capability.id == show-profile"
+  - "capability.id == show-balance"
+  - "capability.id == search-records"
+  - "capability.id == session-control"
+  - "input.id == query"
+  - "input.kind == text"
+  - "action.intent == sign-out"
+  - "action.intent == search"
+  - "decision.id == balance-outcome"
+  - "constraint.effect == visibility"
+  - "data.id == user-session"
+  - "capability.consumes contains data.profile-summary"
+  - "any.label contains Search (case-insensitive)"
+
+must-not-contain:
+  - "any.label contains Shopping Cart (case-insensitive)"
+  - "any.id contains cart"
+  - "any.id contains button"
+  - "any.label contains Captcha (case-insensitive)"
+  - "any.id contains component"

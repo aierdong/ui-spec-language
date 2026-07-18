@@ -1,0 +1,122 @@
+# UISL Spec — File Upload
+# Concepts: Page, Section, Capability (upload), Input (file), Action, State,
+#           Feedback, Decision, Navigation, Constraint, Data.
+
+spec:
+  version: "0.1.0"
+  title: "Upload File"
+  description: >
+    A file upload page where the user selects a document, submits it,
+    sees progress, and receives success or failure feedback.
+
+  constraints:
+    - id: file-required
+      condition: "file-upload is empty"
+      effect: validity
+      severity: error
+      message: "Choose a file to upload"
+
+    - id: file-max-size
+      condition: "file.size exceeds upload-size-limit"
+      effect: validity
+      severity: error
+      message: "The selected file is too large"
+
+    - id: file-type-allowed
+      condition: "file.type is not an accepted document type"
+      effect: validity
+      severity: error
+      message: "Choose an accepted document type"
+
+  navigations:
+    - id: go-to-upload-detail
+      target: page.upload-detail
+      method: push
+
+  data:
+    - id: uploaded-file
+      source: api
+      type: singleton
+      scope: application
+      mutable: true
+
+  pages:
+    - id: file-upload
+      label: "Upload File"
+
+      sections:
+        - id: upload-flow
+          label: "Upload"
+          layout-pattern: centered-column
+
+          capabilities:
+            - id: upload
+              intent: "user uploads a file to the system"
+              consumes: [data.uploaded-file]
+
+              requires:
+                - id: file-upload
+                  kind: file
+                  label: "File"
+                  validation: [file-required, file-max-size, file-type-allowed]
+                  maps-to: data.uploaded-file
+
+              provides:
+                - id: submit-upload
+                  intent: submit
+                  priority: primary
+                  label: "Upload"
+                  triggers: [uploading]
+                  may-lead-to: [upload-outcome]
+
+                - id: cancel-upload
+                  intent: cancel
+                  priority: secondary
+                  label: "Cancel"
+                  triggers: [idle]
+
+              produces:
+                - id: idle
+                  label: "Ready"
+                - id: uploading
+                  label: "Uploading"
+                - id: uploaded
+                  label: "Upload complete"
+                - id: upload-failed
+                  label: "Upload failed"
+
+              communicates:
+                - id: upload-progress
+                  kind: progress
+                  message: "Uploading file"
+                  severity: info
+                  placement: inline
+                  duration: persistent
+
+                - id: upload-success
+                  kind: confirmation
+                  message: "File uploaded"
+                  severity: success
+                  placement: page-top
+                  duration: transient
+
+                - id: upload-error
+                  kind: error-message
+                  message: "The file could not be uploaded"
+                  severity: error
+                  placement: inline
+                  duration: sticky
+
+              explains:
+                - id: upload-outcome
+                  intent: "determine file upload result"
+                  evaluates: [uploaded, upload-failed]
+                  branches:
+                    - condition: "uploaded is active"
+                      resolves-to: navigation.go-to-upload-detail
+                      label: "Open uploaded file detail"
+                    - condition: "upload-failed is active"
+                      resolves-to: feedback.upload-error
+                      label: "Show upload error"
+                  default-branch:
+                    resolves-to: feedback.upload-progress

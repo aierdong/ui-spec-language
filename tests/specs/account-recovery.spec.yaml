@@ -1,0 +1,117 @@
+# UISL Spec — Account Recovery
+# Concepts: Page, Section, Capability (account-recovery), Input (credential),
+#           Action, State, Feedback, Decision, Navigation, Constraint, Data.
+
+spec:
+  version: "0.1.0"
+  title: "Account Recovery"
+  description: >
+    A recovery flow where the user requests account access help by email,
+    provides an OTP when required, and returns to sign in after success.
+
+  constraints:
+    - id: email-format
+      condition: "value does not match email-pattern"
+      effect: validity
+      severity: error
+      message: "Please enter a valid email address"
+
+    - id: otp-required
+      condition: "otp is empty when verification is required"
+      effect: validity
+      severity: error
+      message: "Enter the recovery code"
+
+  navigations:
+    - id: go-to-sign-in
+      target: page.login
+      method: replace
+
+  data:
+    - id: recovery-request
+      source: api
+      type: singleton
+      scope: session
+      mutable: true
+
+  pages:
+    - id: account-recovery
+      label: "Recover Account"
+
+      sections:
+        - id: recovery-flow
+          label: "Recovery Steps"
+          layout-pattern: vertical-stack
+
+          capabilities:
+            - id: account-recovery
+              intent: "recover access to a locked or forgotten account"
+              consumes: [data.recovery-request]
+
+              requires:
+                - id: email
+                  kind: credential
+                  label: "Email Address"
+                  validation: [email-format]
+                  maps-to: data.recovery-request
+
+                - id: otp
+                  kind: credential
+                  label: "Recovery Code"
+                  validation: [otp-required]
+
+              provides:
+                - id: request-recovery
+                  intent: submit
+                  priority: primary
+                  label: "Send recovery instructions"
+                  triggers: [sending]
+                  may-lead-to: [recovery-outcome]
+
+                - id: return-to-sign-in
+                  intent: navigate
+                  priority: tertiary
+                  label: "Back to sign in"
+                  navigates-to: go-to-sign-in
+
+              produces:
+                - id: sending
+                  label: "Sending recovery instructions"
+                - id: instructions-sent
+                  label: "Recovery instructions sent"
+                - id: otp-invalid
+                  label: "Recovery code invalid"
+                - id: recovered
+                  label: "Account recovered"
+
+              communicates:
+                - id: recovery-info
+                  kind: info-notice
+                  message: "Recovery instructions were sent if the account exists"
+                  severity: info
+                  placement: page-top
+                  duration: sticky
+
+                - id: otp-error
+                  kind: error-message
+                  message: "The recovery code is invalid"
+                  severity: error
+                  placement: inline
+                  duration: sticky
+
+              explains:
+                - id: recovery-outcome
+                  intent: "determine account recovery result"
+                  evaluates: [instructions-sent, otp-invalid, recovered]
+                  branches:
+                    - condition: "instructions-sent is active"
+                      resolves-to: feedback.recovery-info
+                      label: "Inform user that instructions were sent"
+                    - condition: "otp-invalid is active"
+                      resolves-to: feedback.otp-error
+                      label: "Show invalid code"
+                    - condition: "recovered is active"
+                      resolves-to: navigation.go-to-sign-in
+                      label: "Return to sign in"
+                  default-branch:
+                    resolves-to: state.sending

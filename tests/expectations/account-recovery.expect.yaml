@@ -1,0 +1,27 @@
+# Conformance Expectations — account-recovery
+
+scenario: account-recovery
+
+must-contain:
+  - "capability.id == account-recovery"
+  - "input.id == email"
+  - "input.id == otp"
+  - "input.kind == credential"
+  - "action.intent == submit"
+  - "action.intent == navigate"
+  - "state.id == instructions-sent"
+  - "state.id == otp-invalid"
+  - "state.id == recovered"
+  - "feedback.kind == info-notice"
+  - "feedback.kind == error-message"
+  - "decision.id == recovery-outcome"
+  - "constraint.id == otp-required"
+  - "navigation.target == page.login"
+
+must-not-contain:
+  - "capability.id contains register (case-insensitive)"
+  - "capability.id contains upload (case-insensitive)"
+  - "any.id contains button"
+  - "any.id contains modal"
+  - "any.id contains component"
+  - "any.label contains Shopping Cart (case-insensitive)"

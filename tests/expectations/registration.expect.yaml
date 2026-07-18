@@ -1,0 +1,28 @@
+# Conformance Expectations — registration
+
+scenario: registration
+
+must-contain:
+  - "capability.id == register"
+  - "input.id == email"
+  - "input.id == password"
+  - "input.id == agree-to-terms"
+  - "input.kind == credential"
+  - "input.kind == boolean"
+  - "action.intent == submit"
+  - "action.intent == navigate"
+  - "state.id == registered"
+  - "state.id == registration-failed"
+  - "feedback.kind == error-message"
+  - "feedback.kind == confirmation"
+  - "decision.id == registration-outcome"
+  - "constraint.id == terms-required"
+  - "navigation.target == page.welcome"
+
+must-not-contain:
+  - "capability.id contains auth (case-insensitive)"
+  - "any.id contains login (case-insensitive)"
+  - "any.id contains button"
+  - "any.id contains modal"
+  - "any.id contains component"
+  - "any.label contains Shopping Cart (case-insensitive)"

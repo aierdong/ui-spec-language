@@ -1,0 +1,125 @@
+# UISL Spec — Checkout Page
+# Concepts: Page, Section, Capability (checkout/place-order), Input
+#           (single-selection, boolean-choice), Action (submit, cancel),
+#           State, Feedback, Decision, Navigation, Constraint, Data.
+
+spec:
+  version: "0.1.0"
+  title: "Checkout"
+  description: >
+    Order checkout page. User picks a payment method, agrees to terms, submits.
+    On success navigates to confirmation; on failure shows an error.
+
+  constraints:
+    - id: payment-required
+      condition: "state.payment-chosen is not active"
+      effect: availability
+      severity: warning
+      message: "Please choose a payment method"
+    - id: terms-required
+      condition: "state.terms-agreed is not active"
+      effect: availability
+      severity: warning
+      message: "Please accept the terms to place the order"
+
+  navigations:
+    - id: go-to-confirmation
+      target: page.confirmation
+      method: push
+    - id: go-to-cart
+      target: page.cart
+      method: push
+
+  data:
+    - id: order-summary
+      source: context
+      type: record
+      scope: application
+    - id: payment-methods
+      source: api
+      type: collection
+      scope: application
+
+  pages:
+    - id: checkout
+      label: "Checkout"
+
+      sections:
+        - id: order-review
+          label: "Order Review"
+          layout-pattern: stacked-list
+          receives: [data.order-summary]
+
+          capabilities:
+            - id: review-order
+              intent: "let the user review the order before paying"
+              consumes: [data.order-summary]
+              produces:
+                - id: order-reviewed
+                  label: "Order reviewed"
+
+        - id: payment-form
+          label: "Payment"
+          layout-pattern: centered-column
+
+          capabilities:
+            - id: place-order
+              intent: "let the user submit the order with a chosen payment"
+              requires:
+                - id: payment-method
+                  kind: single-select
+                  label: "Payment method"
+                  source: data.payment-methods
+
+                - id: accept-terms
+                  kind: boolean
+                  label: "I agree to the terms"
+
+              provides:
+                - id: submit-order
+                  intent: submit
+                  priority: primary
+                  label: "Place order"
+                  obeys: [payment-required, terms-required]
+                  triggers: [processing]
+                  may-lead-to: [order-outcome]
+
+                - id: back-to-cart
+                  intent: cancel
+                  priority: tertiary
+                  label: "Back"
+                  navigates-to: go-to-cart
+
+              produces:
+                - id: payment-chosen
+                  label: "Payment selected"
+                - id: terms-agreed
+                  label: "Terms accepted"
+                - id: processing
+                  label: "Placing order"
+                - id: placed
+                  label: "Order placed"
+                - id: failed
+                  label: "Order failed"
+
+              communicates:
+                - id: order-error
+                  kind: error-message
+                  message: "We could not place your order"
+                  severity: error
+                  placement: inline
+                  duration: sticky
+
+              explains:
+                - id: order-outcome
+                  intent: "decide where to go after submitting the order"
+                  evaluates: [placed, failed]
+                  branches:
+                    - condition: "placed is active"
+                      resolves-to: navigation.go-to-confirmation
+                      label: "Success — go to confirmation"
+                    - condition: "failed is active"
+                      resolves-to: feedback.order-error
+                      label: "Failure — show error"
+                  default-branch:
+                    resolves-to: state.processing

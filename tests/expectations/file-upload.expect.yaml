@@ -1,0 +1,30 @@
+# Conformance Expectations — file-upload
+
+scenario: file-upload
+
+must-contain:
+  - "capability.id == upload"
+  - "input.id == file-upload"
+  - "input.kind == file"
+  - "action.intent == submit"
+  - "action.intent == cancel"
+  - "state.id == uploading"
+  - "state.id == uploaded"
+  - "state.id == upload-failed"
+  - "feedback.kind == progress"
+  - "feedback.kind == confirmation"
+  - "feedback.kind == error-message"
+  - "decision.id == upload-outcome"
+  - "constraint.id == file-required"
+  - "constraint.id == file-max-size"
+  - "constraint.id == file-type-allowed"
+  - "navigation.target == page.upload-detail"
+
+must-not-contain:
+  - "capability.id contains auth (case-insensitive)"
+  - "capability.id contains register (case-insensitive)"
+  - "any.id contains button"
+  - "any.id contains modal"
+  - "any.id contains component"
+  - "any.id contains css"
+  - "any.label contains Shopping Cart (case-insensitive)"

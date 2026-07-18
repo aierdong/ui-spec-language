@@ -1,0 +1,23 @@
+# Conformance Expectations — login
+# Semantic assertions checked by validator/assertions.py against tests/specs/login.spec.yaml.
+
+scenario: login
+
+must-contain:
+  - "capability.id == authentication"
+  - "input.kind == credential"
+  - "input.id == email"
+  - "input.id == password"
+  - "action.intent == submit"
+  - "action.id == submit"
+  - "state.id == auth-failed"
+  - "feedback.kind == error-message"
+  - "decision.id == auth-outcome"
+  - "navigation.target == page.home"
+
+must-not-contain:
+  - "any.label contains Shopping Cart (case-insensitive)"
+  - "any.id contains cart"
+  - "any.id contains button"
+  - "any.id contains modal"
+  - "any.id contains component"

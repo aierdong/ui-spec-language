@@ -1,0 +1,143 @@
+# UISL Spec — Login Page
+# ============================================================================
+# Example demonstrating the canonical schema with a real-world authentication flow.
+#
+# Concepts used: Page, Section, Capability, Input, Action, State, Feedback,
+#                Decision, Navigation, Constraint, Data
+# ============================================================================
+
+spec:
+  version: "0.1.0"
+  title: "Login Page"
+  description: >
+    A sign-in page where users authenticate with email and password.
+    On success, navigate to the home page. On failure, show an error message.
+
+  # ---------------------------------------------------------------------------
+  # Cross-cutting concepts (defined once, referenced by id)
+  # ---------------------------------------------------------------------------
+
+  constraints:
+    - id: email-format
+      condition: "value does not match email-pattern"
+      effect: validity
+      severity: error
+      message: "Please enter a valid email address"
+
+    - id: password-min-length
+      condition: "value.length < 8"
+      effect: validity
+      severity: error
+      message: "Password must be at least 8 characters"
+
+    - id: auth-required
+      condition: "data.user-session is empty"
+      effect: visibility
+      severity: error
+      message: "You must sign in to access this page"
+
+  navigations:
+    - id: go-to-home
+      target: page.home
+      method: replace
+
+    - id: go-to-register
+      target: page.register
+      method: push
+
+  data:
+    - id: user-session
+      source: context
+      type: singleton
+      scope: application
+      mutable: true
+
+  # ---------------------------------------------------------------------------
+  # Structural hierarchy — Page → Section → Capability
+  # ---------------------------------------------------------------------------
+
+  pages:
+    - id: login
+      label: "Sign In"
+      guarded-by: []   # No guard — this is the entry point
+
+      sections:
+        - id: credential-form
+          label: "Credentials"
+          layout-pattern: centered-column
+
+          capabilities:
+            # ================================================================
+            # CAPABILITY — Authentication
+            # ================================================================
+            - id: authentication
+              intent: "user provides credentials to verify identity"
+              label: "Sign In"
+
+              # ---- Inputs (user-provided information) ----
+              requires:
+                - id: email
+                  kind: credential
+                  label: "Email Address"
+                  placeholder: "you@example.com"
+                  validation: [email-format]    # → Constraint reference
+                  maps-to: data.user-session
+
+                - id: password
+                  kind: credential
+                  label: "Password"
+                  sensitive: true
+                  placeholder: "Enter your password"
+                  validation: [password-min-length]
+
+              # ---- Actions (what the user can do) ----
+              provides:
+                - id: submit
+                  intent: submit
+                  priority: primary
+                  label: "Sign In"
+                  triggers: [processing]
+                  may-lead-to: [auth-outcome]
+
+                - id: go-to-register
+                  intent: navigate
+                  priority: tertiary
+                  label: "Create an account"
+                  navigates-to: navigation.go-to-register
+
+              # ---- States (conditions that can arise) ----
+              produces:
+                - id: processing
+                  label: "Signing in..."
+
+                - id: authenticated
+                  label: "Signed in"
+
+                - id: auth-failed
+                  label: "Sign in failed"
+
+              # ---- Feedback (user communication) ----
+              communicates:
+                - id: auth-error
+                  kind: error-message
+                  message: "Invalid email or password"
+                  severity: error
+                  placement: inline
+                  duration: sticky
+
+              # ---- Decision (branching logic) ----
+              explains:
+                - id: auth-outcome
+                  intent: "determine authentication result"
+                  evaluates:
+                    - authenticated
+                    - auth-failed
+                  branches:
+                    - condition: "authenticated is active"
+                      resolves-to: navigation.go-to-home
+                      label: "Success — go to home"
+                    - condition: "auth-failed is active"
+                      resolves-to: feedback.auth-error
+                      label: "Failure — show error"
+                  default-branch:
+                    resolves-to: state.processing

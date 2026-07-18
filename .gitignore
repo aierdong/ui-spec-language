@@ -4,3 +4,8 @@
 # tmp, sample
 /ui-dsl
 /ui-prototype
+
+# Phase 6 generated outputs
+/tests/reports/
+__pycache__/
+*.pyc

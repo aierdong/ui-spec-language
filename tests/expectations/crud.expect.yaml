@@ -1,0 +1,24 @@
+# Conformance Expectations — crud
+
+scenario: crud
+
+must-contain:
+  - "capability.id == crud-records"
+  - "action.intent == create"
+  - "action.intent == edit"
+  - "action.intent == delete"
+  - "action.intent == cancel"
+  - "feedback.kind == confirmation"
+  - "feedback.kind == error-message"
+  - "state.id == deleted"
+  - "state.id == loading"
+  - "decision.id == delete-outcome"
+  - "constraint.effect == availability"
+
+must-not-contain:
+  - "any.id contains datatable (case-insensitive)"
+  - "any.id contains grid"
+  - "any.id contains dialog (case-insensitive)"
+  - "any.id contains button"
+  - "any.id contains login (case-insensitive)"
+  - "any.label contains Shopping Cart (case-insensitive)"

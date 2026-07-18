@@ -1,0 +1,144 @@
+# UISL Spec — Dashboard Page
+# Concepts: Page (guarded), Section, Capability (consume/search/sign-out),
+#           Input (search-query), Action (search, navigate, sign-out),
+#           State, Feedback, Decision, Navigation, Constraint, Data
+
+spec:
+  version: "0.1.0"
+  title: "Dashboard"
+  description: >
+    Authenticated home page. Gated by session data. Shows profile + balance,
+    provides search, records-manager and sign-out entry points.
+
+  constraints:
+    - id: require-auth
+      condition: "data.user-session is empty"
+      effect: visibility
+      severity: error
+      message: "You must sign in to access the dashboard"
+
+  navigations:
+    - id: go-to-search
+      target: page.search
+      method: push
+    - id: go-to-records
+      target: page.records
+      method: push
+    - id: go-to-login
+      target: page.login
+      method: replace
+
+  data:
+    - id: user-session
+      source: context
+      type: singleton
+      scope: application
+      mutable: true
+    - id: profile-summary
+      source: api
+      type: record
+      scope: application
+    - id: account-balance
+      source: api
+      type: record
+      scope: application
+
+  pages:
+    - id: dashboard
+      label: "Home"
+      guarded-by: [require-auth]
+
+      sections:
+        - id: identity
+          label: "Identity"
+          layout-pattern: header-strip
+          receives: [data.profile-summary]
+
+          capabilities:
+            - id: show-profile
+              intent: "show the signed-in user's profile summary"
+              consumes: [data.profile-summary]
+              produces:
+                - id: loaded
+                  label: "Profile loaded"
+
+        - id: finance-strip
+          label: "Account Summary"
+          layout-pattern: stat-row
+
+          capabilities:
+            - id: show-balance
+              intent: "show account balance to the user"
+              consumes: [data.account-balance]
+              produces:
+                - id: balance-loaded
+                  label: "Balance loaded"
+              communicates:
+                - id: balance-unavailable
+                  kind: error-message
+                  message: "Balance is temporarily unavailable"
+                  severity: error
+                  placement: inline
+                  duration: sticky
+              explains:
+                - id: balance-outcome
+                  intent: "decide what to show based on balance availability"
+                  evaluates: [balance-loaded]
+                  branches:
+                    - condition: "balance-loaded is active"
+                      resolves-to: state.balance-loaded
+                      label: "Show balance"
+                    - condition: "balance-loaded is not active"
+                      resolves-to: feedback.balance-unavailable
+                      label: "Show unavailable message"
+                  default-branch:
+                    resolves-to: state.balance-loaded
+
+        - id: quick-actions
+          label: "Quick Actions"
+          layout-pattern: action-row
+
+          capabilities:
+            - id: search-records
+              intent: "let the user search across records"
+              requires:
+                - id: query
+                  kind: text
+                  label: "Search records"
+                  placeholder: "Find a record"
+              provides:
+                - id: do-search
+                  intent: search
+                  priority: primary
+                  label: "Search"
+                  navigates-to: go-to-search
+                - id: open-records
+                  intent: navigate
+                  priority: secondary
+                  label: "Manage records"
+                  navigates-to: go-to-records
+
+            - id: session-control
+              intent: "let the user end the current session"
+              provides:
+                - id: logout
+                  intent: sign-out
+                  priority: tertiary
+                  label: "Sign out"
+                  triggers: [signing-out]
+                  may-lead-to: [logout-outcome]
+              produces:
+                - id: signing-out
+                  label: "Signing out..."
+                - id: signed-out
+                  label: "Signed out"
+              explains:
+                - id: logout-outcome
+                  intent: "decide navigation after sign-out"
+                  evaluates: [signed-out]
+                  branches:
+                    - condition: "signed-out is active"
+                      resolves-to: navigation.go-to-login
+                      label: "Return to login"
+                  default-branch:
+                    resolves-to: state.signing-out

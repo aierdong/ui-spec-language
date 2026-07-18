@@ -1,0 +1,129 @@
+# UISL Spec — Registration Page
+# Concepts: Page, Section, Capability (register), Input (credential/boolean),
+#           Action (submit/navigate), State, Feedback, Decision, Navigation, Constraint, Data.
+
+spec:
+  version: "0.1.0"
+  title: "Create Account"
+  description: >
+    A registration page where a new user creates an account with email,
+    password, and explicit agreement to terms.
+
+  constraints:
+    - id: email-format
+      condition: "value does not match email-pattern"
+      effect: validity
+      severity: error
+      message: "Please enter a valid email address"
+
+    - id: password-min-length
+      condition: "value.length < 8"
+      effect: validity
+      severity: error
+      message: "Password must be at least 8 characters"
+
+    - id: terms-required
+      condition: "agree-to-terms is not accepted"
+      effect: validity
+      severity: error
+      message: "You must agree to the terms"
+
+  navigations:
+    - id: go-to-welcome
+      target: page.welcome
+      method: replace
+
+    - id: go-to-sign-in
+      target: page.login
+      method: push
+
+  data:
+    - id: new-account
+      source: api
+      type: singleton
+      scope: application
+      mutable: true
+
+  pages:
+    - id: registration
+      label: "Create Account"
+
+      sections:
+        - id: registration-flow
+          label: "Account Details"
+          layout-pattern: centered-column
+
+          capabilities:
+            - id: register
+              intent: "create a new user identity in the system"
+              consumes: [data.new-account]
+
+              requires:
+                - id: email
+                  kind: credential
+                  label: "Email Address"
+                  placeholder: "you@example.com"
+                  validation: [email-format]
+                  maps-to: data.new-account
+
+                - id: password
+                  kind: credential
+                  label: "Password"
+                  sensitive: true
+                  validation: [password-min-length]
+
+                - id: agree-to-terms
+                  kind: boolean
+                  label: "Agree to terms"
+                  validation: [terms-required]
+
+              provides:
+                - id: create-account
+                  intent: submit
+                  priority: primary
+                  label: "Create account"
+                  triggers: [creating]
+                  may-lead-to: [registration-outcome]
+
+                - id: sign-in-instead
+                  intent: navigate
+                  priority: tertiary
+                  label: "Sign in instead"
+                  navigates-to: go-to-sign-in
+
+              produces:
+                - id: creating
+                  label: "Creating account"
+                - id: registered
+                  label: "Account created"
+                - id: registration-failed
+                  label: "Account creation failed"
+
+              communicates:
+                - id: registration-error
+                  kind: error-message
+                  message: "Could not create the account"
+                  severity: error
+                  placement: inline
+                  duration: sticky
+
+                - id: registration-success
+                  kind: confirmation
+                  message: "Your account has been created"
+                  severity: success
+                  placement: page-top
+                  duration: transient
+
+              explains:
+                - id: registration-outcome
+                  intent: "determine registration result"
+                  evaluates: [registered, registration-failed]
+                  branches:
+                    - condition: "registered is active"
+                      resolves-to: navigation.go-to-welcome
+                      label: "Success — go to welcome"
+                    - condition: "registration-failed is active"
+                      resolves-to: feedback.registration-error
+                      label: "Failure — show error"
+                  default-branch:
+                    resolves-to: state.creating

@@ -1,0 +1,105 @@
+# UISL Spec — Search Page
+# Concepts: Page, Section, Capability (search), Input (search-query, single-selection),
+#           Action (search, dismiss), State, Feedback, Decision.
+
+spec:
+  version: "0.1.0"
+  title: "Search"
+  description: >
+    A record-search page. User enters a query and optionally a status filter;
+    results region shows matches or an empty-state on no matches.
+
+  constraints:
+    - id: query-min-length
+      condition: "value.length < 2"
+      effect: validity
+      severity: error
+      message: "Query must be at least 2 characters"
+
+  data:
+    - id: records-collection
+      source: api
+      type: collection
+      scope: application
+    - id: status-options
+      source: api
+      type: collection
+      scope: application
+
+  pages:
+    - id: search
+      label: "Search Records"
+
+      sections:
+        - id: search-controls
+          label: "Search Controls"
+          layout-pattern: centered-column
+
+          capabilities:
+            - id: search-records
+              intent: "let the user find records by query and filter"
+              requires:
+                - id: query
+                  kind: text
+                  label: "Search"
+                  placeholder: "Find a record"
+                  validation: [query-min-length]
+
+                - id: status-filter
+                  kind: single-select
+                  label: "Status"
+                  source: data.status-options
+
+              provides:
+                - id: run-search
+                  intent: search
+                  priority: primary
+                  label: "Search"
+                  triggers: [searching]
+                  may-lead-to: [results-outcome]
+
+                - id: clear-results
+                  intent: dismiss
+                  priority: secondary
+                  label: "Clear"
+                  triggers: [idle]
+
+              produces:
+                - id: searching
+                  label: "Searching"
+                - id: has-results
+                  label: "Results available"
+                - id: no-results
+                  label: "No matches"
+                - id: idle
+                  label: "Ready"
+
+              consumes: [data.records-collection]
+
+              communicates:
+                - id: empty-state
+                  kind: empty-state
+                  message: "No records matched your query"
+                  severity: info
+                  placement: inline
+                  duration: sticky
+                - id: query-invalid
+                  kind: error-message
+                  message: "Please enter a longer query"
+                  severity: error
+                  placement: inline
+                  duration: transient
+
+              explains:
+                - id: results-outcome
+                  intent: "decide what region to show after search"
+                  evaluates: [has-results, no-results]
+                  branches:
+                    - condition: "has-results is active"
+                      resolves-to: state.has-results
+                      label: "Show results region"
+                    - condition: "no-results is active"
+                      resolves-to: feedback.empty-state
+                      label: "Show empty state"
+                  default-branch:
+                    resolves-to: state.searching
